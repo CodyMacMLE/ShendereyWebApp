@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: Promise<{ userId: string }> }
+    { params }: { params: { userId: string } }
   ) {
     const { userId } = await params;
     const id = parseInt(userId);
@@ -15,6 +15,34 @@ export async function GET(
         
   
       return NextResponse.json({success: true, body: data})
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
+  }
+
+  export async function POST(
+    req: NextRequest,
+    { params }: { params: { userId: string } }
+  ) {
+    const { userId } = await params;
+    const id = parseInt(userId);
+  
+    try {
+      const { title, description, date } = await req.json();
+  
+      const newAchievement = await db.insert(achievements)
+        .values({
+          athlete: id,
+          title,
+          description,
+          date: new Date(date),
+        })
+        .returning();
+  
+      return NextResponse.json({ success: true, body: newAchievement[0] });
     } catch (error) {
       return NextResponse.json(
         { success: false, error: error instanceof Error ? error.message : String(error) },

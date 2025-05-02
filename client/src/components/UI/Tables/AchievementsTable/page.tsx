@@ -31,6 +31,25 @@ export default function AchievementsTable({ athlete } : { athlete : Athlete}) {
     const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
     const [athleteAchievements, setAthleteAchievements] = useState<Achievement[] | []>([]);
 
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.confirm-delete-button')) {
+      setEnabledStates((prev) => {
+        const updated = { ...prev };
+        for (const id in updated) {
+          updated[id] = false;
+        }
+        return updated;
+      });
+    }
+  };
+  window.addEventListener('click', handleClickOutside);
+  return () => {
+    window.removeEventListener('click', handleClickOutside);
+  };
+}, []);
+
     useEffect(() => {
         const fetchAchievements = async () => {
             try {
@@ -50,17 +69,17 @@ export default function AchievementsTable({ athlete } : { athlete : Athlete}) {
     // Delete Achievement
     const deleteAchievement = async (athleteId : number, achievementId: number) => {
         try {
-        const res = await fetch(`/api/users/${athlete.id}/achievement/${achievementId}`, {
-            method: 'DELETE',
-        })
+            const res = await fetch(`/api/users/${athlete.id}/achievements/${achievementId}`, {
+                method: 'DELETE',
+            })
 
-        if (res.ok) {
-            const data = await res.json();
-            const newArray = athleteAchievements.filter(achievement => achievement.id !== data.body.id);
-            setAthleteAchievements(newArray)
-        }
+            if (res.ok) {
+                const data = await res.json();
+                const newArray = athleteAchievements.filter(achievement => achievement.id !== data.body.id);
+                setAthleteAchievements(newArray)
+            }
         } catch (error) {
-        console.error(error);
+            console.error(error);
         }
     }
 
@@ -75,17 +94,17 @@ export default function AchievementsTable({ athlete } : { athlete : Athlete}) {
     return (
         <>
 
-        {/* addModalEnabled && (
+        { addModalEnabled && (
             <Modal title="Add Achievement" setModalEnable={setAddModalEnabled}>
-            <AddAchievement athleteId={athlete.id} setAthleteAchievements={setAthleteAchievements} setModalEnable={setAddModalEnabled}/>
+                <AddAchievement athleteId={athlete.id} setAthleteAchievements={setAthleteAchievements} setModalEnable={setAddModalEnabled}/>
             </Modal>
         )} 
 
         {editModalEnabled && selectedAchievement && (
             <Modal title="Edit Score" setModalEnable={setEditModalEnabled}>
-            <EditAchievement athleteId={athlete.id} score={selectedAchievement} setModalEnable={setEditModalEnabled}/>
+            <EditAchievement athleteId={athlete.id} achievement={selectedAchievement} setModalEnable={setEditModalEnabled}/>
             </Modal>
-        ) */} 
+        )} 
 
         <div className="px-4 sm:px-6 lg:px-8 mt-8">
             {/* Header Display */}
@@ -124,76 +143,76 @@ export default function AchievementsTable({ athlete } : { athlete : Athlete}) {
             <div className="mt-8 flow-root">
                 <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <div className="overflow-x-auto shadow ring-1 ring-[var(--border)] sm:rounded-lg">
-                        <table className="min-w-full divide-y divide-[var(--border)]">
-                        <thead className="bg-[var(--card-bg)]">
-                            <tr>
-                            <th scope="col" className="pl-3 pr-3.5 text-left text-sm font-semibold text-[var(--foreground)] sm:pl-6">
-                                Title
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
-                                Date
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
-                                Description
-                            </th>
-                            <th scope="col" className="px-0 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
-                            </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
-                            {athleteAchievements.map((achievement: Achievement) => { 
-                                const enabled = enabledStates[achievement.id] || false;
-
-                                const handleDeleteClick = async () => {
-                                if (!enabled) {
-                                    toggleEnabled(achievement.id);
-                                } else {
-                                    console.log("Delete score with id:", achievement.id);
-                                    await deleteAchievement(athlete.id, achievement.id);
-                                }
-                                };
-
-                                return (
-                                    <tr key={achievement.id} className="transition-colors duration-150">
-                                        <td className="whitespace-nowrap pl-3 pr-3 text-sm font-medium text-[var(--foreground)] sm:pl-6">
-                                            {achievement.title}
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
-                                            {new Date(achievement.date).toLocaleDateString()}
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
-                                            {achievement.description}
-                                        </td>
-                                        <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6">
-                                            <button
-                                                onClick={handleDeleteClick}
-                                                className={` cursor-pointer group relative inline-flex h-6 w-14 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
-                                            >
-                                                <span className="text-xs text-white">
-                                                    {enabled ? 'Confirm' : ''}
-                                                </span>
-                                                <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1">
-                                                    {!enabled ? 'Delete' : ''}
-                                                </span>
-                                            </button>
-                                            <button
-                                            type="button"
-                                            onClick={() => {
-                                                setSelectedAchievement(achievement);
-                                                setEditModalEnabled(true);
-                                            }}
-                                            className="text-[var(--primary)] hover:text-[var(--primary-hover)]"
-                                            >
-                                            Edit
-                                            </button>
-                                        </td>
+                        <div className="overflow-x-auto shadow ring-1 ring-[var(--border)] sm:rounded-lg">
+                            <table className="min-w-full divide-y divide-[var(--border)]">
+                                <thead className="bg-[var(--card-bg)]">
+                                    <tr>
+                                        <th scope="col" className="pl-3 pr-3.5 text-left text-sm font-semibold text-[var(--foreground)] sm:pl-6">
+                                            Title
+                                        </th>
+                                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
+                                            Date
+                                        </th>
+                                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
+                                            Description
+                                        </th>
+                                        <th scope="col" className="px-0 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
+                                        </th>
                                     </tr>
-                                )
-                            })}
-                        </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
+                                    {athleteAchievements.map((achievement: Achievement) => { 
+                                        const enabled = enabledStates[achievement.id] || false;
+
+                                        const handleDeleteClick = async () => {
+                                        if (!enabled) {
+                                            toggleEnabled(achievement.id);
+                                        } else {
+                                            console.log("Delete score with id:", achievement.id);
+                                            await deleteAchievement(athlete.id, achievement.id);
+                                        }
+                                        };
+
+                                        return (
+                                            <tr key={achievement.id} className="transition-colors duration-150">
+                                                <td className="whitespace-nowrap pl-3 pr-3 text-sm font-medium text-[var(--foreground)] sm:pl-6">
+                                                    {achievement.title}
+                                                </td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
+                                                    {new Date(achievement.date).toLocaleDateString()}
+                                                </td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
+                                                    {achievement.description}
+                                                </td>
+                                                <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6">
+                                                    <button
+                                                        onClick={handleDeleteClick}
+                                                        className={`confirm-delete-button cursor-pointer group relative inline-flex h-6 w-16 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
+                                                    >
+                                                        <span className="text-xs text-white font-semibold">
+                                                            {enabled ? 'Confirm' : ''}
+                                                        </span>
+                                                        <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
+                                                            {!enabled ? 'Delete' : ''}
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedAchievement(achievement);
+                                                        setEditModalEnabled(true);
+                                                    }}
+                                                    className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-semibold"
+                                                    >
+                                                    Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

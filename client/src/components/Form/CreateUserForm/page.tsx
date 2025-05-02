@@ -418,7 +418,7 @@ export default function CreateUserForm() {
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Staff specific information.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
@@ -572,7 +572,7 @@ export default function CreateUserForm() {
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Default athlete specific information that is used for all versions of the athlete.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                             
@@ -646,7 +646,7 @@ export default function CreateUserForm() {
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Prospect specific information for athletes looking for NCAA scholarships.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
@@ -657,7 +657,7 @@ export default function CreateUserForm() {
                               {prospectPhotoPreview ? (
                                 <img src={prospectPhotoPreview} alt="Prospect" className="h-70 w-50 rounded-md object-cover" />
                                 ) : (
-                                <div className='flex items-center justify-center bg-[var(--border)] h-70 w-50 rounded-md'>
+                                <div className='flex items-center justify-center h-12 w-12 rounded-full'>
                                     <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                 </div>
                                 )}
@@ -836,7 +836,7 @@ export default function CreateUserForm() {
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Alumni specific information for athletes recieving a NCAA scholarship.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
@@ -847,7 +847,7 @@ export default function CreateUserForm() {
                                 {alumniPhotoPreview ? (
                                     <img src={alumniPhotoPreview} alt="Alumni" className="h-70 w-50 rounded-md object-cover" />
                                     ) : (
-                                    <div className='flex items-center justify-center bg-[var(--border)] h-70 w-50 rounded-md'>
+                                    <div className='flex items-center justify-center h-12 w-12 rounded-full'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                     </div>
                                     )}

@@ -122,66 +122,34 @@ export default function DisplayUser({ user } : { user : UserData }) {
                 <div className="flex flex-col justify-between items-center p-5 sm:px-0 ring-1 ring-[var(--border)] rounded-xl bg-[var(--card-bg)]">
                     <div className="flex flex-col items-center text-center">
                         <div className="flex flex-col items-center text-center">
-                            {user.images.staffUrl ? (
-                                <div className="relative mt-3">
-                                    <div className="h-[150px] w-[150px] rounded-full overflow-hidden ring-1 ring-[var(--border)]">
-                                        <Image
-                                            src={user.images.staffUrl}
-                                            alt="Staff Image"
-                                            width={150}
-                                            height={150}
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                
-                                    {/* Status Icon */}
-                                    <div className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring-1 ring-[var(--border)] flex justify-center items-center rounded-full">
-                                        {user.isActive ? (
-                                            <EyeIcon className="w-5 h-5 text-green-600" />
-                                        ) : (
-                                            <EyeSlashIcon className="w-5 h-5 text-red-600" />
-                                        )}
-                                    </div>
-                                </div>
-                            ) : user.images.athleteUrl ? (
-                                <div className="relative mt-3">
-                                    <div className="h-[150px] w-[150px] rounded-full overflow-hidden ring ring-[var(--border)]">
-                                        <Image
-                                            src={user.images.athleteUrl}
-                                            alt="Athlete Image"
-                                            width={150}
-                                            height={150}
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                
-                                    {/* Status Icon */}
-                                    <div className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring ring-[var(--border)] flex justify-center items-center rounded-full">
-                                        {user.isActive ? (
-                                            <EyeIcon className="w-5 h-5 text-green-600" />
-                                        ) : (
-                                            <EyeSlashIcon className="w-5 h-5 text-red-600" />
-                                        )}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="relative mt-3">
-                                    <div className='flex items-center justify-center bg-[var(--card-bg)] ring ring-[var(--border)] mt-8 h-50 w-50 rounded-full'>
-                                        <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
-                                    </div> 
+                            {(() => {
+                              const imageUrl =
+                                user.images.staffUrl ||
+                                user.images.athleteUrl ||
+                                user.images.prospectUrl ||
+                                user.images.alumniUrl ||
+                                "/default-user-icon.png";
 
-                                    {/* Status Icon */}
-                                    <div className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring ring-[var(--border)] flex justify-center items-center rounded-full">
-                                        {user.isActive ? (
-                                            <EyeIcon className="w-5 h-5 text-green-600" />
-                                        ) : (
-                                            <EyeSlashIcon className="w-5 h-5 text-red-600" />
-                                        )}
-                                    </div>
+                              return (
+                                <div className="relative mt-3">
+                                    <Image
+                                      src={imageUrl}
+                                      alt="User Image"
+                                      width={150}
+                                      height={150}
+                                      className="object-cover h-[175px] w-[175px] rounded-full ring-1 ring-[var(--border)]"
+                                    />
+                                  {/* Status Icon */}
+                                  <div className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring-1 ring-[var(--border)] flex justify-center items-center rounded-full">
+                                    {user.isActive ? (
+                                      <EyeIcon className="w-5 h-5 text-green-600" />
+                                    ) : (
+                                      <EyeSlashIcon className="w-5 h-5 text-red-600" />
+                                    )}
+                                  </div>
                                 </div>
-                            )}
-
-                            
+                              );
+                            })()}
                         </div>
 
                         {/* Name, Active Edit */}
@@ -210,8 +178,7 @@ export default function DisplayUser({ user } : { user : UserData }) {
                     <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                         <h2 className="text-base font-semibold text-[var(--foreground)]">Delete account</h2>
                         <p className="mt-1 text-sm text-[var(--muted)]">
-                            No longer want to use our service? You can delete your account here. This action is not reversible.
-                            All information related to this account will be deleted permanently.
+                            Are you sure you want to delete this user? This action is permanent and cannot be undone. All associated data will be permanently removed from the system.
                         </p>
                         
                         <button
