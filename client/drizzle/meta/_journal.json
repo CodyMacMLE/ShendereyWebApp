@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1745105484254,
+      "tag": "0000_thankful_kulan_gath",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1745110524649,
+      "tag": "0001_freezing_stingray",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1745346134890,
+      "tag": "0002_icy_eternity",
+      "breakpoints": true
+    }
+  ]
+}
