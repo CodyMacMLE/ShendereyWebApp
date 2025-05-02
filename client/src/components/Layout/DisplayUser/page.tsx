@@ -119,12 +119,12 @@ export default function DisplayUser({ user } : { user : UserData }) {
             <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
 
                 {/* Left */}
-                <div className="flex flex-col justify-between items-center p-5 sm:px-0 ring ring-[var(--border)] rounded-xl bg-[var(--card-bg)]">
+                <div className="flex flex-col justify-between items-center p-5 sm:px-0 ring-1 ring-[var(--border)] rounded-xl bg-[var(--card-bg)]">
                     <div className="flex flex-col items-center text-center">
                         <div className="flex flex-col items-center text-center">
                             {user.images.staffUrl ? (
                                 <div className="relative mt-3">
-                                    <div className="h-[150px] w-[150px] rounded-full overflow-hidden ring ring-[var(--border)]">
+                                    <div className="h-[150px] w-[150px] rounded-full overflow-hidden ring-1 ring-[var(--border)]">
                                         <Image
                                             src={user.images.staffUrl}
                                             alt="Staff Image"
@@ -135,7 +135,7 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                     </div>
                                 
                                     {/* Status Icon */}
-                                    <div className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring ring-[var(--border)] flex justify-center items-center rounded-full">
+                                    <div className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring-1 ring-[var(--border)] flex justify-center items-center rounded-full">
                                         {user.isActive ? (
                                             <EyeIcon className="w-5 h-5 text-green-600" />
                                         ) : (

@@ -1,6 +1,6 @@
-import { eq, and } from 'drizzle-orm';
-import { db } from '../../../../../../../lib/db';
-import { scores } from '../../../../../../../lib/schema';
+import { eq, and } from 'drizzle-orm/sql';
+import { db } from '@/lib/db';
+import { scores } from '@/lib/schema';
 import { NextRequest, NextResponse } from 'next/server';
 
 type ScoreInput = {
@@ -54,8 +54,8 @@ export async function PUT(
       const deletedScore = await db.delete(scores)
         .where(and( eq(scores.athlete, parseInt(userId)), eq(scores.id, parseInt(scoreId))))
         .returning();
-  
-      return NextResponse.json({ success: true, body: deletedScore[0] });
+
+      return NextResponse.json({ success: true, body: deletedScore?.[0] ?? null });
     } catch (error) {
       return NextResponse.json(
         { success: false, error: error instanceof Error ? error.message : String(error) },

@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
-import { db } from '../../../../../../lib/db';
-import { achievements, users } from '../../../../../../lib/schema';
+import { eq } from 'drizzle-orm/sql';
+import { db } from '@/lib/db';
+import { achievements } from '@/lib/schema';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(

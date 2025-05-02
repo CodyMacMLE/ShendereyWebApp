@@ -139,6 +139,7 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                 className="h-18 w-auto"
                 width={70}
                 height={60}
+                priority
               />
             </div>
               

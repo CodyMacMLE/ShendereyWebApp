@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '../../../../../lib/db'
-import { users, userImages, coaches, athletes, prospects, alumni, scores, videos, achievements } from '../../../../../lib/schema'
-import { eq } from 'drizzle-orm'
+import { db } from '@/lib/db'
+import { users, userImages, coaches, athletes, prospects, alumni, scores, videos, achievements } from '@/lib/schema'
+import { eq } from 'drizzle-orm/sql'
 
 
 export async function GET(

@@ -23,7 +23,6 @@ async function uploadToS3(file: File, keyPrefix: string) {
 }
 
 export async function GET(req: NextRequest) {
-  console.log("GET /api/users hit");
   try {
     const allUsers = await db.select().from(users)
     const allImages = await db.select().from(userImages);

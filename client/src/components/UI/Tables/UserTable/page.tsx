@@ -25,7 +25,7 @@ type User = {
   images?: {
     staffUrl: string | null;
     athleteUrl: string | null;
-    ProspectUrl: string | null;
+    prospectUrl: string | null;
     alumniUrl: string | null;
   };
 };
@@ -92,34 +92,25 @@ export default function UserTable({ users }: Props) {
                           >
                             <td className="whitespace-nowrap pl-3 pr-3 text-sm font-medium text-[var(--foreground)] sm:pl-6 w-full sm:w-1/3 md:w-1/4 max-w-[220px]">
                               <div className="flex items-center gap-3">
-                                {person.images?.staffUrl ? (
-                                  <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 ">
-                                    <Image
-                                      src={person.images.staffUrl}
-                                      alt="Coach Photo"
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  </div>
-                                ) : person.images?.athleteUrl ? (
-                                  <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
-                                    <Image
-                                      src={person.images.athleteUrl}
-                                      alt="Athlete Photo"
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
-                                    <Image
-                                      src="/default-user-icon.png"
-                                      alt="Default User"
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  </div>
-                                )}
+                                <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
+                                  <Image
+                                    src={
+                                      person.images?.staffUrl
+                                        ? person.images.staffUrl
+                                        : person.images?.athleteUrl
+                                        ? person.images.athleteUrl
+                                        : person.images?.prospectUrl
+                                        ? person.images.prospectUrl
+                                        : person.images?.alumniUrl
+                                        ? person.images.alumniUrl
+                                        : "/default-user-icon.png"
+                                    }
+                                    alt="User Photo"
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                  />
+                                </div>
                                 <span>{person.name}</span>
                               </div>
                             </td>

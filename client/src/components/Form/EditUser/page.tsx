@@ -487,7 +487,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Staff specific information.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
@@ -567,9 +567,9 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                                     </div>
                                     ))}
                                     {isSeniorStaff && (staffPhotoPreview ? (
-                                    <img src={staffPhotoPreview} alt="Staff" className="h-70 w-50 rounded-md object-cover" />
+                                    <img src={staffPhotoPreview} alt="Staff" className="h-[225px] w-[150px] rounded-md object-cover" />
                                     ) : (
-                                    <div className='flex items-center justify-center bg-[var(--border)] h-70 w-50 rounded-md'>
+                                    <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                     </div>
                                     ))}
@@ -641,7 +641,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Default athlete specific information that is used for all versions of the athlete.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                             
@@ -715,7 +715,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Prospect specific information for athletes looking for NCAA scholarships.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
@@ -724,9 +724,9 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                               <label htmlFor="prospect-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Prospect Photo</label>
                               <div className="mt-2 flex items-center gap-x-3">
                               {prospectPhotoPreview ? (
-                                <img src={prospectPhotoPreview} alt="Prospect" className="h-70 w-50 rounded-md object-cover" />
+                                <img src={prospectPhotoPreview} alt="Prospect" className="h-[225px] w-[150px] rounded-md object-cover" />
                                 ) : (
-                                <div className='flex items-center justify-center bg-[var(--border)] h-70 w-50 rounded-md'>
+                                <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
                                     <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                 </div>
                                 )}
@@ -905,7 +905,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                 <p className="mt-1 text-sm/6 text-[var(--muted)]">Alumni specific information for athletes recieving a NCAA scholarship.</p>
                 </div>
 
-                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--foreground)]/5 sm:rounded-xl md:col-span-2">
+                <div className="bg-[var(--background)] shadow-sm ring-1 ring-[var(--border)] sm:rounded-xl md:col-span-2">
                     <div className="px-4 py-6 sm:p-8">
                         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
@@ -914,9 +914,9 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                                 <label htmlFor="alumni-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Alumni Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                 {alumniPhotoPreview ? (
-                                    <img src={alumniPhotoPreview} alt="Alumni" className="h-70 w-50 rounded-md object-cover" />
+                                    <img src={alumniPhotoPreview} alt="Alumni" className="h-[225px] w-[150px] rounded-md object-cover" />
                                     ) : (
-                                    <div className='flex items-center justify-center bg-[var(--border)] h-70 w-50 rounded-md'>
+                                    <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                     </div>
                                     )}

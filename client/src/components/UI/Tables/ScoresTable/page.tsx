@@ -44,7 +44,22 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
   useEffect(() => {
     fetchScores();
   }, [])
+
   useEffect(() => {}, [athleteScores])
+
+  // Global click detection for delete confirm button
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.confirm-delete-button')) {
+        setEnabledStates({});
+      }
+    };
+    window.addEventListener('click', handleClickOutside);
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
 
   // Create Score
@@ -86,8 +101,10 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
 
       if (res.ok) {
         const data = await res.json();
-        const newArray = athleteScores.filter(score => score.id !== data.body.id);
-        setAthleteScores(newArray)
+        if (data.body) {
+          const newArray = athleteScores.filter(score => score.id !== data.body.id);
+          setAthleteScores(newArray);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -121,7 +138,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto flex items-center gap-5">
           {images.athleteUrl ? (
-                <div className="h-[50px] w-[50px] rounded-full overflow-hidden ring ring-[var(--border)]">
+                <div className="h-[50px] w-[50px] rounded-full overflow-hidden ring-1 ring-[var(--border)]">
                     <Image
                         src={images.athleteUrl}
                         alt="Athlete Image"
@@ -137,7 +154,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
             )}
             <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}'s Scores</h1>
           </div>
-          <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <div className="mt-10 sm:ml-16 sm:mt-0 sm:flex-none">
             <button
               type="button"
               onClick={() => setAddModalEnabled(true)}
@@ -149,6 +166,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
         </div>
 
         {/* Table */}
+        {athleteScores.length > 0 ? (
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -192,7 +210,6 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                           if (!enabled) {
                             toggleEnabled(score.id);
                           } else {
-                            console.log("Delete score with id:", score.id);
                             await deleteScore(athlete.id, score.id);
                           }
                         };
@@ -226,12 +243,12 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                                 <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6">
                                     <button
                                         onClick={handleDeleteClick}
-                                        className={` cursor-pointer group relative inline-flex h-6 w-14 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
+                                        className={`confirm-delete-button cursor-pointer group relative inline-flex h-6 w-16 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
                                     >
-                                        <span className="text-xs text-white">
+                                        <span className="text-xs text-white font-semibold">
                                             {enabled ? 'Confirm' : ''}
                                         </span>
-                                        <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1">
+                                        <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
                                             {!enabled ? 'Delete' : ''}
                                         </span>
                                     </button>
@@ -241,7 +258,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                                         setSelectedScore(score);
                                         setEditModalEnabled(true);
                                       }}
-                                      className="text-[var(--primary)] hover:text-[var(--primary-hover)]"
+                                      className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-semibold"
                                     >
                                       Edit
                                     </button>
@@ -255,6 +272,9 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
             </div>
           </div>
         </div>
+        ) : (
+          <div className="flex mt-10 p-6 text-sm text-[var(--muted)] items-center justify-center">No scores available.</div>
+        )}
       </div>
       
     </>

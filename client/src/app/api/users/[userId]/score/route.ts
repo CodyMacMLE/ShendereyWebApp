@@ -1,3 +1,8 @@
+import { db } from '@/lib/db';
+import { scores } from '@/lib/schema';
+import { eq } from 'drizzle-orm/sql';
+import { NextRequest, NextResponse } from 'next/server';
+
 type ScoreInput = {
   competitionName: string;
   competitionDate: string;
@@ -8,12 +13,6 @@ type ScoreInput = {
   floorScore: number;
   overallScore: number;
 };
-
-import { eq } from 'drizzle-orm';
-import { db } from '../../../../../../lib/db';
-import { scores } from '../../../../../../lib/schema';
-import { NextRequest, NextResponse } from 'next/server';
-
 
 export async function POST(req: NextRequest) {
   try {

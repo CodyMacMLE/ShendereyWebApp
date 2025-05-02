@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { redirect, useParams } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import { redirect, useParams } from 'next/navigation';
 
-import DisplayUser from '@/components/Layout/DisplayUser/page'
-import { ChevronLeftIcon } from '@heroicons/react/24/outline'
-import ScoresTable from '@/components/UI/Tables/ScoresTable/page'
-import AchievementsTable from '@/components/UI/Tables/AchievementsTable/page'
+import DisplayUser from '@/components/Layout/DisplayUser/page';
+import ScoresTable from '@/components/UI/Tables/ScoresTable/page';
+import AchievementsTable from '@/components/UI/Tables/AchievementsTable/page';
+
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 type UserData = {
     id: number,
@@ -110,7 +111,7 @@ export default function UserPage() {
                 <div className="flex">
                     <div onClick={() => redirect("/admin/users") } className="group flex items-center cursor-pointer">
                         <ChevronLeftIcon className="h-4 w-4 mr-2 text-[var(--muted)] group-hover:text-[var(--primary)]" />
-                        <span className="text-[var(--muted)] group-hover:text-[var(--primary)]">Back</span>
+                        <span className="text-[var(--muted)] group-hover:text-[var(--primary)] font-semibold items-center">Back</span>
                     </div>
                 </div>
             </div>
