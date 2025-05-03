@@ -5,6 +5,7 @@ import { redirect, useParams } from 'next/navigation';
 
 import DisplayUser from '@/components/Layout/DisplayUser/page';
 import ScoresTable from '@/components/UI/Tables/ScoresTable/page';
+import UserGallery from '@/component/Layout/UserGallery/page'
 import AchievementsTable from '@/components/UI/Tables/AchievementsTable/page';
 
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
@@ -56,7 +57,7 @@ enum NavPages {
     Profile = 'Profile',
     Groups = 'Groups',
     Scores = 'Scores',
-    Videos = 'Videos',
+    Gallery = 'Gallery',
     Achievements = 'Achievements',
 }
 
@@ -68,14 +69,14 @@ export default function UserPage() {
     const [isProfile, setIsProfile] = useState(true);
     const [isGroups, setIsGroups] = useState(false);
     const [isScores, setIsScores] = useState(false);
-    const [isVideos, setIsVideos] = useState(false);
+    const [isGallery, setIsGallery] = useState(false);
     const [isAchievements, setIsAchievements] = useState(false);
 
     function setNav(newPage: NavPages) {
         setIsProfile(newPage === NavPages.Profile);
         setIsGroups(newPage === NavPages.Groups);
         setIsScores(newPage === NavPages.Scores);
-        setIsVideos(newPage === NavPages.Videos);
+        setIsGallery(newPage === NavPages.Gallery);
         setIsAchievements(newPage === NavPages.Achievements);
     }
 
@@ -155,8 +156,8 @@ export default function UserPage() {
 
                                 {/* Videos Nav */}
                                 <li>
-                                    <a onClick={() => setNav(NavPages.Videos)} className={isVideos ? 'text-[var(--primary)] cursor-pointer' : 'hover:text-[var(--primary)] cursor-pointer'}>
-                                        Videos
+                                    <a onClick={() => setNav(NavPages.Gallery)} className={isGallery ? 'text-[var(--primary)] cursor-pointer' : 'hover:text-[var(--primary)] cursor-pointer'}>
+                                        Gallery
                                     </a>
                                 </li>
 
@@ -180,6 +181,12 @@ export default function UserPage() {
                 <ScoresTable  
                     athlete={{ id: userData.athlete!.id, name: userData.name }} 
                     images={userData.images}
+                />
+            )}
+
+            {isGallery && userData && (
+                <UserGallery  
+                    athlete={{ id: userData.athlete!.id, name: userData.name, image:userData.images.athleteUrl }}
                 />
             )}
 

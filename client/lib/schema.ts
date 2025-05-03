@@ -90,13 +90,14 @@ export const scores = pgTable('scores', {
 })
 
 // VIDEOS
-export const videos = pgTable('videos', {
+export const media = pgTable('media', {
     id: serial('id').primaryKey(),
     athlete: integer('athlete').references(() => athletes.id),
     name: text('name'),
     description: text('description'),
     date: timestamp('date'),
-    videoUrl: text('videoUrl'),
+    mediaType: text('mediaType'),
+    mediaUrl: text('videoUrl'),
 })
 
 // ACHIEVEMENT
@@ -174,7 +175,8 @@ export const gallery = pgTable('gallery', {
     name: text('name'),
     description: text('description'),
     date: timestamp('date'),
-    galleryUrl: text('galleryUrl'),
+    mediaType: text('mediaType'),
+    mediaUrl: text('videoUrl'),
 })
 
 // RESOURCES

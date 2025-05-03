@@ -1,11 +1,14 @@
 "use client"
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+
 import Modal from "@/components/UI/Modal/page"
 import AddAchievement from "@/components/Form/AddAchievement/page";
 import EditAchievement from "@/components/Form/EditAchievement/page";
+
+import { useState, useEffect } from "react";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 type Athlete = {
     id: number,
@@ -184,16 +187,18 @@ useEffect(() => {
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
                                                     {achievement.description}
                                                 </td>
-                                                <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6">
+                                                <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6 ml-5">
                                                     <button
                                                         onClick={handleDeleteClick}
-                                                        className={`confirm-delete-button cursor-pointer group relative inline-flex h-6 w-16 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
+                                                        className={`confirm-delete-button cursor-pointer group relative inline-flex p-1 items-center justify-center rounded-full ${enabled ? 'bg-red-600 hover:bg-red-500' : 'hover:bg-red-600'}`}
                                                     >
-                                                        <span className="text-xs text-white font-semibold">
-                                                            {enabled ? 'Confirm' : ''}
-                                                        </span>
-                                                        <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
-                                                            {!enabled ? 'Delete' : ''}
+                                                        <span className="relative w-[60px] h-[20px] flex items-center justify-center">
+                                                          <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
+                                                            Confirm
+                                                          </span>
+                                                          <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
+                                                            <TrashIcon className="w-4 h-4" />
+                                                          </span>
                                                         </span>
                                                     </button>
                                                     <button
