@@ -10,7 +10,6 @@ export default function Users() {
         const loadUsers = async () => {
             const data = await fetchUsers();
             setUsers(data);
-            console.log(users)
         };
         loadUsers();
     }, []);

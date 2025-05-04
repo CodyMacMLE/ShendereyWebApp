@@ -1,14 +1,15 @@
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 
 import Modal from "@/components/UI/Modal/page"
 import Gallery from '@/component/UI/Gallery/page'
-//import AddVideo from "@/components/Form/AddVideo/page";
+import AddUserMedia from "@/components/Form/AddUserMedia/page";
 
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 type Athlete = {
-    id: number,
+    userId: number
+    athleteId: number,
     name: string,
     image: string,
 }
@@ -18,7 +19,9 @@ type Media = {
     name: string,
     description: string,
     date: Date,
-    mediaUrl: string
+    mediaUrl: string,
+    mediaType: string
+    thumbnailUrl: string
 }
 
 export default function UserGallery({ athlete } : { athlete : Athlete}) {
@@ -26,16 +29,39 @@ export default function UserGallery({ athlete } : { athlete : Athlete}) {
         const [addModalEnabled, setAddModalEnabled] = useState(false);
         // Edit State
         const [editModalEnabled, setEditModalEnabled] = useState(false);
-        //const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+        //const [selectedMediaItem, setSelectedMediaItem] = useState<Media | null>(null);
     
-        const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
         const [athleteMedia, setAthleteMedia] = useState<Media[] | []>([]);
+
+        useEffect(() => {
+            fetchMedia();
+          }, [])
+        
+        useEffect(() => {
+            console.log(athleteMedia)
+            }, [athleteMedia]);
+
+        // Get Media
+        const fetchMedia = async () => {
+            try {
+            const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}`, {
+                method: 'GET',
+            })
+
+            if (res.ok) {
+                const data = await res.json();
+                setAthleteMedia(data.body || []);
+            }
+            } catch (error) {
+            console.error(error)
+            }
+        }
 
     return (
         <>
             {addModalEnabled && (
-                <Modal title="Add Achievement" setModalEnable={setAddModalEnabled}>
-                    "Adding Video" {/* <AddVideo athleteId={athlete.id} setAthleteAchievements={setAthleteAchievements} setModalEnable={setAddModalEnabled}/> */}
+                <Modal title="Add Media" setModalEnable={setAddModalEnabled}>
+                    <AddUserMedia userId={athlete.userId} athleteId={athlete.athleteId} setAthleteMedia={setAthleteMedia} setModalEnable={setAddModalEnabled}/>
                 </Modal>
             )} 
 

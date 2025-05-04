@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db'
-import { users, userImages, coaches, athletes, prospects, alumni, scores, videos, achievements } from '@/lib/schema'
+import { users, userImages, coaches, athletes, prospects, alumni, scores, media, achievements } from '@/lib/schema'
 import { eq } from 'drizzle-orm/sql'
+import { S3Client, DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { randomUUID } from 'crypto';
 
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME
 
 export async function GET(
   req: NextRequest,
@@ -116,10 +120,9 @@ export async function GET(
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
   const id = parseInt(userId);
+  const formData = await req.formData();
 
   try {
-    const formData = await req.formData();
-
     const name = formData.get('name') as string;
     const isCoach = formData.get('isCoach') === 'true';
     const isAthlete = formData.get('isAthlete') === 'true';
@@ -144,61 +147,161 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
     const alumniGraduationYear = formData.get('alumniGraduationYear') as string;
     const alumniDescription = formData.get('alumniDescription') as string;
 
-    await db.update(users)
-      .set({
-        name,
-        isCoach,
-        isAthlete,
-        isProspect,
-        isAlumni,
-      })
-      .where(eq(users.id, id));
+    const updatedImageFields: Partial<typeof userImages.$inferSelect> = {};
+
+    const imageFields = [
+      { field: 'staffImg', dbKey: 'staffUrl' },
+      { field: 'athleteImg', dbKey: 'athleteUrl' },
+      { field: 'prospectImg', dbKey: 'prospectUrl' },
+      { field: 'alumniImg', dbKey: 'alumniUrl' }
+    ];
+
+    for (const { field, dbKey } of imageFields) {
+      const file = formData.get(field) as File | null;
+      if (file && typeof file === 'object') {
+        // Get current URL from DB
+        let selectedColumn;
+        switch (dbKey) {
+          case 'staffUrl':
+            selectedColumn = userImages.staffUrl;
+            break;
+          case 'athleteUrl':
+            selectedColumn = userImages.athleteUrl;
+            break;
+          case 'prospectUrl':
+            selectedColumn = userImages.prospectUrl;
+            break;
+          case 'alumniUrl':
+            selectedColumn = userImages.alumniUrl;
+            break;
+          default:
+            continue; // skip to next iteration if key is invalid
+        }
+
+        const currentImage = await db
+          .select({ url: selectedColumn })
+          .from(userImages)
+          .where(eq(userImages.user, id));
+        const currentUrl = currentImage?.[0]?.url;
+
+        // Delete existing image if present
+        if (currentUrl) {
+          const existingKey = currentUrl.split('/').slice(3).join('/');
+          await s3.send(new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: existingKey,
+          }));
+        }
+
+        // Upload new image
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const folderMap = {
+          staffImg: 'coach',
+          athleteImg: 'athlete',
+          prospectImg: 'prospect',
+          alumniImg: 'alumni',
+        };
+        const folder = folderMap[field as keyof typeof folderMap] || 'user';
+        const key = `${folder}/${randomUUID()}-${file.name}`;
+
+        try {
+          await s3.send(new PutObjectCommand({ 
+            Bucket: BUCKET_NAME,
+            Key: key,
+            Body: buffer,
+            ContentType: file.type,
+           }));
+          updatedImageFields[dbKey] = `https://${BUCKET_NAME}.s3.amazonaws.com/${key}`;
+        } catch (err) {
+          console.error(`Failed to upload ${dbKey}`, err);
+        }
+      }
+    }
+
+    if (Object.keys(updatedImageFields).length > 0) {
+      await db.update(userImages)
+        .set(updatedImageFields)
+        .where(eq(userImages.user, id));
+    }
+
+    try {
+      console.log('Starting user update...');
+      await db.update(users)
+        .set({
+          name,
+          isCoach,
+          isAthlete,
+          isProspect,
+          isAlumni,
+        })
+        .where(eq(users.id, id));
+    } catch (err) {
+      console.error('Error updating user:', err);
+    }
 
     if (isCoach) {
-      await db.update(coaches)
-        .set({
-          title: coachTitle,
-          description: coachDescription,
-          isSeniorStaff
-        })
-        .where(eq(coaches.user, id));
+      try {
+        await db.update(coaches)
+          .set({
+            title: coachTitle,
+            description: coachDescription,
+            isSeniorStaff
+          })
+          .where(eq(coaches.user, id));
+      } catch (err) {
+        console.error('Error updating coach:', err);
+      }
     }
 
     if (isAthlete) {
-      await db.update(athletes)
-        .set({
-          level: athleteLevel
-        })
-        .where(eq(athletes.user, id));
+      try {
+        await db.update(athletes)
+          .set({
+            level: athleteLevel
+          })
+          .where(eq(athletes.user, id));
+      } catch (err) {
+        console.error('Error updating athlete:', err);
+      }
     }
 
     if (isProspect) {
-      await db.update(prospects)
-        .set({
-          gpa: parseFloat(prospectGPA),
-          major: prospectMajor,
-          institution: prospectInstitution,
-          description: prospectDescription,
-          graduationYear: new Date(`${prospectGraduationYear}-01-01`),
-          instagramLink: prospectInstagram,
-          youtubeLink: prospectYoutube,
-        })
-        .where(eq(prospects.user, id));
+      try {
+        await db.update(prospects)
+          .set({
+            gpa: prospectGPA ? parseFloat(prospectGPA) : null,
+            major: prospectMajor,
+            institution: prospectInstitution,
+            description: prospectDescription,
+            graduationYear: prospectGraduationYear ? new Date(`${prospectGraduationYear}-01-01`) : null,
+            instagramLink: prospectInstagram,
+            youtubeLink: prospectYoutube,
+          })
+          .where(eq(prospects.user, id));
+      } catch (err) {
+        console.error('Error updating prospect:', err);
+      }
     }
 
     if (isAlumni) {
-      await db.update(alumni)
-        .set({
-          school: alumniSchool,
-          year: new Date(`${alumniGraduationYear}-01-01`),
-          description: alumniDescription,
-        })
-        .where(eq(alumni.user, id));
+      try {
+        await db.update(alumni)
+          .set({
+            school: alumniSchool,
+            year: alumniGraduationYear ? new Date(`${alumniGraduationYear}-01-01`) : null,
+            description: alumniDescription,
+          })
+          .where(eq(alumni.user, id));
+      } catch (err) {
+        console.error('Error updating alumni:', err);
+      }
     }
 
     return NextResponse.json({ success: true, redirect: `/admin/users/${userId}` });
 
   } catch (error) {
+    console.error('PUT error:', error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
@@ -216,34 +319,86 @@ export async function DELETE(
   .from(athletes)
   .where(eq(athletes.user, parseInt(userId)));
 
-const athleteId = athleteIdResult.length > 0 ? athleteIdResult[0].athleteId : null;
-
-try {
-  const deletePromises = [];
+  const athleteId = athleteIdResult.length > 0 ? athleteIdResult[0].athleteId : null;
 
   if (athleteId) {
-    deletePromises.push(
-      db.delete(achievements).where(eq(achievements.athlete, athleteId)),
-      db.delete(videos).where(eq(videos.athlete, athleteId)),
-      db.delete(scores).where(eq(scores.athlete, athleteId))
+    const mediaUrls = await db.select({ url: media.mediaUrl }).from(media).where(eq(media.athlete, athleteId));
+
+    const mediaKeys = mediaUrls
+      .filter((obj): obj is { url: string } => obj.url !== null)
+      .map(obj => {
+        const parts = obj.url.split('/');
+        return parts.slice(3).join('/');
+      });
+
+    const s3MediaDeletePromises = mediaKeys.map(key =>
+      s3.send(new DeleteObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+      }))
     );
+
+    const userImageUrls = await db.select({
+      staffUrl: userImages.staffUrl,
+      athleteUrl: userImages.athleteUrl,
+      prospectUrl: userImages.prospectUrl,
+      alumniUrl: userImages.alumniUrl,
+    }).from(userImages).where(eq(userImages.user, parseInt(userId)));
+    
+    const imageUrls = userImageUrls[0];
+    const keys = ['staffUrl', 'athleteUrl', 'prospectUrl', 'alumniUrl'] as const;
+    const s3Keys = keys
+      .map((key) => {
+        switch (key) {
+          case 'staffUrl': return imageUrls?.staffUrl;
+          case 'athleteUrl': return imageUrls?.athleteUrl;
+          case 'prospectUrl': return imageUrls?.prospectUrl;
+          case 'alumniUrl': return imageUrls?.alumniUrl;
+        }
+      })
+      .filter((url): url is string => Boolean(url))
+      .map((url) => {
+        const parts = url.split('/');
+        return parts.slice(3).join('/');
+      });
+    
+    const s3DeletePromises = s3Keys.map(key =>
+      s3.send(new DeleteObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+      }))
+    );
+    
+    await Promise.all(s3DeletePromises);
+    await Promise.all(s3MediaDeletePromises);
   }
 
-  deletePromises.push(
-    db.delete(alumni).where(eq(alumni.user, parseInt(userId))),
-    db.delete(prospects).where(eq(prospects.user, parseInt(userId))),
-    db.delete(athletes).where(eq(athletes.user, parseInt(userId))),
-    db.delete(coaches).where(eq(coaches.user, parseInt(userId))),
-    db.delete(userImages).where(eq(userImages.user, parseInt(userId)))
-  );
+  try {
+    const deletePromises = [];
 
-  await Promise.all(deletePromises);
+    if (athleteId) {
+      deletePromises.push(
+        db.delete(achievements).where(eq(achievements.athlete, athleteId)),
+        db.delete(media).where(eq(media.athlete, athleteId)),
+        db.delete(scores).where(eq(scores.athlete, athleteId))
+      );
+    }
 
-  await db.delete(users)
-    .where(eq(users.id, parseInt(userId)))
-    .returning();
+    deletePromises.push(
+      db.delete(alumni).where(eq(alumni.user, parseInt(userId))),
+      db.delete(prospects).where(eq(prospects.user, parseInt(userId))),
+      db.delete(athletes).where(eq(athletes.user, parseInt(userId))),
+      db.delete(coaches).where(eq(coaches.user, parseInt(userId))),
+      db.delete(userImages).where(eq(userImages.user, parseInt(userId)))
+    );
 
-  return NextResponse.json({ success: true, redirect: '/admin/users' });
+    await Promise.all(deletePromises);
+
+    await db.delete(users)
+      .where(eq(users.id, parseInt(userId)))
+      .returning();
+
+    return NextResponse.json({ success: true, redirect: '/admin/users' });
 
   } catch (error) {
     return NextResponse.json(

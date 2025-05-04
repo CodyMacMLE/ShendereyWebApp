@@ -186,7 +186,7 @@ export default function UserPage() {
 
             {isGallery && userData && (
                 <UserGallery  
-                    athlete={{ id: userData.athlete!.id, name: userData.name, image:userData.images.athleteUrl }}
+                    athlete={{ userId: userData.id, athleteId: userData.athlete!.id, name: userData.name, image:userData.images.athleteUrl }}
                 />
             )}
 

@@ -89,7 +89,7 @@ export const scores = pgTable('scores', {
     overall: doublePrecision('overall'),
 })
 
-// VIDEOS
+// MEDIA
 export const media = pgTable('media', {
     id: serial('id').primaryKey(),
     athlete: integer('athlete').references(() => athletes.id),
@@ -97,7 +97,8 @@ export const media = pgTable('media', {
     description: text('description'),
     date: timestamp('date'),
     mediaType: text('mediaType'),
-    mediaUrl: text('videoUrl'),
+    mediaUrl: text('mediaUrl'),
+    videoThumbnail: text('videoThumbnail')
 })
 
 // ACHIEVEMENT

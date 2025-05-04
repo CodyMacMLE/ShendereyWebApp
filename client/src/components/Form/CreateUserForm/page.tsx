@@ -498,9 +498,9 @@ export default function CreateUserForm() {
                                     </div>
                                     ))}
                                     {isSeniorStaff && (staffPhotoPreview ? (
-                                    <img src={staffPhotoPreview} alt="Staff" className="h-70 w-50 rounded-md object-cover" />
+                                    <img src={staffPhotoPreview} alt="Staff" className="h-[225px] w-[150px] rounded-md object-cover" />
                                     ) : (
-                                    <div className='flex items-center justify-center bg-[var(--border)] h-70 w-50 rounded-md'>
+                                    <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                     </div>
                                     ))}
@@ -655,9 +655,9 @@ export default function CreateUserForm() {
                               <label htmlFor="prospect-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Prospect Photo</label>
                               <div className="mt-2 flex items-center gap-x-3">
                               {prospectPhotoPreview ? (
-                                <img src={prospectPhotoPreview} alt="Prospect" className="h-70 w-50 rounded-md object-cover" />
+                                <img src={prospectPhotoPreview} alt="Prospect" className="h-[225px] w-[150px] rounded-md object-cover" />
                                 ) : (
-                                <div className='flex items-center justify-center h-12 w-12 rounded-full'>
+                                <div className='flex items-center justify-center h-[225px] w-[150px] bg-[var(--border)] rounded-md'>
                                     <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                 </div>
                                 )}
@@ -845,9 +845,9 @@ export default function CreateUserForm() {
                                 <label htmlFor="alumni-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Alumni Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                 {alumniPhotoPreview ? (
-                                    <img src={alumniPhotoPreview} alt="Alumni" className="h-70 w-50 rounded-md object-cover" />
+                                    <img src={alumniPhotoPreview} alt="Alumni" className="h-[225px] w-[150px] rounded-md object-cover" />
                                     ) : (
-                                    <div className='flex items-center justify-center h-12 w-12 rounded-full'>
+                                    <div className='flex items-center justify-center h-[225px] w-[150px] bg-[var(--border)] rounded-md'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                     </div>
                                     )}

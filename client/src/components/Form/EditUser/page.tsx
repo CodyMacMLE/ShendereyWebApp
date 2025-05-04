@@ -158,7 +158,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
         if (isStaff) {
             form.append('coachTitle', staffTitle);
             form.append('coachDescription', staffAbout);
-            if (staffPhotoFile) form.append('coachImg', staffPhotoFile);
+            if (staffPhotoFile) form.append('staffImg', staffPhotoFile);
         }
 
         // Athlete fields
