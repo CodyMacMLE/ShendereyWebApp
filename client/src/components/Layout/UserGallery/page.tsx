@@ -21,7 +21,7 @@ type Media = {
     date: Date,
     mediaUrl: string,
     mediaType: string
-    thumbnailUrl: string
+    videoThumbnail: string
 }
 
 export default function UserGallery({ athlete } : { athlete : Athlete}) {

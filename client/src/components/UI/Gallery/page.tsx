@@ -5,7 +5,7 @@ type Media = {
     date: Date,
     mediaUrl: string
     mediaType: string
-    thumbnailUrl: string
+    videoThumbnail: string
 }
 
 export default function Gallery({ media }: { media: Media[] | [] }) {
@@ -19,7 +19,7 @@ export default function Gallery({ media }: { media: Media[] | [] }) {
                     <div key={item.id}>
                         {item.mediaType.startsWith("video/") ? (
                         <img
-                            src="/video-thumbnail.png"
+                            src={item.videoThumbnail}
                             alt={`${item.name} (video)`}
                             className="h-auto max-w-full rounded-lg"
                         />

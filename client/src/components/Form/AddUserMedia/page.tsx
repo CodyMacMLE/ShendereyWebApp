@@ -12,7 +12,7 @@ type Media = {
     date: Date,
     mediaUrl: string
     mediaType: string,
-    thumbnailUrl: string
+    videoThumbnail: string
 }
 
 export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setModalEnable }: { 
@@ -63,7 +63,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
         if (setModalEnable) setModalEnable(false);
         if (setAthleteMedia && data.body) setAthleteMedia(data.body);
       } else {
-        console.error('Upload failed.');
+        console.error('Upload failed.', await res.json());
       }
     } catch (err) {
       console.error('Error submitting form', err);

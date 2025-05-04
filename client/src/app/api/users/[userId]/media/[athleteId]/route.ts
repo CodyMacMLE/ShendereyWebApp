@@ -9,10 +9,13 @@ import { randomUUID } from 'crypto';
 import { file as tmpFile } from 'tmp-promise';
 import path from 'path';
 import fs from 'fs/promises';
-import ffmpegPath from '@ffmpeg-installer/ffmpeg';
-import ffmpeg from 'fluent-ffmpeg';
+const ffmpegPath = '/opt/homebrew/bin/ffmpeg'
+import Ffmpeg from 'fluent-ffmpeg';
 
-ffmpeg.setFfmpegPath(ffmpegPath.path);
+if (!ffmpegPath) {
+  throw new Error('ffmpeg binary not found');
+}
+Ffmpeg.setFfmpegPath(ffmpegPath);
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
@@ -52,18 +55,24 @@ export async function POST(
       const { path: tmpVideoPath, cleanup } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
       await fs.writeFile(tmpVideoPath, buffer);
 
-      const { path: thumbPath } = await tmpFile({ postfix: '.jpg' });
+      const tmpThumb = await tmpFile({ postfix: '.jpg' });
+      const thumbPath = tmpThumb.path;
 
       await new Promise((resolve, reject) => {
-        ffmpeg(tmpVideoPath)
+        // Ensure thumbPath is not null
+        if (!thumbPath) {
+          return reject(new Error('Thumbnail path is null'));
+        }
+        Ffmpeg(tmpVideoPath)
           .on('end', resolve)
           .on('error', reject)
           .screenshots({
-            timestamps: ['1'],
-            filename: path.basename(thumbPath),
+            timestamps: ['5'],
+            filename: 'thumb.jpg',
             folder: path.dirname(thumbPath),
-            size: '320x240',
-          });
+            size: '1280x720'
+          })
+          .outputOptions('-qscale:v', '2')
       });
 
       const thumbBuffer = await fs.readFile(thumbPath);
@@ -78,7 +87,7 @@ export async function POST(
 
       thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
 
-      await cleanup();
+      await tmpThumb.cleanup();
     }
     
 
