@@ -1,17 +1,22 @@
 'use client';
 
-import React, { Dispatch, SetStateAction, useState } from 'react';
-import imageCompression from 'browser-image-compression';
+import React, { Dispatch, SetStateAction, useState, useEffect } from 'react';
 
 import ErrorModal from '@/components/UI/ErrorModal/page';
 import Dropdown from '@/components/UI/Dropdown/page';
+
+type Athlete = {
+    userId: number,
+    athleteId: number
+}
 
 type Media = {
     id: string,
     name: string,
     description: string,
-    date: Date,
-    mediaUrl: string
+    category: string,
+    date: string | Date,
+    mediaUrl: string,
     mediaType: string,
     videoThumbnail: string
 }
@@ -24,57 +29,71 @@ const categories = [
     "Other",
 ]
 
-export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setModalEnable }: { 
-    userId: number, 
-    athleteId: number, 
-    setAthleteMedia?: Dispatch<SetStateAction<Media[]>>,
-    setModalEnable?: Dispatch<SetStateAction<boolean>>, 
+// PUT works
+// However on edit close, open modal and main gallery do not update
+
+export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
+    athlete: Athlete,
+    media: Media,
+    closeModal?: () => void,
+    onSuccess: (updated: Media) => void
 }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('Vault');
+    const [category, setCategory] = useState('');
     const [date, setDate] = useState('');
-    const [mediaFile, setMediaFile] = useState<File | null>(null);
+
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
+
+    useEffect(() => {
+        console.log(media)
+        if (media) {
+            setName(media.name || '');
+            setDescription(media.description || '');
+            setCategory(media.category || 'Vault');
+            setDate(media.date ? new Date(media.date).toISOString().split('T')[0] : '');
+        }
+    }, [media]);
 
     const handleSubmit = async () => {
         const errors: { msg: string }[] = [];
 
         if (!name.trim()) errors.push({ msg: 'Name is required.' });
-        description.trim()
+        description.trim();
         if (!date) errors.push({ msg: 'Date is required.' });
-        if (!mediaFile) errors.push({ msg: 'Media file is required.' });
 
         if (errors.length > 0) {
-        setFormErrors(errors);
-        return;
+            setFormErrors(errors);
+            return;
         }
 
         try {
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('description', description);
-        formData.append('category', category);
-        formData.append('date', date);
-        if (mediaFile) {
-            formData.append('media', mediaFile);
-            formData.append('mediaType', mediaFile.type)
-        }
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', description);
+            formData.append('category', category);
+            formData.append('date', date);
 
-        const res = await fetch(`/api/users/${userId}/media/${athleteId}`, {
-            method: 'POST',
-            body: formData,
-        });
+            const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}?mediaId=${media.id}`, {
+                method: 'PUT',
+                body: formData,
+            });
 
-        if (res.ok) {
-            const data = await res.json();
-            if (setModalEnable) setModalEnable(false);
-            if (setAthleteMedia && data.body) setAthleteMedia(data.body);
-        } else {
-            console.error('Upload failed.', await res.json());
-        }
+            if (res.ok) {
+                const updatedMedia: Media = {
+                    ...media,
+                    name,
+                    description,
+                    category,
+                    date,
+                };
+                onSuccess(updatedMedia);
+                if (closeModal) closeModal();
+            } else {
+                console.error('Upload failed.', await res.json());
+            }
         } catch (err) {
-        console.error('Error submitting form', err);
+            console.error('Error submitting form', err);
         }
     };
 
@@ -130,7 +149,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                         {/* Category */}
                         <div className="sm:col-span-4">
                             <label htmlFor="media-category" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                            <Dropdown items={categories} setItem={setCategory}/>
+                            <Dropdown items={categories} setItem={setCategory} currentItem={category} />
                         </div>
 
                         {/* Description */}
@@ -153,54 +172,13 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
     
                     </div>
 
-                    {/* Media Input */}
-                    <div className="col-span-full mt-6">
-                        <label htmlFor="media-item" className="block text-sm/6 font-medium text-[var(--foreground)]">Media</label>
-                        <div className="mt-2 flex items-center gap-x-3">
-                            <input
-                            type="file"
-                            accept="image/*,video/*"
-                            className="hidden"
-                            id="media-item"
-                            onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                if (file.size > 100 * 1024 * 1024) {
-                                    console.warn("File too large (max 100MB):", file.name);
-                                    return;
-                                }
-                                let processedFile = file;
-                                if (file.type.startsWith('image/')) {
-                                processedFile = await imageCompression(file, { maxSizeMB: 0.8, maxWidthOrHeight: 1024, useWebWorker: true });
-                                }
-                                setMediaFile(processedFile);
-                                }
-                            }}
-                            />
-                            <label 
-                                htmlFor="media-item" 
-                                className="cursor-pointer rounded-md bg-[var(--background)] px-2.5 py-1.5 text-sm font-bold text-[var(--foreground)] shadow-sm ring-1 ring-inset ring-[var(--muted)] hover:bg-[var(--primary)] hover:ring-[var(--primary-hover)]"
-                            >
-                                Change
-                            </label>
-                            {mediaFile && (
-                                <p className="text-sm text-[var(--foreground)] mt-1">
-                                    Selected file: <span className="font-medium">{mediaFile.name}</span>
-                                </p>
-                            )}
-                        </div>
-                        <p id="image-warning" className="text-[var(--muted)] text-sm mt-2">
-                            Image or Video. 100MB max.
-                        </p>
-                    </div>
-
                 </div>
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-x-6">
                 <button
                     type="button"
-                    onClick={() => {setModalEnable? setModalEnable(false) : "" }}
+                    onClick={() => { closeModal?.(); }}
                     className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
                 >
                     Cancel

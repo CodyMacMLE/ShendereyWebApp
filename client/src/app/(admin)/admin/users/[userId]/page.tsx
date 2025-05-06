@@ -5,10 +5,10 @@ import { redirect, useParams } from 'next/navigation';
 
 import DisplayUser from '@/components/Layout/DisplayUser/page';
 import ScoresTable from '@/components/UI/Tables/ScoresTable/page';
-import UserGallery from '@/component/Layout/UserGallery/page'
 import AchievementsTable from '@/components/UI/Tables/AchievementsTable/page';
 
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import AthleteMedia from '@/components/Layout/AthleteMedia/page';
 
 type UserData = {
     id: number,
@@ -185,7 +185,7 @@ export default function UserPage() {
             )}
 
             {isGallery && userData && (
-                <UserGallery  
+                <AthleteMedia  
                     athlete={{ userId: userData.id, athleteId: userData.athlete!.id, name: userData.name, image:userData.images.athleteUrl }}
                 />
             )}

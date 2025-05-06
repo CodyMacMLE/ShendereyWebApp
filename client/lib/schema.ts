@@ -95,6 +95,7 @@ export const media = pgTable('media', {
     athlete: integer('athlete').references(() => athletes.id),
     name: text('name'),
     description: text('description'),
+    category: text('category'),
     date: timestamp('date'),
     mediaType: text('mediaType'),
     mediaUrl: text('mediaUrl'),

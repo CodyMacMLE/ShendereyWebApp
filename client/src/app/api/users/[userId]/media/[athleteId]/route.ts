@@ -3,7 +3,7 @@ import { media } from '@/lib/schema';
 import { eq } from 'drizzle-orm/sql';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
 import { file as tmpFile } from 'tmp-promise';
@@ -29,7 +29,7 @@ async function uploadToS3(file: File, keyPrefix: string) {
     Bucket: BUCKET_NAME,
     Key: key,
     Body: buffer,
-    ContentType: file.type,
+    ContentType: file.type
   }));
 
   return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
@@ -55,6 +55,21 @@ export async function POST(
       const { path: tmpVideoPath, cleanup } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
       await fs.writeFile(tmpVideoPath, buffer);
 
+      const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
+        return new Promise((resolve, reject) => {
+          Ffmpeg.ffprobe(tmpVideoPath, (err, metadata) => {
+            if (err) return reject(err);
+            const stream = metadata.streams.find(s => s.width && s.height);
+            if (!stream) return reject(new Error('No video stream found'));
+            resolve({ width: stream.width!, height: stream.height! });
+          });
+        });
+      };
+
+      const { width, height } = await getVideoDimensions();
+      const isPortrait = height > width;
+      const thumbnailSize = isPortrait ? '360x640' : '640x360';
+
       const tmpThumb = await tmpFile({ postfix: '.jpg' });
       const thumbPath = tmpThumb.path;
 
@@ -63,16 +78,17 @@ export async function POST(
         if (!thumbPath) {
           return reject(new Error('Thumbnail path is null'));
         }
+
+        
         Ffmpeg(tmpVideoPath)
           .on('end', resolve)
           .on('error', reject)
           .screenshots({
             timestamps: ['5'],
-            filename: 'thumb.jpg',
+            filename: path.basename(thumbPath),
             folder: path.dirname(thumbPath),
-            size: '1280x720'
-          })
-          .outputOptions('-qscale:v', '2')
+            size: thumbnailSize,
+          });
       });
 
       const thumbBuffer = await fs.readFile(thumbPath);
@@ -82,7 +98,7 @@ export async function POST(
         Bucket: BUCKET_NAME,
         Key: thumbKey,
         Body: thumbBuffer,
-        ContentType: 'image/jpeg',
+        ContentType: 'image/jpeg'
       }));
 
       thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
@@ -93,17 +109,18 @@ export async function POST(
 
     const title = formData.get('name');
     const description = formData.get('description');
+    const category = formData.get('category');
     const dateRaw = formData.get('date');
     const date = typeof dateRaw === 'string' ? new Date(dateRaw) : null;
-    
 
     await db.insert(media).values({
       athlete: parseInt(athleteId),
       name: title?.toString() || '',
       description: description?.toString() || '',
-      date,
+      category: category?.toString() || '',
+      date: date,
       mediaType: mediaType?.toString() || '',
-      mediaUrl,
+      mediaUrl: mediaUrl,
       videoThumbnail: thumbnailUrl || ''
     })
 
@@ -133,5 +150,87 @@ export async function GET(
       { success: false, error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
+  }
+}
+
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ athleteId: string, mediaId: string }> }
+) {
+  const { searchParams } = req.nextUrl;
+  const mediaId = searchParams.get('mediaId');
+
+  
+
+  const formData = await req.formData();
+  const name = formData.get('name')?.toString() || '';
+  const category = formData.get('category')?.toString() || '';
+  const description = formData.get('description')?.toString() || '';
+  const dateRaw = formData.get('date');
+  const date = typeof dateRaw === 'string' ? new Date(dateRaw) : null;
+
+  if (!mediaId) {
+    return NextResponse.json({ success: false, error: 'Missing mediaId query param' }, { status: 400 });
+  }
+
+  try {
+    await db.update(media)
+      .set({ name, description, category, date })
+      .where(eq(media.id, parseInt(mediaId)));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ userId: string, athleteId: string }> }
+) {
+  const { searchParams } = req.nextUrl;
+  const mediaId = searchParams.get('mediaId');
+
+  if (!mediaId) {
+    return NextResponse.json({ success: false, error: 'Missing mediaId query param' }, { status: 400 });
+  }
+
+  try {
+    const [target] = await db.select().from(media).where(eq(media.id, parseInt(mediaId)));
+    if (!target) {
+      return NextResponse.json({ success: false, error: 'Media not found' }, { status: 404 });
+    }
+
+    const commands = [];
+
+    if (target.mediaUrl) {
+      const mediaKey = target.mediaUrl.split('.com/')[1];
+      if (mediaKey) {
+        commands.push(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: mediaKey }));
+      }
+    }
+
+    if (target.videoThumbnail && target.mediaType?.startsWith('video/')) {
+      const thumbKey = target.videoThumbnail.split('.com/')[1];
+      if (thumbKey) {
+        commands.push(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: thumbKey }));
+      }
+    }
+
+    for (const cmd of commands) {
+      await s3.send(cmd);
+    }
+
+    await db.delete(media).where(eq(media.id, parseInt(mediaId)));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }
