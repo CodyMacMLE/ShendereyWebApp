@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
+    // Get Form Data
     const name = formData.get('name') as string;
     const isAthlete = formData.get('isAthlete') === 'true';
     const isCoach = formData.get('isCoach') === 'true';

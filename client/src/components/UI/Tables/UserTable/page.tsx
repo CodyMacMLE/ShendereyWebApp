@@ -5,10 +5,11 @@ import { useState } from 'react';
 
 import Link from "next/link";
 
+import UserTableSkeleton from './UserTableSkeleton';
 import { Role, RoleTag } from "@/components/UI/RoleTag/page";
 import Image from "next/image";
 import StatusTag from "@/components/UI/StatusTag/page";
-import Modal from "../../Modal/page";
+import Modal from "@/components/UI/Modal/page";
 import EditUser from "@/components/Form/EditUser/page";
 
 type User = {
@@ -32,9 +33,10 @@ type User = {
 
 interface Props {
     users: User[];
+    isLoading?: boolean
 }
 
-export default function UserTable({ users }: Props) {
+export default function UserTable({ users, isLoading }: Props) {
 
     const router = useRouter();
     const [editModal, setEditModal] = useState(false);
@@ -63,7 +65,27 @@ export default function UserTable({ users }: Props) {
             </div>
           </div>
 
-          {users.length > 0 ? (
+          {isLoading ? (
+            <div className="mt-8 flow-root">
+              <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div className="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
+                    <table className="min-w-full divide-y divide-[var(--border)]">
+                      <thead className="bg-[var(--card-bg)]">
+                        <tr>
+                          <th className="pl-3 pr-3.5 text-left text-sm font-semibold text-[var(--foreground)] sm:pl-6 w-1/4 sm:w-1/3 md:w-1/4">User</th>
+                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">Role</th>
+                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">Status</th>
+                          <th className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Edit</span></th>
+                        </tr>
+                      </thead>
+                      <UserTableSkeleton />
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : users.length > 0 ? (
           <div className="mt-8 flow-root">
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">

@@ -5,11 +5,13 @@ import { useState, useEffect } from 'react';
 
 export default function Users() {
     const [users, setUsers] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const loadUsers = async () => {
             const data = await fetchUsers();
             setUsers(data);
+            setIsLoading(false);
         };
         loadUsers();
     }, []);
@@ -34,7 +36,6 @@ export default function Users() {
                     updatedAt: user.updatedAt ?? new Date(),
                     images: user.images ?? undefined
                 }));
-    
                 return transformedData;
             }
         } catch (error) {
@@ -44,7 +45,7 @@ export default function Users() {
 
 
     return (
-        <UserTable users={users}/>
+        <UserTable users={users} isLoading={isLoading} />
     )
     
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "../../globals.css";
 
-import AdminNavbar from "../../../components/Layout/AdminNavbar/page";
+import AdminNavbar from "../../../components/Layout/Admin/AdminNavbar/page";
 
 export const metadata: Metadata = {
   title: "Admin",

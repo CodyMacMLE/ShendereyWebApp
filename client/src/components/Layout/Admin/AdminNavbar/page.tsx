@@ -20,11 +20,11 @@ import {
   CursorArrowRaysIcon,
   BookOpenIcon,
   PlayCircleIcon,
-  TrophyIcon,
-  MegaphoneIcon,
   ArrowLeftStartOnRectangleIcon,
   MagnifyingGlassIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline'
+import { IoShirtOutline } from 'react-icons/io5';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image'
 
@@ -37,7 +37,8 @@ const navigation = [
   { name: 'Users', href: '/admin/users', icon: UsersIcon},
   //{ name: 'Blog', href: '/admin/blog', icon: BookOpenIcon },
   { name: 'Gallery', href: '/admin/gallery', icon: PlayCircleIcon },
-  //{ name: 'Store', href: '/admin/merchandise', icon: IoShirtOutline },
+  { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
+  { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
   { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
 ]
 

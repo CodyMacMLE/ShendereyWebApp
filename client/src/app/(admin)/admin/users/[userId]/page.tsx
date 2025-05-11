@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { redirect, useParams } from 'next/navigation';
 
-import DisplayUser from '@/components/Layout/DisplayUser/page';
+import DisplayUser from '@/components/Layout/Admin/DisplayUser/page';
 import ScoresTable from '@/components/UI/Tables/ScoresTable/page';
 import AchievementsTable from '@/components/UI/Tables/AchievementsTable/page';
 
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import AthleteMedia from '@/components/Layout/AthleteMedia/page';
+import AthleteMedia from '@/components/Layout/Admin/AthleteMedia/page';
 
 type UserData = {
     id: number,

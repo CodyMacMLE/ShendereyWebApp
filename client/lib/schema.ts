@@ -162,6 +162,7 @@ export const groups = pgTable('groups', {
     endTime: time('endTime'),
     startDate: timestamp('startDate'),
     endDate: timestamp('endDate'),
+    active: boolean('active')
 })
 
 // COACHGROUPLINE
