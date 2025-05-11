@@ -18,7 +18,7 @@ interface ProgramLayoutProps {
 
 export default function ProgramLayout({ programs, isLoading }: ProgramLayoutProps) {
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-10">
+        <div className="px-4 sm:px-6 lg:px-8 py-0">
             {/* Title */}
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">

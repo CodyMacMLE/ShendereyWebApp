@@ -1,11 +1,10 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { redirect, useParams } from "next/navigation"
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
-import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 type Program = {
     id: number,
@@ -18,35 +17,19 @@ type Program = {
 }
 
 type Group = {
-
-}
-
-const stats = [
-  { name: 'Number of deploys', value: '405' },
-  { name: 'Average deploy time', value: '3.65', unit: 'mins' },
-  { name: 'Number of servers', value: '3' },
-  { name: 'Success rate', value: '98.5%' },
-]
-const statuses = { Completed: 'text-green-400 bg-green-400/10', Error: 'text-rose-400 bg-rose-400/10' }
-const activityItems = [
-  {
-    user: {
-      name: 'Michael Foster',
-      imageUrl:
-        'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
-    commit: '2d89f0c8',
-    branch: 'main',
-    status: 'Completed',
-    duration: '25s',
-    date: '45 minutes ago',
-    dateTime: '2023-01-23T11:00',
-  },
-  // More items...
-]
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+    id: number,
+    program: number,
+    day: string,
+    startTime: string,
+    endTime: string,
+    startDate: Date,
+    endDate: Date,
+    active: boolean
+    coaches: [
+        {
+            name: string,
+        }
+    ]
 }
 
 export default function Program() {
@@ -56,11 +39,10 @@ export default function Program() {
 
     // Data
     const [program, setProgram] = useState<Program | null>(null)
-    const [groups, setGroups] = useState<Group | null>(null)
+    const [groups, setGroups] = useState<Group[] | null>(null)
 
     // State
     const [isLoading, setIsLoading] = useState(true);
-    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     // Fetching
     const fetchProgram = async () => {
@@ -75,8 +57,6 @@ export default function Program() {
             }
         } catch (err) {
             console.error('Fetch error:', err);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -96,17 +76,26 @@ export default function Program() {
         }
     };
 
+    const fetchData = async () => {
+        try {
+            await fetchProgram();
+            await fetchGroups();
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     // Reload state
 
     // On load
     useEffect(() => {
-        fetchProgram();
-        // fetchGroups(); 
+        fetchData(); 
     }, []);
 
     // On data change
-    useEffect(() => {  
-        console.log(program);
+    useEffect(() => { 
     }, [program, groups]);
 
     return (
@@ -117,15 +106,22 @@ export default function Program() {
             <>
                 <div>
                     <main>
+                        {/* Back Button */}
+                        <div className="px-6 mb-10">
+                            <div className="flex">
+                                <div onClick={() => redirect("/admin/programs") } className="group flex items-center cursor-pointer">
+                                    <ChevronLeftIcon className="h-4 w-4 mr-2 text-[var(--muted)] group-hover:text-[var(--primary)]" />
+                                    <span className="text-[var(--muted)] group-hover:text-[var(--primary)] font-semibold items-center">Back</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <header>
                             {/* Heading */}
                             <div className="flex flex-col items-start justify-between gap-x-8 gap-y-4 bg-[var(--background)] px-4 py-4 sm:flex-row sm:items-center sm:px-6 lg:px-8">
                                 <div>
                                     <div className="flex justify-between">
                                         <div className="flex items-center gap-x-3">
-                                            <div className="flex-none rounded-full bg-green-400/10 p-1 text-green-400">
-                                                <div className="size-2 rounded-full bg-current" />
-                                            </div>
                                             <h1 className="flex gap-x-3 text-base/7">
                                                 <span className="font-semibold text-[var(--foreground)]">
                                                     {program!.category.charAt(0).toUpperCase() + program!.category.slice(1).toLowerCase()}
@@ -162,8 +158,7 @@ export default function Program() {
                                 >
                                     <p className="text-sm/6 font-medium text-[var(--muted)]">Groups</p>
                                     <p className="mt-2 flex items-baseline gap-x-2">
-                                        {/* Should be groups.length() */}
-                                        <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]">{10}</span>
+                                        <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]">{groups ? groups.length : 0}</span>
                                     </p>
                                 </div>
                                 <div
@@ -188,80 +183,126 @@ export default function Program() {
 
                         {/* Groups list */}
                         <div className="border-t border-[var(--border)] pt-11">
-                        <h2 className="px-4 text-base/7 font-semibold text-[var(--foreground)] sm:px-6 lg:px-8">Groups</h2>
-                        <table className="mt-6 w-full whitespace-nowrap text-left">
-                            <colgroup>
-                            <col className="w-full sm:w-2/12" />
-                            <col className="lg:w-4/12" />
-                            <col className="lg:w-2/12" />
-                            <col className="lg:w-2/12" />
-                            <col className="lg:w-2/12" />
-                            <col className="lg:w-2/12" />
-                            <col className="lg:w-1/12" />
-                            </colgroup>
-                            <thead className="border-b border-[var(--border)] text-sm/6 text-[var(--foreground)]">
-                            <tr>
-                                <th scope="col" className="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">
-                                Day
-                                </th>
-                                <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">
-                                Coach
-                                </th>
-                                <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
-                                Start Time
-                                </th>
-                                <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
-                                End Time
-                                </th>
-                                <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
-                                Start Date
-                                </th>
-                                <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
-                                End Date
-                                </th>
-                                <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
-                                Status
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                            {activityItems.map((item) => (
-                                <tr key={item.commit}>
-                                <td className="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
-                                    <div className="flex items-center gap-x-4">
-                                    <img alt="" src={item.user.imageUrl} className="size-8 rounded-full bg-gray-800" />
-                                    <div className="truncate text-sm/6 font-medium text-white">{item.user.name}</div>
-                                    </div>
-                                </td>
-                                <td className="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
-                                    <div className="flex gap-x-3">
-                                    <div className="font-mono text-sm/6 text-gray-400">{item.commit}</div>
-                                    <span className="inline-flex items-center rounded-md bg-gray-400/10 px-2 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-gray-400/20">
-                                        {item.branch}
-                                    </span>
-                                    </div>
-                                </td>
-                                <td className="py-4 pl-0 pr-4 text-sm/6 sm:pr-8 lg:pr-20">
-                                    <div className="flex items-center justify-end gap-x-2 sm:justify-start">
-                                    <time dateTime={item.dateTime} className="text-gray-400 sm:hidden">
-                                        {item.date}
-                                    </time>
-                                    <div className={classNames(statuses[item.status as keyof typeof statuses], 'flex-none rounded-full p-1')}>
-                                        <div className="size-1.5 rounded-full bg-current" />
-                                    </div>
-                                    <div className="hidden text-white sm:block">{item.status}</div>
-                                    </div>
-                                </td>
-                                <td className="hidden py-4 pl-0 pr-8 text-sm/6 text-gray-400 md:table-cell lg:pr-20">
-                                    {item.duration}
-                                </td>
-                                <td className="hidden py-4 pl-0 pr-4 text-right text-sm/6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-                                    <time dateTime={item.dateTime}>{item.date}</time>
-                                </td>
+
+                            {/* Title */}
+                            <div className="sm:flex sm:items-center">
+                                <div className="sm:flex-auto">
+                                <h1 className="text-base font-semibold text-[var(--foreground)]">Groups</h1>
+                                </div>
+                                <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                                <Link
+                                    href="/admin/group/create-group"
+                                    type="button"
+                                    className="block rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[var(--primary-hover)]"
+                                >
+                                    Add Group
+                                </Link>
+                                </div>
+                            </div>
+
+                            {/* Group Table */}
+                            <table className="mt-6 w-full whitespace-nowrap text-left">
+                                <colgroup>
+                                <col className="w-full sm:w-2/12" />
+                                <col className="lg:w-4/12" />
+                                <col className="lg:w-2/12" />
+                                <col className="lg:w-2/12" />
+                                <col className="lg:w-2/12" />
+                                <col className="lg:w-2/12" />
+                                <col className="lg:w-1/12" />
+                                </colgroup>
+                                <thead className="border-b border-[var(--border)] text-sm/6 text-[var(--foreground)]">
+                                <tr>
+                                    <th scope="col" className="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">
+                                    Day
+                                    </th>
+                                    <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">
+                                    Coach
+                                    </th>
+                                    <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
+                                    Start Time
+                                    </th>
+                                    <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                    End Time
+                                    </th>
+                                    <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
+                                    Start Date
+                                    </th>
+                                    <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                    End Date
+                                    </th>
+                                    <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                    Status
+                                    </th>
                                 </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                {groups &&
+                                    groups.map((group) => (
+                                    <tr key={group.id}>
+                                        {/* Day */}
+                                        <td className="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
+                                            <div className="font-mono text-sm/6 text-[var(--foreground)] text-center">{group.day}</div>
+                                        </td>
+                                        {/* Coaches */}
+                                        <td className="py-4 pl-0 pr-8 sm:pl-0 lg:pl-0">
+                                            <div className="font-mono truncate text-sm/6 font-medium text-[var(--foreground)] text-left">
+                                                {group.coaches.length > 0 ? group.coaches.map(coach => coach.name.split(' ')[0]).join(', ') : "Unassigned"}
+                                            </div>
+                                        </td>
+                                        {/* Start Time */}
+                                        <td className="py-4 pl-0 pr-4 text-sm/6 sm:pr-8 lg:pr-20">
+                                            <div className="font-mono flex items-center justify-end gap-x-2 sm:justify-start">
+                                                {new Date(`1970-01-01T${group.startTime}`).toLocaleTimeString([], {
+                                                    hour: 'numeric',
+                                                    minute: '2-digit',
+                                                    hour12: true
+                                                })}
+                                            </div>
+                                        </td>
+                                        {/* End Time */}
+                                        <td className="py-4 pl-0 pr-4 text-sm/6 sm:pr-8 lg:pr-20">
+                                            <div className="font-mono flex items-center justify-end gap-x-2 sm:justify-start">
+                                                {new Date(`1970-01-01T${group.endTime}`).toLocaleTimeString([], {
+                                                    hour: 'numeric',
+                                                    minute: '2-digit',
+                                                    hour12: true
+                                                })}
+                                            </div>
+                                        </td>
+                                        {/* Start Date */}
+                                        <td className="font-mono hidden py-4 pl-0 pr-4 text-left text-sm/6 sm:table-cell sm:pr-6 lg:pr-8">
+                                            {new Date(group.startDate).toLocaleDateString()}
+                                        </td>
+                                        {/* End Date */}
+                                        <td className="font-mono hidden py-4 pl-0 pr-4 text-left text-sm/6 sm:table-cell sm:pr-6 lg:pr-8">
+                                            {new Date(group.endDate).toLocaleDateString()}
+                                        </td>
+                                        {/* Active Status */}
+                                        <td className="py-4 pl-0 pr-4 sm:table-cell sm:pr-6 lg:pr-8 flex justify-center items-center">
+                                            <div className="flex items-center justify-end gap-x-2 sm:justify-start">
+                                                {group.active ? (
+                                                    <>
+                                                        <div className="flex-none rounded-full bg-green-400/10 p-1 text-green-400 w-4">
+                                                            <div className="size-2 rounded-full bg-current" />
+                                                        </div>
+                                                        <div className="hidden text-[var(--foreground)] sm:block font-mono text-sm/6">Active</div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex-none rounded-full bg-red-400/10 p-1 text-red-400 w-4">
+                                                            <div className="size-2 rounded-full bg-current" />
+                                                        </div>
+                                                        <div className="hidden text-[var(--foreground)] sm:block font-mono text-sm/6">Inactive</div>
+                                                    </>
+                                                )}
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
                         </div>
                     </main>
                 </div>

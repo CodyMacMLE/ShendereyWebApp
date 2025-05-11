@@ -156,7 +156,6 @@ export const programs = pgTable('programs', {
 export const groups = pgTable('groups', {
     id: serial('id').primaryKey(),
     program: integer('program').references(() => programs.id),
-    coach: text('coach'),
     day: text('day'),
     startTime: time('startTime'),
     endTime: time('endTime'),

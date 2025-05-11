@@ -26,16 +26,9 @@ export default function Programs() {
 
     // Nav Pages
     const [isPrograms, setIsPrograms] = useState(true);
-    const [isClasses, setIsClasses] = useState(false);
-
-    function setNav(newPage: NavPages) {
-        setIsPrograms(newPage === NavPages.Programs);
-        setIsClasses(newPage === NavPages.Classes);
-    }
 
     // Page Data
     const [programs, setPrograms] = useState<Program[] | []>([]);
-    const [groups, setGroups] = useState<Group[] | []>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchPrograms = async () => {
@@ -51,55 +44,24 @@ export default function Programs() {
             
         } catch (err) {
             console.error('Fetch error:', err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         fetchPrograms()
-        // fetchClasses()
-        setIsLoading(false);
     },[])
 
     useEffect(() => {
-        console.log(programs)
-    },[programs, groups])
+    },[programs])
 
     return (
         <>
-            {/* Programs Nav */}
-            <header className="border-b border-[var(--border)]">
-            {/* Secondary navigation */}
-            <nav className="flex overflow-x-auto py-4">
-                <ul
-                role="list"
-                className="flex min-w-full flex-none gap-x-6 px-4 text-sm/6 font-semibold text-[var(--muted)] sm:px-6 lg:px-8"
-                >
-                    {/* Programs Nav */}
-                    <li>
-                        <a onClick={() => setNav(NavPages.Programs)} className={isPrograms ? 'text-[var(--primary)] cursor-pointer' : 'hover:text-[var(--primary)] cursor-pointer'}>
-                            Programs
-                        </a>
-                    </li>
-
-                    {/* Groups Nav */}
-                    <li>
-                        <a onClick={() => setNav(NavPages.Classes)} className={isClasses ? 'text-[var(--primary)] cursor-pointer' : 'hover:text-[var(--primary)] cursor-pointer'}>
-                            Groups
-                        </a>
-                    </li>
-
-                </ul>
-            </nav>
-        </header>
-
-        {/* Content */}
-        {isPrograms && (
-            <ProgramLayout programs={programs} isLoading={isLoading}/>
-        )}
-
-        {isClasses && (
-            <></>
-        )}
-    </>
+            {/* Content */}
+            {isPrograms && (
+                <ProgramLayout programs={programs} isLoading={isLoading}/>
+            )}
+        </>
     )
 }
