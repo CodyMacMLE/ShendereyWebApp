@@ -3,11 +3,6 @@
 import { useEffect, useState } from "react";
 import ProgramLayout from "@/components/Layout/Admin/ProgramLayout/page";
 
-enum NavPages {
-    Programs = 'Programs',
-    Classes = 'Classes',
-}
-
 type Program = {
     id: number,
     name: string,
@@ -18,14 +13,7 @@ type Program = {
     programImgUrl: string,
 }
 
-type Group = {
-
-}
-
 export default function Programs() {
-
-    // Nav Pages
-    const [isPrograms, setIsPrograms] = useState(true);
 
     // Page Data
     const [programs, setPrograms] = useState<Program[] | []>([]);
@@ -57,11 +45,6 @@ export default function Programs() {
     },[programs])
 
     return (
-        <>
-            {/* Content */}
-            {isPrograms && (
-                <ProgramLayout programs={programs} isLoading={isLoading}/>
-            )}
-        </>
+        <ProgramLayout programs={programs} setPrograms={setPrograms} isLoading={isLoading}/>
     )
 }

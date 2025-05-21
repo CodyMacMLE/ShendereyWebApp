@@ -40,31 +40,21 @@ export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData();
 
-        // Handle S3 uploads for each image field with type checking
-        const programImgRaw = formData.get('programImg');
-        const programImgUrl = programImgRaw instanceof File ? await uploadToS3(programImgRaw, 'program') : '';
-
         // Grab Form Data
-        const name = formData.get('programName') as string;
-        const categoryRaw = formData.get('programCategory');
-        const description = formData.get('programDescription') as string;
-        const length = formData.get('programLength') as string;
-        const ages = formData.get('programAges') as string;
+        const name = formData.get('name') as string;
+        const category = formData.get('category');
+        const ages = formData.get('ages') as string;
+        const length = formData.get('length') as string;
+        const description = formData.get('description') as string;
 
-        // Validate Form Data
-        const category = (categoryRaw === 'competitive' || categoryRaw === 'recreational')
-            ? categoryRaw
-            : null;
-
-        if (!category) {
-            return NextResponse.json({ success: false, error: 'Invalid program category' }, { status: 400 });
-        }
-
+        // Handle S3 uploads for each image field with type checking
+        const programImgRaw = formData.get('programImgFile');
+        const programImgUrl = programImgRaw instanceof File ? await uploadToS3(programImgRaw, 'program') : '';
 
         // Insert Data into DB
         const insertedProgram = await db.insert(programs).values({
             name: name?.toString() || '',
-            category: category,
+            category: category as "competitive" | "recreational",
             description: description?.toString() || '',
             length: isNaN(parseInt(length)) ? 0 : parseInt(length),
             ages: ages?.toString() || '',
