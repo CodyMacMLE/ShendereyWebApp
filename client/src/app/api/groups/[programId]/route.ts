@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { groups, coachGroupLines, coaches, users } from '@/lib/schema';
+import { groups, coachGroupLines, coaches, users, programs } from '@/lib/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -45,39 +45,43 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prog
     }
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ programId: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: { programId: string } }) {
     const { programId } = await params;
-    const id = parseInt(programId);
-
-    if (!id) {
-        return NextResponse.json({ success: false, error: "Missing program ID" }, { status: 400 });
-    }
-
     try {
-        const body = await req.json();
-        const { coachId, day, startTime, endTime, startDate, endDate, active } = body;
+        const formData = await req.formData();
+        const coachIdRaw = formData.get('coachId');
+        const day = formData.get('day');
+        const startTime = formData.get('startTime');
+        const endTime = formData.get('endTime');
+        const startDateRaw = formData.get('startDate');
+        const endDateRaw = formData.get('endDate');
 
+        // Convert types as needed
+        const coachId = coachIdRaw ? parseInt(coachIdRaw.toString(), 10) : undefined;
+        const startDate = startDateRaw ? new Date(startDateRaw.toString()) : undefined;
+        const endDate = endDateRaw ? new Date(endDateRaw.toString()) : undefined;
+
+        // Insert into DB
         const [newGroup] = await db.insert(groups).values({
-          program: id,
-          day,
-          startTime,
-          endTime,
-          startDate: new Date(startDate),
-          endDate: new Date(endDate),
-          active,
-        }).returning({ id: groups.id });
+            program: parseInt(programId, 10),
+            day: day?.toString() || '',
+            startTime: startTime?.toString() || '',
+            endTime: endTime?.toString() || '',
+            startDate,
+            endDate,
+            active: true,
+        }).returning();
 
-        await db.insert(coachGroupLines).values({
-          coachId,
-          groupId: newGroup.id
-        });
+        let newCoachGroupLine = null;
+        if (coachId) {
+            [newCoachGroupLine] = await db.insert(coachGroupLines).values({
+                groupId: newGroup.id,
+                coachId,
+            }).returning();
+        }
 
-        return NextResponse.json({ success: true, body: newGroup }, { status: 201 });
+        return NextResponse.json({ success: true, body: { group: newGroup, coachGroupLine: newCoachGroupLine } });
     } catch (error) {
-        console.error("Error in POST /api/groups/programId:", error);
-        return NextResponse.json(
-            { success: false, error: error instanceof Error ? error.message : String(error) },
-            { status: 500 }
-        );
+        return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 });
     }
-}
+}  

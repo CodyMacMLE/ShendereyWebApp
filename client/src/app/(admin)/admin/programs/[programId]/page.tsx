@@ -2,13 +2,14 @@
 
 import { redirect, useParams } from "next/navigation"
 import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
 import imageCompression from "browser-image-compression";
 
 import Modal from "@/components/UI/Modal/page";
 import ErrorModal from "@/components/UI/ErrorModal/page";
 import Dropdown from "@/components/UI/Dropdown/page";
 
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 type Program = {
@@ -32,6 +33,7 @@ type Group = {
     active: boolean
     coaches: [
         {
+            id: number,
             name: string,
         }
     ]
@@ -55,17 +57,19 @@ const day = [
 
 export default function Program() {
 
+    const router = useRouter();
+
     // Parameters
     const { programId } = useParams();
 
     // Data
     const [program, setProgram] = useState<Program | null>(null)
     const [groups, setGroups] = useState<Group[] | null>(null)
-    const [coaches, setCoaches] = useState<Coach[] | null>(null)
+    const [coaches, setCoaches] = useState<Coach[]>([{id: -1, name: 'Select Coach'}])
 
     // State
     const [isLoading, setIsLoading] = useState(true);
-    const [editModal, setEditModal] = useState(false);
+    const [programEditModal, setProgramEditModal] = useState(false);
     const [addModal, setAddModal] = useState(false);
     const [deleteModal, setDeleteModal] = useState(false);
     const [formErrors, setFormErrors] = useState<{msg: string}[]>([]);
@@ -88,8 +92,12 @@ export default function Program() {
     const [groupEndTime, setGroupEndTime] = useState<string>('16:00');
     const [groupStartDate, setGroupStartDate] = useState<Date>(new Date());
     const [groupEndDate, setGroupEndDate] = useState<Date>(new Date());
-    const [groupCoach, setGroupCoach] = useState('');
+    const [groupCoach, setGroupCoach] = useState<string>('');
      
+
+    // Edit Group
+    const [editGroupModal, setEditGroupModal] = useState(false);
+    const [groupBeingEdited, setGroupBeingEdited] = useState<Group | null>(null);
 
     // Fetching
     const fetchProgram = async () => {
@@ -131,11 +139,11 @@ export default function Program() {
 
             if (res.ok) {
                 const data = await res.json();
-                const coachNames = data.body.map((coach: { id: number; name: string }) => ({
+                const fetchedCoaches = data.body.map((coach: { id: number; name: string }) => ({
                     id: coach.id,
                     name: coach.name
                 }));
-                setCoaches(coachNames);
+                setCoaches([{ id: -1, name: 'Select Coach' }, ...fetchedCoaches]);
             }
         } catch (err) {
             console.error('Fetch error:', err);
@@ -176,8 +184,8 @@ export default function Program() {
 
     // On data change
     useEffect(() => { 
-        console.log(coaches)
     }, [program, groups, coaches]);
+
 
     // Handle Submit
     const handleEditProgram = async () => {
@@ -193,8 +201,6 @@ export default function Program() {
             setFormErrors(errors);
             return;
         }
-
-
 
         try {
             const formData = new FormData();
@@ -221,18 +227,171 @@ export default function Program() {
         } catch (err) {
             console.error('Fetch error:', err);
         } finally {
-            setEditModal(false);
+            setProgramEditModal(false);
         }
 
     }
 
     const handleDeleteProgram = async () => {
         console.log("deleting...")
+        try {
+            const res = await fetch(`/api/programs/${programId}`, {
+                method: 'DELETE'
+            });
+            
+            if (res.ok) {
+                router.push("/admin/programs");
+            }
+            
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setDeleteModal(false);
+        }
     }
 
     const handleAddGroup = async () => {
+        let errors = [];
 
+        if (!groupDay.trim()) errors.push({msg: "Group day is required"});
+        if (!groupStartTime.trim()) errors.push({msg: "Group start time is required"});
+        if (!groupEndTime.trim()) errors.push({msg: "Group end time is required"});
+        if (!groupStartDate) errors.push({msg: "Group start date is required"});
+        if (!groupEndDate) errors.push({msg: "Group end date is required"});
+
+        if (errors.length > 0) {
+            setFormErrors(errors);
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('day', groupDay);
+            formData.append('startTime', groupStartTime);
+            formData.append('endTime', groupEndTime);
+            formData.append('startDate', groupStartDate.toISOString());
+            formData.append('endDate', groupEndDate.toISOString());
+            if (groupCoach) {
+                // Find the coach by name to get the ID
+                const selectedCoach = coaches.find(coach => coach.name === groupCoach);
+                if (selectedCoach && selectedCoach.id !== -1) {
+                    formData.append('coachId', selectedCoach.id.toString());
+                }
+            }
+
+            const res = await fetch(`/api/groups/${programId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setGroups(prevGroups => [...(prevGroups || []), data.body.group]);
+            }
+
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setAddModal(false);
+        }
     }
+
+    const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
+    const [groupDeleted, setGroupDeleted] = useState(false);
+
+    useEffect(() => {
+        fetchGroups();
+      }, [groupDeleted]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('.confirm-delete-button')) {
+            setEnabledStates((prev) => {
+                const updated = { ...prev };
+                for (const id in updated) {
+                updated[id] = false;
+                }
+                return updated;
+            });
+            }
+        };
+        window.addEventListener('click', handleClickOutside);
+        return () => {
+            window.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+       // Delete Group
+    const deleteGroup = async (programId: string | number | undefined, groupId: number) => {
+        if (programId === undefined) return;
+        let pid = programId;
+        if (Array.isArray(pid)) {
+            pid = pid[0];
+        }
+        pid = typeof pid === 'string' ? parseInt(pid, 10) : pid;
+        try {
+            const res = await fetch(`/api/groups/${pid}/${groupId}`, {
+                method: 'DELETE',
+            })
+            if (res.ok) {
+                setGroupDeleted(true);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const toggleEnabled = (id: number) => {
+        setEnabledStates(prev => ({
+        ...prev,
+        [id]: !prev[id],
+        }));
+    };
+
+    const handleUpdateGroup = async () => {
+        
+        try {
+            const formData = new FormData();
+            formData.append('day', groupDay);
+            formData.append('startTime', groupStartTime);
+            formData.append('endTime', groupEndTime);
+            formData.append('startDate', groupStartDate.toISOString());
+            formData.append('endDate', groupEndDate.toISOString());
+            if (groupCoach) {
+                // Find the coach by name to get the ID
+                const selectedCoach = coaches.find(coach => coach.name === groupCoach);
+                if (selectedCoach && selectedCoach.id !== -1) {
+                    formData.append('coachId', selectedCoach.id.toString());
+                }
+            }
+
+            const res = await fetch(`/api/groups/${programId}/${groupBeingEdited?.id}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            if (res.ok) {
+                setGroupBeingEdited(null);
+                fetchGroups();
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setEditGroupModal(false);
+        }
+    }
+
+    const handleEditGroupClick = (group: Group) => {
+        setGroupBeingEdited(group);
+        setGroupDay(group.day);
+        setGroupStartTime(group.startTime);
+        setGroupEndTime(group.endTime);
+        setGroupStartDate(new Date(group.startDate));
+        setGroupEndDate(new Date(group.endDate));
+        setGroupCoach(group.coaches[0]?.name || '');
+        setEditGroupModal(true);
+    };
 
     return (
         <>
@@ -362,8 +521,8 @@ export default function Program() {
                 </Modal>
             )}
 
-            {editModal && (
-                <Modal title="Add Program" setModalEnable={setEditModal}>
+            {programEditModal && (
+                <Modal title="Edit Program" setModalEnable={setProgramEditModal}>
                 <div>
                     {formErrors.length > 0 && (
                         <div className="px-4 pt-6 sm:px-8">
@@ -507,7 +666,7 @@ export default function Program() {
                         <div className="mt-6 flex items-center justify-end gap-x-6">
                             <button
                                 type="button"
-                                onClick={() => {setEditModal(false);}}
+                                onClick={() => {setProgramEditModal(false);}}
                                 className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
                             >
                                 Cancel
@@ -522,6 +681,132 @@ export default function Program() {
 
                     </form>
                 </div>
+                </Modal>
+            )}
+
+            {editGroupModal && (
+                <Modal title="Edit Group" setModalEnable={setEditGroupModal}>
+                    <div>
+                        {formErrors.length > 0 && (
+                            <div className="px-4 pt-6 sm:px-8">
+                                <ErrorModal errors={formErrors} />
+                            </div>
+                        )}
+                        <form onSubmit={(e) => { e.preventDefault(); handleUpdateGroup(); }}>
+                            <div className="space-y-12">
+                                <div className="border-b border-[var(--border)] pb-12">
+                                    <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-12 sm:min-w-4xl">
+
+                                        {/* Day */}
+                                        <div className="sm:col-span-2">
+                                            <label htmlFor="group-day" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
+                                            <Dropdown items={day} setItem={setGroupDay} currentItem={groupDay}/>
+                                        </div>
+
+                                        {/* Coach */}
+                                        <div className="sm:col-span-2">
+                                            <label htmlFor="group-coach" className="block text-sm/6 font-medium text-[var(--foreground)]">Coach</label>
+                                            <Dropdown
+                                                items={coaches ? coaches.map(coach => coach.name) : []}
+                                                setItem={setGroupCoach}
+                                                currentItem={groupCoach}
+                                            />
+                                        </div>
+
+                                        {/* Start Time */}
+                                        <div className="sm:col-span-2">
+                                            <label htmlFor="group-start-time" className="block text-sm/6 font-medium text-[var(--foreground)]">Start Time</label>
+                                            <div className="mt-2">
+                                                <div className="flex items-center rounded-md bg-white pl-3 overflow-hidden outline outline-1 -outline-offset-1 outline-[var(--border)] focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)]">
+                                                    <input
+                                                        id="group-start-time"
+                                                        name="group-start-time"
+                                                        type="time"
+                                                        value={groupStartTime}
+                                                        onChange={(e) => setGroupStartTime(e.target.value)}
+                                                        className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-[#161616] placeholder:text-[var(--muted)] focus:outline focus:outline-0 sm:text-sm/6"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* End Time */}
+                                        <div className="sm:col-span-2">
+                                            <label htmlFor="group-end-time" className="block text-sm/6 font-medium text-[var(--foreground)]">End Time</label>
+                                            <div className="mt-2">
+                                                <div className="flex items-center rounded-md bg-white pl-3 overflow-hidden outline outline-1 -outline-offset-1 outline-[var(--border)] focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)]">
+                                                    <input
+                                                        id="group-end-time"
+                                                        name="group-end-time"
+                                                        type="time"
+                                                        value={groupEndTime}
+                                                        onChange={(e) => setGroupEndTime(e.target.value)}
+                                                        className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-[#161616] placeholder:text-[var(--muted)] focus:outline focus:outline-0 sm:text-sm/6"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Start Date */}
+                                        <div className="sm:col-span-2">
+                                            <label htmlFor="group-start-date" className="block text-sm/6 font-medium text-[var(--foreground)]">Start Date</label>
+                                            <div className="mt-2">
+                                                <div className="flex items-center rounded-md bg-white pl-3 overflow-hidden outline outline-1 -outline-offset-1 outline-[var(--border)] focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)]">
+                                                    <input
+                                                        id="group-start-date"
+                                                        name="group-start-date"
+                                                        type="date"
+                                                        value={groupStartDate.toISOString().split('T')[0]}
+                                                        onChange={(e) => setGroupStartDate(new Date(e.target.value))}
+                                                        className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-[#161616] placeholder:text-[var(--muted)] focus:outline focus:outline-0 sm:text-sm/6"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* End Date */}
+                                        <div className="sm:col-span-2">
+                                            <label htmlFor="group-end-date" className="block text-sm/6 font-medium text-[var(--foreground)]">End Date</label>
+                                            <div className="mt-2">
+                                                <div className="flex items-center rounded-md bg-white pl-3 overflow-hidden outline outline-1 -outline-offset-1 outline-[var(--border)] focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)]">
+                                                    <input
+                                                        id="group-end-date"
+                                                        name="group-end-date"
+                                                        type="date"
+                                                        value={groupEndDate.toISOString().split('T')[0]}
+                                                        onChange={(e) => setGroupEndDate(new Date(e.target.value))}
+                                                        className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-[#161616] placeholder:text-[var(--muted)] focus:outline focus:outline-0 sm:text-sm/6"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 flex items-center justify-end gap-x-6">
+                                <button
+                                    type="button"
+                                    onClick={() => { setEditGroupModal(false) }}
+                                    className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                                >
+                                    Save
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
                 </Modal>
             )}
 
@@ -577,13 +862,13 @@ export default function Program() {
                                         <div className="flex items-center gap-x-3">
                                             <h1 className="flex gap-x-3 text-base/7">
                                                 <span className="font-semibold text-[var(--foreground)]">
-                                                    {program!.category.charAt(0).toUpperCase() + program!.category.slice(1).toLowerCase()}
+                                                    {program ? (program.category.charAt(0).toUpperCase() + program.category.slice(1).toLowerCase()) : '...'}
                                                 </span>
                                                 <span className="text-gray-600">
                                                     /
                                                 </span>
                                                 <span className="font-semibold text-[var(--foreground)]">
-                                                    {program!.name}
+                                                    {program ? program.name : '...'}
                                                 </span>
                                             </h1>
                                         </div>
@@ -591,7 +876,7 @@ export default function Program() {
                                     {/* Edit / Delete (right) */}
                                     <div className="mt-2 sm:mt-0 sm:ml-6 flex gap-4 items-center">
                                         <span 
-                                            onClick={() => setEditModal(true)}
+                                            onClick={() => setProgramEditModal(true)}
                                             className="text-[var(--primary)] cursor-pointer hover:text-[var(--primary-hover)]"
                                         >
                                             Edit
@@ -677,6 +962,7 @@ export default function Program() {
                                     <col className="lg:w-2/12" />
                                     <col className="lg:w-2/12" />
                                     <col className="lg:w-1/12" />
+                                    <col className="lg:w-1/12" />
                                     </colgroup>
                                     <thead className="border-b border-[var(--border)] text-sm/6 text-[var(--foreground)]">
                                     <tr>
@@ -701,20 +987,38 @@ export default function Program() {
                                         <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
                                         Status
                                         </th>
+                                        <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                        </th>
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
                                     {groups &&
-                                        groups.map((group) => (
-                                        <tr key={group.id}>
-                                            {/* Day */}
-                                            <td className="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 sm:pl-6 lg:pl-8">
-                                                <div className="font-mono text-sm/6 text-[var(--foreground)] text-left">{group.day}</div>
+                                        groups.map((group) => {
+                                            const enabled = enabledStates[group.id] || false;
+
+                                            const handleDeleteClick = async () => {
+                                                if (!enabled) {
+                                                    toggleEnabled(group.id);
+                                                } else {
+                                                    console.log("Delete group with id:", group.id);
+                                                    let pid = programId;
+                                                    if (Array.isArray(pid)) {
+                                                        pid = pid[0];
+                                                    }
+                                                    await deleteGroup(pid, group.id);
+                                                }
+                                            };
+                                            
+                                            return (
+                                                <tr key={group.id}>
+                                                    {/* Day */}
+                                                    <td className="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 sm:pl-6 lg:pl-8">
+                                                        <div className="font-mono text-sm/6 text-[var(--foreground)] text-left">{group.day}</div>
                                             </td>
                                             {/* Coaches */}
                                             <td className="py-4 pl-0 pr-8 sm:pl-0 lg:pl-0">
                                                 <div className="font-mono truncate text-sm/6 font-medium text-[var(--foreground)] text-left">
-                                                    {group.coaches.length > 0 ? group.coaches.map(coach => coach.name.split(' ')[0]).join(', ') : "Unassigned"}
+                                                    {group.coaches && group.coaches.length > 0 ? group.coaches.map(coach => coach.name.split(' ')[0]).join(', ') : "Unassigned"}
                                                 </div>
                                             </td>
                                             {/* Start Time */}
@@ -766,8 +1070,34 @@ export default function Program() {
                                                     
                                                 </div>
                                             </td>
-                                        </tr>
-                                    ))}
+                                            {/* Edit / Delete */}
+                                            <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6 ml-5">
+                                                    <button
+                                                        onClick={handleDeleteClick}
+                                                        className={`confirm-delete-button cursor-pointer group relative inline-flex p-1 items-center justify-center rounded-full ${enabled ? 'bg-red-600 hover:bg-red-500' : 'hover:bg-red-600'}`}
+                                                    >
+                                                        <span className="relative w-[60px] h-[20px] flex items-center justify-center">
+                                                          <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
+                                                            Confirm
+                                                          </span>
+                                                          <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
+                                                            <TrashIcon className="w-4 h-4" />
+                                                          </span>
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            handleEditGroupClick(group);
+                                                        }}
+                                                        className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-semibold"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                     </tbody>
                                 </table>
                             </div>

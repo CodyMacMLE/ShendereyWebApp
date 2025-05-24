@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { ChevronUpDownIcon } from '@heroicons/react/16/solid'
 import { CheckIcon } from '@heroicons/react/20/solid'
@@ -13,8 +13,21 @@ export default function Dropdown(
     }
 ) {
 
-  const firstItem = currentItem ? currentItem : items[0]
-  const [selected, setSelected] = useState(firstItem)
+  const [selected, setSelected] = useState(() => {
+    if (currentItem) return currentItem;
+    if (items.length > 0) return items[0];
+    return ""; // or some safe fallback
+  });
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    if (currentItem && currentItem !== selected) {
+      setSelected(currentItem);
+    } else if (!currentItem && selected !== items[0]) {
+      setSelected(items[0]);
+    }
+    // Only run when items are loaded and not empty
+  }, [currentItem, items]);
 
   return (
     <Listbox

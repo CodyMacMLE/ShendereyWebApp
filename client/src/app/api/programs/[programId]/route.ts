@@ -1,8 +1,8 @@
 import { db } from '@/lib/db';
-import { programs } from '@/lib/schema';
+import { coachGroupLines, groups, programs } from '@/lib/schema';
 import { PutObjectCommand, DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
@@ -99,3 +99,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ prog
     }
 
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: { programId: string } }) {
+    const { programId } = await params;
+    const id = parseInt(programId);
+
+    if (!id) {
+        return NextResponse.json({ success: false, error: "Missing program ID" }, { status: 400 });
+    }
+
+    try {
+        const groupsIds = await db.select({ id: groups.id }).from(groups).where(eq(groups.program, parseInt(programId)));
+        await db.delete(coachGroupLines).where(inArray(coachGroupLines.groupId, groupsIds.map(group => group.id)));
+        await db.delete(groups).where(eq(groups.program, id));
+        await db.delete(programs).where(eq(programs.id, id));
+
+        return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error) {
+        return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    }
+} 
