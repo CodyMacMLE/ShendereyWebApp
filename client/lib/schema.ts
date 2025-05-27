@@ -125,7 +125,7 @@ export const sponsors = pgTable('sponsors', {
     id: serial('id').primaryKey(),
     organization: text('organization'),
     description: text('description'),
-    requirements: text('requirements'),
+    website: text('website'),
     sponsorLevel: text('sponsorLevel'),
     sponsorImgUrl: text('sponsorImgUrl'),
 })

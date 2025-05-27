@@ -18,11 +18,11 @@ import {
   XMarkIcon,
   UsersIcon,
   CursorArrowRaysIcon,
-  BookOpenIcon,
   PlayCircleIcon,
   ArrowLeftStartOnRectangleIcon,
   MagnifyingGlassIcon,
   CurrencyDollarIcon,
+  ClipboardDocumentIcon,
 } from '@heroicons/react/24/outline'
 import { IoShirtOutline } from 'react-icons/io5';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/solid';
@@ -35,9 +35,9 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Programs', href: '/admin/programs', icon: CursorArrowRaysIcon },
   { name: 'Users', href: '/admin/users', icon: UsersIcon},
-  //{ name: 'Blog', href: '/admin/blog', icon: BookOpenIcon },
   { name: 'Gallery', href: '/admin/gallery', icon: PlayCircleIcon },
   { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
+  { name: 'Tryouts', href: '/admin/tryouts', icon: ClipboardDocumentIcon },
   { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
   { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
 ]
