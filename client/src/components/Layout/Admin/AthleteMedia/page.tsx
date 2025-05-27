@@ -1,5 +1,7 @@
+"use client"
+
 import Image from "next/image";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 
 import Modal from "@/components/UI/Modal/page"
 import AthleteGallery from '@/components/UI/AthleteGallery/page'

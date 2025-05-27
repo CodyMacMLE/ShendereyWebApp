@@ -179,6 +179,7 @@ export const gallery = pgTable('gallery', {
     date: timestamp('date'),
     mediaType: text('mediaType'),
     mediaUrl: text('mediaUrl'),
+    videoThumbnail: text('videoThumbnail')
 })
 
 // RESOURCES

@@ -214,8 +214,8 @@ export default function AthleteGallery({ athlete, media }: { athlete: Athlete, m
                         // Pass onSuccess correctly to EditUserMedia
                         onSuccess={(updated: Media) => {
                           setMediaItems(prev => prev.map(item => item.id === updated.id ? updated : item));
+                          setSelectedMedia(updated);
                           setEditModalOpen(false);
-                          setModalOpen(false);
                         }}
                       />
                     )}

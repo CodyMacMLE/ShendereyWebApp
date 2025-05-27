@@ -3,41 +3,24 @@
 import React, { useState, useEffect } from 'react';
 
 import ErrorModal from '@/components/UI/ErrorModal/page';
-import Dropdown from '@/components/UI/Dropdown/page';
-
-type Athlete = {
-    userId: number,
-    athleteId: number
-}
 
 type Media = {
-    id: string,
+    id: number,
     name: string,
     description: string,
-    category: string,
-    date: string | Date,
-    mediaUrl: string,
+    date: Date,
     mediaType: string,
+    mediaUrl: string,
     videoThumbnail: string
 }
 
-const categories = [
-    "Vault",
-    "Bars",
-    "Beam",
-    "Floor",
-    "Other",
-]
-
-export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
-    athlete: Athlete,
+export function EditGalleryMedia({ media, closeModal, onSuccess }: {
     media: Media,
     closeModal?: () => void,
     onSuccess: (updated: Media) => void
 }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
     const [date, setDate] = useState('');
 
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
@@ -47,7 +30,6 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
         if (media) {
             setName(media.name || '');
             setDescription(media.description || '');
-            setCategory(media.category || 'Vault');
             setDate(media.date ? new Date(media.date).toISOString().split('T')[0] : '');
         }
     }, [media]);
@@ -68,10 +50,9 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
             const formData = new FormData();
             formData.append('name', name);
             formData.append('description', description);
-            formData.append('category', category);
             formData.append('date', date);
 
-            const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}?mediaId=${media.id}`, {
+            const res = await fetch(`/api/gallery/${media.id}`, {
                 method: 'PUT',
                 body: formData,
             });
@@ -81,8 +62,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
                     ...media,
                     name,
                     description,
-                    category,
-                    date,
+                    date: new Date(date),
                 };
                 onSuccess(updatedMedia);
                 if (closeModal) closeModal();
@@ -141,12 +121,6 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
                                     />
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Category */}
-                        <div className="sm:col-span-4">
-                            <label htmlFor="media-category" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                            <Dropdown items={categories} setItem={setCategory} currentItem={category} />
                         </div>
 
                         {/* Description */}

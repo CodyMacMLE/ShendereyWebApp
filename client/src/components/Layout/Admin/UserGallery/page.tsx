@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useState, useEffect, use } from "react";
 
 import Modal from "@/components/UI/Modal/page"
-import Gallery from '@/component/UI/Gallery/page'
+import Gallery from '@/components/UI/AthleteGallery/page'
 import AddUserMedia from "@/components/Form/AddUserMedia/page";
 
 import { UserCircleIcon } from "@heroicons/react/24/solid";
@@ -18,9 +18,10 @@ type Media = {
     id: string,
     name: string,
     description: string,
-    date: Date,
+    category: string,
+    date: string | Date,
     mediaUrl: string,
-    mediaType: string
+    mediaType: string,
     videoThumbnail: string
 }
 
@@ -61,7 +62,7 @@ export default function UserGallery({ athlete } : { athlete : Athlete}) {
         <>
             {addModalEnabled && (
                 <Modal title="Add Media" setModalEnable={setAddModalEnabled}>
-                    <AddUserMedia userId={athlete.userId} athleteId={athlete.athleteId} setAthleteMedia={setAthleteMedia} setModalEnable={setAddModalEnabled}/>
+                    <AddUserMedia userId={athlete.userId} athleteId={athlete.athleteId} setAthleteMedia={(media) => setAthleteMedia(media as Media[])} setModalEnable={setAddModalEnabled}/>
                 </Modal>
             )} 
 
@@ -99,7 +100,7 @@ export default function UserGallery({ athlete } : { athlete : Athlete}) {
 
                 {/* Gallery */}
                 <div className="py-10">
-                    <Gallery media={athleteMedia} />
+                    <Gallery athlete={athlete} media={athleteMedia} />
                 </div>
             </div>
 
