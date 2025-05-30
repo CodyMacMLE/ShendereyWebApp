@@ -189,3 +189,26 @@ export const resources = pgTable('resources', {
     date: timestamp('date'),
     resourceUrl: text('resourceUrl'),
 })
+
+// TRYOUTS
+export const tryouts = pgTable('tryouts', {
+    id: serial('id').primaryKey(),
+    athleteName: text('athleteName'),
+    athleteDOB: timestamp('athleteDOB'),
+    athleteAbout: text('athleteAbout'),
+    experienceProgram: text('experienceProgram'),
+    experienceLevel: text('experienceLevel'),
+    experienceYears: integer('experienceYears'),
+    currentClub: text('currentClub'),
+    currentCoach: text('currentCoach'),
+    currentHours: integer('currentHours'),
+    tryoutPreferences: text('tryoutPreferences'),
+    tryoutLevel: text('tryoutLevel'),
+    contactName: text('contactName'),
+    contactEmail: text('contactEmail'),
+    contactPhone: text('contactPhone'),
+    contactRelationship: text('contactRelationship'),
+    readStatus: boolean('readStatus').default(false),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow(),
+})
