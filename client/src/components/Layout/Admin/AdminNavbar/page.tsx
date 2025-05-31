@@ -30,6 +30,7 @@ import Image from 'next/image'
 
 import { useTheme } from '@/components/Theme/page';
 
+import {LogoutLink} from "@kinde-oss/kinde-auth-nextjs/components";
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
@@ -246,7 +247,9 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                 </Switch>
                 {/* Logout Button */}
                 <div className="flex items-center gap-x-4 lg:gap-x-6">
-                  <ArrowLeftStartOnRectangleIcon className='size-6 text-gray-400 hover:text-[var(--primary)] cursor-pointer'/>
+                  <LogoutLink className='flex items-center gap-x-2'>
+                    <ArrowLeftStartOnRectangleIcon className='size-6 text-gray-400 hover:text-[var(--primary)] cursor-pointer'/>
+                  </LogoutLink>
                 </div>
               </div>
 
