@@ -321,7 +321,11 @@ export default function Program() {
 
             if (res.ok) {
                 const data = await res.json();
-                const newGroup = {...data.body.group, coaches: [selectedCoach]};
+                const newGroup = {
+                    ...data.body.group,
+                    startDate: new Date(data.body.group.startDate),
+                    endDate: new Date(data.body.group.endDate),
+                    coaches: [selectedCoach]};
                 setGroups(prevGroups => [...(prevGroups || []), newGroup]);
                 setSelectedCoach({id: -1, name: 'Unassigned'});
             }
