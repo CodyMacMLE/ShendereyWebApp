@@ -23,8 +23,8 @@ export const users = pgTable('users', {
     isProspect: boolean('isProspect').default(false),
     isCoach: boolean('isCoach').default(false),
     isScouted: boolean('isScouted').default(false),
-    createdAt: timestamp('createdAt'),
-    updatedAt: timestamp('updatedAt'),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow(),
 })
 
 // USER IMAGES
@@ -42,6 +42,7 @@ export const athletes = pgTable('athletes', {
     id: serial('id').primaryKey(),
     user: integer('user').references(() => users.id),
     level: text('level'),
+    isActive: boolean('isActive').default(true),
 })
 
 // ALUMNI
@@ -73,6 +74,8 @@ export const coaches = pgTable('coaches', {
     title: text('title'),
     description: text('description'),
     isSeniorStaff: boolean('isSeniorStaff').default(false),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow(),
 })
 
 // SCORES

@@ -5,17 +5,21 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(req: NextRequest, { params }: { params: { programId: string, groupId: string } }) {
     const { groupId } = await params;
+    
     try {
-        const [deletedGroup] = await db.delete(groups).where(eq(groups.id, parseInt(groupId, 10))).returning();
-        const deletedCoachGroupLine = await db.delete(coachGroupLines).where(eq(coachGroupLines.groupId, parseInt(groupId, 10)));
-        return NextResponse.json({ success: true, body: { group: deletedGroup, coachGroupLine: deletedCoachGroupLine } });
+        const groupIdInt = parseInt(groupId);
+
+        await db.delete(coachGroupLines).where(eq(coachGroupLines.groupId, groupIdInt));
+        await db.delete(groups).where(eq(groups.id, groupIdInt));
+
+        return NextResponse.json({ success: true, body: { group: groupIdInt } });
     } catch (error) {
         return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 });
     }
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { programId: string; groupId: string } }) {
-    const { groupId } = params;
+    const { groupId } = await params;
     try {
         const formData = await req.formData();
         const coachIdRaw = formData.get('coachId');

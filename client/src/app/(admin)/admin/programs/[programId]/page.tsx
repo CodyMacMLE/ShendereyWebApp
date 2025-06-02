@@ -42,17 +42,21 @@ type Group = {
 type Coach = {
     id: number;
     name: string;
-}
+};
 
 const categories = [
-    "Recreational",
-    "Competitive",
+    {id: 1, name: "Recreational"},
+    {id: 2, name: "Competitive"},
 ]
 
 const day = [
-    "Monday", "Tuesday", "Wednesday",
-    "Thursday", "Friday", "Saturday",
-    "Sunday"
+    {id: 1, name: "Monday"},
+    {id: 2, name: "Tuesday"},
+    {id: 3, name: "Wednesday"},
+    {id: 4, name: "Thursday"},
+    {id: 5, name: "Friday"},
+    {id: 6, name: "Saturday"},
+    {id: 7, name: "Sunday"}
 ]
 
 export default function Program() {
@@ -65,7 +69,7 @@ export default function Program() {
     // Data
     const [program, setProgram] = useState<Program | null>(null)
     const [groups, setGroups] = useState<Group[] | null>(null)
-    const [coaches, setCoaches] = useState<Coach[]>([{id: -1, name: 'Select Coach'}])
+    const [coaches, setCoaches] = useState<Coach[]>([])
 
     // State
     const [isLoading, setIsLoading] = useState(true);
@@ -92,8 +96,7 @@ export default function Program() {
     const [groupEndTime, setGroupEndTime] = useState<string>('16:00');
     const [groupStartDate, setGroupStartDate] = useState<Date>(new Date());
     const [groupEndDate, setGroupEndDate] = useState<Date>(new Date());
-    const [groupCoach, setGroupCoach] = useState<string>('');
-     
+    const [selectedCoach, setSelectedCoach] = useState<{id: number, name: string}>({id: -1, name: 'Unassigned'});
 
     // Edit Group
     const [editGroupModal, setEditGroupModal] = useState(false);
@@ -123,7 +126,13 @@ export default function Program() {
 
             if (res.ok) {
                 const data = await res.json();
-                setGroups(data.body);
+                // Convert date strings to Date objects
+                const groupsWithDates = data.body.map((group: any) => ({
+                    ...group,
+                    startDate: new Date(group.startDate),
+                    endDate: new Date(group.endDate),
+                }));
+                setGroups(groupsWithDates);
             }
             
         } catch (err) {
@@ -143,7 +152,7 @@ export default function Program() {
                     id: coach.id,
                     name: coach.name
                 }));
-                setCoaches([{ id: -1, name: 'Select Coach' }, ...fetchedCoaches]);
+                setCoaches(prevCoaches => [...prevCoaches, ...fetchedCoaches]);
             }
         } catch (err) {
             console.error('Fetch error:', err);
@@ -233,7 +242,6 @@ export default function Program() {
     }
 
     const handleDeleteProgram = async () => {
-        console.log("deleting...")
         try {
             const res = await fetch(`/api/programs/${programId}`, {
                 method: 'DELETE'
@@ -247,52 +255,6 @@ export default function Program() {
             console.error('Fetch error:', err);
         } finally {
             setDeleteModal(false);
-        }
-    }
-
-    const handleAddGroup = async () => {
-        let errors = [];
-
-        if (!groupDay.trim()) errors.push({msg: "Group day is required"});
-        if (!groupStartTime.trim()) errors.push({msg: "Group start time is required"});
-        if (!groupEndTime.trim()) errors.push({msg: "Group end time is required"});
-        if (!groupStartDate) errors.push({msg: "Group start date is required"});
-        if (!groupEndDate) errors.push({msg: "Group end date is required"});
-
-        if (errors.length > 0) {
-            setFormErrors(errors);
-            return;
-        }
-
-        try {
-            const formData = new FormData();
-            formData.append('day', groupDay);
-            formData.append('startTime', groupStartTime);
-            formData.append('endTime', groupEndTime);
-            formData.append('startDate', groupStartDate.toISOString());
-            formData.append('endDate', groupEndDate.toISOString());
-            if (groupCoach) {
-                // Find the coach by name to get the ID
-                const selectedCoach = coaches.find(coach => coach.name === groupCoach);
-                if (selectedCoach && selectedCoach.id !== -1) {
-                    formData.append('coachId', selectedCoach.id.toString());
-                }
-            }
-
-            const res = await fetch(`/api/groups/${programId}`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setGroups(prevGroups => [...(prevGroups || []), data.body.group]);
-            }
-
-        } catch (err) {
-            console.error('Fetch error:', err);
-        } finally {
-            setAddModal(false);
         }
     }
 
@@ -322,16 +284,58 @@ export default function Program() {
         };
     }, []);
 
-       // Delete Group
-    const deleteGroup = async (programId: string | number | undefined, groupId: number) => {
-        if (programId === undefined) return;
-        let pid = programId;
-        if (Array.isArray(pid)) {
-            pid = pid[0];
+    // HANDLE GROUPS
+    const handleAddGroup = async () => {
+        let errors = [];
+
+        if (!groupDay.name.trim()) errors.push({msg: "Group day is required"});
+        if (!groupStartTime.trim()) errors.push({msg: "Group start time is required"});
+        if (!groupEndTime.trim()) errors.push({msg: "Group end time is required"});
+        if (!groupStartDate) errors.push({msg: "Group start date is required"});
+        if (!groupEndDate) errors.push({msg: "Group end date is required"});
+
+        if (errors.length > 0) {
+            setFormErrors(errors);
+            return;
         }
-        pid = typeof pid === 'string' ? parseInt(pid, 10) : pid;
+
         try {
-            const res = await fetch(`/api/groups/${pid}/${groupId}`, {
+            const formData = new FormData();
+            formData.append('day', groupDay.name);
+            formData.append('startTime', groupStartTime);
+            formData.append('endTime', groupEndTime);
+            formData.append('startDate', groupStartDate.toISOString());
+            formData.append('endDate', groupEndDate.toISOString());
+            if (selectedCoach) {
+                // Find the coach by name to get the ID
+                const selectedCoachId = coaches.find(coach => coach.name === selectedCoach.name)?.id;
+                if (selectedCoachId) {
+                    formData.append('coachId', selectedCoachId.toString());
+                }
+            }
+
+            const res = await fetch(`/api/groups/${programId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const newGroup = {...data.body.group, coaches: [selectedCoach]};
+                setGroups(prevGroups => [...(prevGroups || []), newGroup]);
+                setSelectedCoach({id: -1, name: 'Unassigned'});
+            }
+
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setAddModal(false);
+        }
+    }
+
+    const deleteGroup = async (groupId: number) => {
+        try {
+            const res = await fetch(`/api/groups/${programId}/${groupId}`, {
                 method: 'DELETE',
             })
             if (res.ok) {
@@ -353,16 +357,16 @@ export default function Program() {
         
         try {
             const formData = new FormData();
-            formData.append('day', groupDay);
+            formData.append('day', groupDay.name);
             formData.append('startTime', groupStartTime);
             formData.append('endTime', groupEndTime);
             formData.append('startDate', groupStartDate.toISOString());
             formData.append('endDate', groupEndDate.toISOString());
-            if (groupCoach) {
+            if (selectedCoach) {
                 // Find the coach by name to get the ID
-                const selectedCoach = coaches.find(coach => coach.name === groupCoach);
-                if (selectedCoach && selectedCoach.id !== -1) {
-                    formData.append('coachId', selectedCoach.id.toString());
+                const selectedCoachId = coaches.find(coach => coach.name === selectedCoach.name)?.id;
+                if (selectedCoachId) {
+                    formData.append('coachId', selectedCoachId.toString());
                 }
             }
 
@@ -384,12 +388,12 @@ export default function Program() {
 
     const handleEditGroupClick = (group: Group) => {
         setGroupBeingEdited(group);
-        setGroupDay(group.day);
+        setGroupDay(day.find(day => day.name === group.day) || day[0]);
         setGroupStartTime(group.startTime);
         setGroupEndTime(group.endTime);
         setGroupStartDate(new Date(group.startDate));
         setGroupEndDate(new Date(group.endDate));
-        setGroupCoach(group.coaches[0]?.name || '');
+        setSelectedCoach(group.coaches[0]);
         setEditGroupModal(true);
     };
 
@@ -411,16 +415,20 @@ export default function Program() {
                                     {/* Day */}
                                     <div className="sm:col-span-2">
                                         <label htmlFor="group-day" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                                        <Dropdown items={day} setItem={setGroupDay} currentItem={groupDay}/>
+                                        <Dropdown 
+                                            items={[{id: -1, name: 'Unassigned'}, ...day]} 
+                                            selected={groupDay}
+                                            setSelected={setGroupDay}
+                                        />
                                     </div>
 
                                     {/* Coach */}
                                     <div className="sm:col-span-2">
                                         <label htmlFor="group-coach" className="block text-sm/6 font-medium text-[var(--foreground)]">Coach</label>
                                         <Dropdown
-                                            items={coaches ? coaches.map(coach => coach.name) : []}
-                                            setItem={setGroupCoach}
-                                            currentItem={groupCoach}
+                                            items={[{id: -1, name: 'Unassigned'}, ...coaches]}
+                                            selected={selectedCoach}
+                                            setSelected={setSelectedCoach}
                                         />
                                     </div>
 
@@ -556,7 +564,11 @@ export default function Program() {
                                     {/* Category */}
                                     <div className="sm:col-span-2">
                                         <label htmlFor="program-category" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                                        <Dropdown items={categories} setItem={setProgramCategory} currentItem={programCategory}/>
+                                        <Dropdown 
+                                            items={categories.map(category => ({ id: category.id, name: category.name }))} 
+                                            setSelected={(category) => setProgramCategory(category.name)} 
+                                            selected={categories.find(category => category.name === programCategory) || categories[0]}
+                                        />
                                     </div>
 
 
@@ -700,16 +712,20 @@ export default function Program() {
                                         {/* Day */}
                                         <div className="sm:col-span-2">
                                             <label htmlFor="group-day" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                                            <Dropdown items={day} setItem={setGroupDay} currentItem={groupDay}/>
+                                            <Dropdown 
+                                                items={day.map(day => ({ id: day.id, name: day.name }))} 
+                                                setSelected={(day) => setGroupDay(day)} 
+                                                selected={day.find(day => day.name === groupDay.name) || day[0]}
+                                            />
                                         </div>
 
                                         {/* Coach */}
                                         <div className="sm:col-span-2">
                                             <label htmlFor="group-coach" className="block text-sm/6 font-medium text-[var(--foreground)]">Coach</label>
                                             <Dropdown
-                                                items={coaches ? coaches.map(coach => coach.name) : []}
-                                                setItem={setGroupCoach}
-                                                currentItem={groupCoach}
+                                                items={coaches.map(coach => ({ id: coach.id, name: coach.name }))} 
+                                                setSelected={setSelectedCoach} 
+                                                selected={selectedCoach || null}
                                             />
                                         </div>
 
@@ -893,7 +909,7 @@ export default function Program() {
                                 {/* Program Image and Description Row */}
                                 <div className="flex flex-col sm:flex-row gap-4 items-center py-10 px-4 sm:px-6 lg:px-8">
                                     <img
-                                        src={program?.programImgUrl?.trim() ? program.programImgUrl : "/sg_logo.png"}
+                                        src={program?.programImgUrl?.trim() ? program.programImgUrl : "/logos/sg_logo.png"}
                                         alt={program?.name}
                                         className="w-20 h-20 rounded-full bg-white shadow-md"
                                     />
@@ -919,6 +935,7 @@ export default function Program() {
                                         <p className="text-sm/6 font-medium text-[var(--muted)]">Ages</p>
                                         <p className="mt-2 flex items-baseline gap-x-2">
                                             <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]">{program!.ages}</span>
+                                            <span className="text-sm text-[var(--muted)]">years</span>
                                         </p>
                                     </div>
                                     <div
@@ -955,41 +972,41 @@ export default function Program() {
                                 {/* Group Table */}
                                 <table className="mt-6 w-full whitespace-nowrap text-left">
                                     <colgroup>
-                                    <col className="w-full sm:w-2/12" />
-                                    <col className="lg:w-4/12" />
-                                    <col className="lg:w-2/12" />
-                                    <col className="lg:w-2/12" />
-                                    <col className="lg:w-2/12" />
-                                    <col className="lg:w-2/12" />
-                                    <col className="lg:w-1/12" />
-                                    <col className="lg:w-1/12" />
+                                        <col className="w-full sm:w-2/12" />
+                                        <col className="lg:w-4/12" />
+                                        <col className="lg:w-2/12" />
+                                        <col className="lg:w-2/12" />
+                                        <col className="lg:w-2/12" />
+                                        <col className="lg:w-2/12" />
+                                        <col className="lg:w-1/12" />
+                                        <col className="lg:w-1/12" />
                                     </colgroup>
                                     <thead className="border-b border-[var(--border)] text-sm/6 text-[var(--foreground)]">
-                                    <tr>
-                                        <th scope="col" className="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">
-                                        Day
-                                        </th>
-                                        <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">
-                                        Coach
-                                        </th>
-                                        <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
-                                        Start Time
-                                        </th>
-                                        <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
-                                        End Time
-                                        </th>
-                                        <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
-                                        Start Date
-                                        </th>
-                                        <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
-                                        End Date
-                                        </th>
-                                        <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
-                                        Status
-                                        </th>
-                                        <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
-                                        </th>
-                                    </tr>
+                                        <tr>
+                                            <th scope="col" className="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">
+                                            Day
+                                            </th>
+                                            <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">
+                                            Coach
+                                            </th>
+                                            <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
+                                            Start Time
+                                            </th>
+                                            <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                            End Time
+                                            </th>
+                                            <th scope="col" className="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">
+                                            Start Date
+                                            </th>
+                                            <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                            End Date
+                                            </th>
+                                            <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                            Status
+                                            </th>
+                                            <th scope="col" className="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">
+                                            </th>
+                                        </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
                                     {groups &&
@@ -1000,12 +1017,7 @@ export default function Program() {
                                                 if (!enabled) {
                                                     toggleEnabled(group.id);
                                                 } else {
-                                                    console.log("Delete group with id:", group.id);
-                                                    let pid = programId;
-                                                    if (Array.isArray(pid)) {
-                                                        pid = pid[0];
-                                                    }
-                                                    await deleteGroup(pid, group.id);
+                                                    await deleteGroup(group.id);
                                                 }
                                             };
                                             
@@ -1043,11 +1055,11 @@ export default function Program() {
                                             </td>
                                             {/* Start Date */}
                                             <td className="font-mono hidden py-4 pl-0 pr-4 text-left text-sm/6 sm:table-cell sm:pr-6 lg:pr-8">
-                                                {new Date(group.startDate).toLocaleDateString()}
+                                                {group.startDate.toISOString().split('T')[0]}
                                             </td>
                                             {/* End Date */}
                                             <td className="font-mono hidden py-4 pl-0 pr-4 text-left text-sm/6 sm:table-cell sm:pr-6 lg:pr-8">
-                                                {new Date(group.endDate).toLocaleDateString()}
+                                                {group.endDate.toISOString().split('T')[0]}
                                             </td>
                                             {/* Active Status */}
                                             <td className="py-4 pl-0 pr-4 sm:table-cell sm:pr-6 lg:pr-8 flex justify-center items-center">

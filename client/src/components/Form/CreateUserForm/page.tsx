@@ -513,8 +513,8 @@ export default function CreateUserForm() {
                                         onChange={async (e) => {
                                           const file = e.target.files?.[0];
                                           if (file) {
-                                            if (file.size > 2 * 1024 * 1024) {
-                                              console.warn("File too large (max 2MB):", file.name);
+                                            if (file.size > 100 * 1024 * 1024) {
+                                              console.warn("File too large (max 10MB):", file.name);
                                               return;
                                             }
                                             const compressed = await imageCompression(file, { maxSizeMB: 0.8, maxWidthOrHeight: 1024, useWebWorker: true });
@@ -534,7 +534,7 @@ export default function CreateUserForm() {
                                     
                             </div>
                             <p id="image-warning" className="text-[var(--muted)] text-sm mt-2">
-                                JPG, or PNG. 2MB max.
+                                JPG, or PNG. 10MB max.
                             </p>
                         </div>
 
@@ -595,8 +595,8 @@ export default function CreateUserForm() {
                                     onChange={async (e) => {
                                         const file = e.target.files?.[0];
                                         if (file) {
-                                        if (file.size > 2 * 1024 * 1024) {
-                                            console.warn("File too large (max 2MB):", file.name);
+                                        if (file.size > 100 * 1024 * 1024) {
+                                            console.warn("File too large (max 10MB):", file.name);
                                             return;
                                         }
                                         const compressed = await imageCompression(file, { maxSizeMB: 0.8, maxWidthOrHeight: 1024, useWebWorker: true });
@@ -611,7 +611,7 @@ export default function CreateUserForm() {
                                     </label>
                                 </div>
                                 <p id="image-warning" className="text-[var(--muted)] text-sm mt-2">
-                                    JPG, or PNG. 2MB max.
+                                    JPG, or PNG. 10MB max.
                                 </p>
                             </div>
 
@@ -669,8 +669,8 @@ export default function CreateUserForm() {
                                   onChange={async (e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                      if (file.size > 2 * 1024 * 1024) {
-                                        console.warn("File too large (max 2MB):", file.name);
+                                      if (file.size > 100 * 1024 * 1024) {
+                                        console.warn("File too large (max 10MB):", file.name);
                                         return;
                                       }
                                       const compressed = await imageCompression(file, { maxSizeMB: 0.8, maxWidthOrHeight: 1024, useWebWorker: true });
@@ -688,7 +688,7 @@ export default function CreateUserForm() {
                                 </label>
                                 </div>
                                 <p id="image-warning" className="text-[var(--muted)] text-sm mt-2">
-                                    JPG, or PNG. 2MB max.
+                                    JPG, or PNG. 10MB max.
                                 </p>
                             </div>
 
@@ -859,8 +859,8 @@ export default function CreateUserForm() {
                                     onChange={async (e) => {
                                         const file = e.target.files?.[0];
                                         if (file) {
-                                        if (file.size > 2 * 1024 * 1024) {
-                                            console.warn("File too large (max 2MB):", file.name);
+                                        if (file.size > 100 * 1024 * 1024) {
+                                            console.warn("File too large (max 10MB):", file.name);
                                             return;
                                         }
                                         const compressed = await imageCompression(file, { maxSizeMB: 0.8, maxWidthOrHeight: 1024, useWebWorker: true });
@@ -878,7 +878,7 @@ export default function CreateUserForm() {
                                     </label>
                                 </div>
                                 <p id="image-warning" className="text-[var(--muted)] text-sm mt-2">
-                                    JPG, or PNG. 2MB max.
+                                    JPG, or PNG. 10MB max.
                                 </p>
                             </div>
                             

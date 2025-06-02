@@ -25,8 +25,8 @@ interface ProgramLayoutProps {
 }
 
 const categories = [
-  "Recreational",
-  "Competitive",
+  {id: 0, name: "Recreational"},
+  {id: 1, name: "Competitive"},
 ]
 
 export default function ProgramLayout({ programs, setPrograms, isLoading }: ProgramLayoutProps) {
@@ -45,7 +45,7 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
     const errors: { msg: string }[] = [];
 
     if (!name.trim()) errors.push({ msg: 'Name is required.' });
-    const parsedCategory = category === "Recreational" ? 'recreational' : 'competitive';
+    const parsedCategory = category.id === 0 ? 'recreational' : 'competitive';
     if (!ages.trim()) errors.push({ msg: 'Ages are required.' });
     if (!length) errors.push({ msg: 'Length is required.' });
     description.trim();
@@ -84,7 +84,7 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
   }
 
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(categories[0]);
   const [ages, setAges] = useState("");
   const [length, setLength] = useState("");
   const [description, setDescription] = useState("");
@@ -129,7 +129,7 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                                 {/* Category */}
                                 <div className="sm:col-span-2">
                                     <label htmlFor="program-category" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                                    <Dropdown items={categories} setItem={setCategory}/>
+                                    <Dropdown items={categories} selected={category} setSelected={setCategory}/>
                                 </div>
 
 
@@ -196,7 +196,7 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                                 <div className="mt-2 flex items-center gap-x-3">
                                   <div className="h-28 w-28 rounded-full bg-white overflow-hidden shadow-md">
                                     <img
-                                      src={programImgFile ? URL.createObjectURL(programImgFile) : "/sg_logo.png"}
+                                      src={programImgFile ? URL.createObjectURL(programImgFile) : "/logos/sg_logo.png"}
                                       alt="Preview"
                                       className="h-full w-full object-cover rounded-full"
                                     />
@@ -286,13 +286,13 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                          <div className="flex flex-1 flex-col p-8">
                            <img
                              alt=""
-                             src={program.programImgUrl?.trim() ? program.programImgUrl : "/sg_logo.png"}
+                             src={program.programImgUrl?.trim() ? program.programImgUrl : "/logos/sg_logo.png"}
                              className="mx-auto size-32 shrink-0 rounded-full shadow-md"
                            />
                            <h3 className="mt-6 text-sm font-medium text-[var(--foreground)]">{program.name}</h3>
                            <dl className="mt-1 flex grow flex-col justify-between">
                              <dt className="sr-only">Title</dt>
-                             <dd className="text-sm text-gray-500">{program.ages}</dd>
+                             <dd className="text-sm text-gray-500">{program.ages} years</dd>
                              <dt className="sr-only">Role</dt>
                              <dd className="mt-3">
                                <span className="inline-flex items-center rounded-full bg-[var(--primary)]/50 px-2 py-1 text-xs font-medium text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]">

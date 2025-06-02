@@ -21,7 +21,15 @@ async function uploadToS3(file: File, keyPrefix: string) {
     }));
   
     return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-  }
+}
+
+async function deleteFromS3(url: string) {
+    const key = url.substring(1);
+    await s3.send(new DeleteObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+    }));
+}
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ programId: string }> }) {
     const { programId } = await params;
@@ -110,8 +118,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { programId
 
     try {
         const groupsIds = await db.select({ id: groups.id }).from(groups).where(eq(groups.program, parseInt(programId)));
-        await db.delete(coachGroupLines).where(inArray(coachGroupLines.groupId, groupsIds.map(group => group.id)));
-        await db.delete(groups).where(eq(groups.program, id));
+        if (groupsIds.length > 0) {
+            await db.delete(coachGroupLines).where(inArray(coachGroupLines.groupId, groupsIds.map(group => group.id)));
+            await db.delete(groups).where(eq(groups.program, id));
+        }
+        const program = await db.select().from(programs).where(eq(programs.id, id));
+        if (program.length > 0) {
+            const programImgUrl = program[0].programImgUrl;
+            if (programImgUrl) {
+                await deleteFromS3(programImgUrl);
+            }
+        }
         await db.delete(programs).where(eq(programs.id, id));
 
         return NextResponse.json({ success: true }, { status: 200 });
