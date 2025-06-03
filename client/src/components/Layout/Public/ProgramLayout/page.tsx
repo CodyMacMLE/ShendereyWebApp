@@ -3,7 +3,7 @@
 import { Program } from "@/lib/types";
 import { redirect } from "next/navigation";
 
-export default function ProgramLayout({ programs }: { programs: Program[] }) {
+export default function ProgramLayout({ programs, category }: { programs: Program[], category: string }) {
 
     return (
         <div>
@@ -35,7 +35,7 @@ export default function ProgramLayout({ programs }: { programs: Program[] }) {
                          </div>
                          <div>
                            <div
-                                onClick={() => redirect(`/recreational/${program.id}`)}
+                                onClick={() => redirect(`/${category}/${program.id}`)}
                                 className="-mt-px flex divide-x divide-[var(--border)] items-center justify-center gap-x-3 rounded-b-lg border border-transparent py-4 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--border)] cursor-pointer"
                             >
                                 View More

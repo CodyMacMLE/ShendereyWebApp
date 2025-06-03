@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { athletes, coaches, users, userImages, achievements, programs, groups, coachGroupLines } from "@/lib/schema";
-import { Group } from "@/lib/types";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
     const seniorStaffWithUsers = await db.select({
@@ -132,12 +131,13 @@ export const getProgram = async (programId: number) => {
     const program = await db.select().from(programs).where(eq(programs.id, programId));
     return program;
 }
+
 export const getGroups = async (programId: number) => {
     const groupsWithCoaches = await db.select().from(groups)
         .innerJoin(coachGroupLines, eq(groups.id, coachGroupLines.groupId))
         .innerJoin(coaches, eq(coachGroupLines.coachId, coaches.id))
         .innerJoin(users, eq(coaches.user, users.id))
         .where(eq(groups.program, programId))
-
+        .orderBy(asc(groups.startDate));
     return groupsWithCoaches;
 }

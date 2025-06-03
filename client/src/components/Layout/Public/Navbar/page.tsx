@@ -92,7 +92,7 @@ export default function Navbar() {
             <span className="sr-only">Shenderey Gymnastics</span>
             <Image
               alt=""
-              src="/sg_logo.png"
+              src="/logos/sg_logo.png"
               className="h-20 w-auto"
               width={70}
               height={60}
@@ -105,7 +105,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 hover:text-[var(--primary)]"
           >
             <span className="sr-only">Open main menu</span>
             <Bars3Icon aria-hidden="true" className="size-6" />
@@ -115,9 +115,9 @@ export default function Navbar() {
         {/* About */}
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-magenta-600">
-              About
-              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+            <PopoverButton className="group flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-[var(--primary)] focus-within:outline focus-within:outline-0">
+              <span className="group-hover:text-[var(--primary)]">About</span>
+              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400 group-hover:text-[var(--primary)]" />
             </PopoverButton>
 
             <PopoverPanel
@@ -131,7 +131,7 @@ export default function Navbar() {
                     className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm/6 hover:bg-gray-50"
                   >
                     <div className="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-magenta-600" />
+                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-[var(--primary)]" />
                     </div>
                     <div className="flex-auto">
                       <Link href={item.href} className="block font-semibold text-gray-900">
@@ -164,9 +164,9 @@ export default function Navbar() {
 
         {/* Programs */}    
         <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-magenta-600">
-              Programs
-              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+            <PopoverButton className="group flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-[var(--primary)] focus-within:outline focus-within:outline-0">
+              <span className="group-hover:text-[var(--primary)]">Programs</span>
+              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400 group-hover:text-[var(--primary)]" />
             </PopoverButton>
 
             <PopoverPanel
@@ -180,7 +180,7 @@ export default function Navbar() {
                     className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm/6 hover:bg-gray-50"
                   >
                     <div className="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-magenta-600" />
+                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-[var(--primary)]" />
                     </div>
                     <div className="flex-auto">
                       <Link href={item.href} className="block font-semibold text-gray-900">
@@ -213,9 +213,9 @@ export default function Navbar() {
 
         {/* Community */}
           <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-magenta-600">
-              Community
-              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+            <PopoverButton className="group flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-[var(--primary)] focus-within:outline focus-within:outline-0">
+              <span className="group-hover:text-[var(--primary)]">Community</span>
+              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400 group-hover:text-[var(--primary)]" />
             </PopoverButton>
 
             <PopoverPanel
@@ -229,7 +229,7 @@ export default function Navbar() {
                     className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm/6 hover:bg-gray-50"
                   >
                     <div className="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-magenta-600" />
+                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-[var(--primary)]" />
                     </div>
                     <div className="flex-auto">
                       <Link href={item.href} className="block font-semibold text-gray-900">
@@ -262,9 +262,9 @@ export default function Navbar() {
 
         {/* Media */}
         <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-magenta-600">
-              Media
-              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+            <PopoverButton className="group flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-[var(--primary)] focus-within:outline focus-within:outline-0">
+              <span className="group-hover:text-[var(--primary)]">Media</span>
+              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400 group-hover:text-[var(--primary)]" />
             </PopoverButton>
 
             <PopoverPanel
@@ -278,7 +278,7 @@ export default function Navbar() {
                     className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm/6 hover:bg-gray-50"
                   >
                     <div className="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-magenta-600" />
+                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-[var(--primary)]" />
                     </div>
                     <div className="flex-auto">
                       <Link href={item.href} className="block font-semibold text-gray-900">
@@ -311,9 +311,9 @@ export default function Navbar() {
 
         {/* Recruitment */}
           <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-magenta-600">
-              Recruitment
-              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+            <PopoverButton className="group flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 hover:text-[var(--primary)] focus-within:outline focus-within:outline-0">
+              <span className="group-hover:text-[var(--primary)]">Recruitment</span>
+              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400 group-hover:text-[var(--primary)]" />
             </PopoverButton>
 
             <PopoverPanel
@@ -327,7 +327,7 @@ export default function Navbar() {
                     className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm/6 hover:bg-gray-50"
                   >
                     <div className="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-magenta-600" />
+                      <item.icon aria-hidden="true" className="size-6 text-gray-600 group-hover:text-[var(--primary)]" />
                     </div>
                     <div className="flex-auto">
                       <Link href={item.href} className="block font-semibold text-gray-900">
@@ -363,7 +363,7 @@ export default function Navbar() {
 
         {/* Register */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <Link href="/register" className="text-sm/6 font-semibold text-gray-900 hover:text-magenta-600">
+          <Link href="/register" className="text-sm/6 font-semibold text-gray-900 hover:text-[var(--primary)]">
             Register <span aria-hidden="true">&rarr;</span>
           </Link>
         </div>
@@ -378,7 +378,7 @@ export default function Navbar() {
               <span className="sr-only">Shenderey Gymnastics</span>
               <Image
                 alt=""
-                src="/sg_logo.png"
+                src="/logos/sg_logo.png"
                 className="h-15 w-20"
                 width={100}
                 height={50}
@@ -386,7 +386,7 @@ export default function Navbar() {
             </Link>
             <button
               type="button"
-              className="-m-2.5 rounded-md p-2.5 text-gray-700"
+              className="-m-2.5 rounded-md p-2.5 text-gray-700 hover:text-[var(--primary)]"
               onClick={() => setMobileMenuOpen(false)}
             >
               <span className="sr-only">Close menu</span>
@@ -398,7 +398,7 @@ export default function Navbar() {
               <div className="space-y-2 py-6">
                 {/* Mobile About */}
                 <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]">
                     About
                     <ChevronDownIcon aria-hidden="true" className="size-5 flex-none group-data-[open]:rotate-180" />
                   </DisclosureButton>
@@ -408,7 +408,7 @@ export default function Navbar() {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
+                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}
@@ -419,7 +419,7 @@ export default function Navbar() {
 
                 {/* Mobile Programs */}
                 <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]">
                     Programs
                     <ChevronDownIcon aria-hidden="true" className="size-5 flex-none group-data-[open]:rotate-180" />
                   </DisclosureButton>
@@ -429,7 +429,7 @@ export default function Navbar() {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
+                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}
@@ -440,7 +440,7 @@ export default function Navbar() {
                 
                 {/* Mobile Community */}
                 <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]">
                     Community
                     <ChevronDownIcon aria-hidden="true" className="size-5 flex-none group-data-[open]:rotate-180" />
                   </DisclosureButton>
@@ -450,7 +450,7 @@ export default function Navbar() {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
+                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}
@@ -461,7 +461,7 @@ export default function Navbar() {
                 
                 {/* Mobile Media */}
                 <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]">
                     Media
                     <ChevronDownIcon aria-hidden="true" className="size-5 flex-none group-data-[open]:rotate-180" />
                   </DisclosureButton>
@@ -471,7 +471,7 @@ export default function Navbar() {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
+                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}
@@ -482,7 +482,7 @@ export default function Navbar() {
 
                 {/* Mobile Recruitment */}
                 <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]">
                     Recruitment
                     <ChevronDownIcon aria-hidden="true" className="size-5 flex-none group-data-[open]:rotate-180" />
                   </DisclosureButton>
@@ -492,7 +492,7 @@ export default function Navbar() {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
+                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}
@@ -506,7 +506,7 @@ export default function Navbar() {
               <div className="py-6">
                 <Link
                   href="/register"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 hover:text-[var(--primary)]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Register

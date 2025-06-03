@@ -12,11 +12,11 @@ export default async function PublicLayout({
 }>) {
 
   const admin = await isAdmin();
-  
+
   return (
     <section>
       <Navbar />
-      <main className="mt-[70px]">
+      <main className="mt-[70px] bg-[var(--background)]">
         {children}
       </main>
       { admin && <AdminButton />}

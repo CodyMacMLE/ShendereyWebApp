@@ -51,3 +51,30 @@ export const RecreationalFeatures: Feature[] = [
       icon: CheckIcon,
   }
 ]
+
+export const CompetitiveFeatures: Feature[] = [
+  {
+      name: 'Experienced Coaching.',
+      description:
+      'Led by coaches with extensive knowledge of elite-level gymnastics and NCAA recruiting processes.',
+      icon: CheckIcon,
+  },
+  {
+      name: 'Progressive Training Plans.',
+      description:
+      'Tailored to individual athletes, with an emphasis on skill progression, routines, and competition preparation.',
+      icon: CheckIcon,
+  },
+  {
+      name: 'Holistic Development.',
+      description:
+      'Focus on injury prevention, nutrition, mental coaching, and balancing academics and athletics.',
+      icon: CheckIcon,
+  },
+  {
+      name: 'NCAA Preparation.',
+      description:
+      'Guidance on academic performance, recruitment, and compliance with NCAA eligibility standards.',
+      icon: CheckIcon,
+  },
+]

@@ -35,7 +35,7 @@ export default async function Recreational() {
                                     {RecreationalFeatures.map((feature) => (
                                         <div key={feature.name} className="relative pl-9">
                                             <dt className="inline font-semibold text-gray-900">
-                                                <CheckIcon aria-hidden="true" className="absolute left-1 top-1 size-5 text-magenta-600" />
+                                                <CheckIcon aria-hidden="true" className="absolute left-1 top-1 size-5 text-[var(--primary)]" />
                                                 {feature.name}
                                             </dt>{' '}
                                             <dd className="inline">{feature.description}</dd>
@@ -66,7 +66,7 @@ export default async function Recreational() {
 
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Programs */}
-                <ProgramLayout programs={programs as unknown as Program[]} />
+                <ProgramLayout programs={programs as unknown as Program[]} category="recreational" />
             </div>
 
         </div>

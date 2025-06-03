@@ -18,7 +18,7 @@ export default async function ProgramPage({ params }: { params: { programId: num
                     {/* Back Button */}
                     <div className="px-6 mb-10">
                         <div className="flex">
-                            <Link href="/recreational">
+                            <Link href="/competitive">
                                 <div className="group flex items-center cursor-pointer">
                                     <ChevronLeftIcon className="h-4 w-4 mr-2 text-[var(--muted)] group-hover:text-[var(--primary)]" />
                                     <span className="text-[var(--muted)] group-hover:text-[var(--primary)] font-semibold items-center">Back</span>
