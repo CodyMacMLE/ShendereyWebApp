@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { athletes, coaches, users, userImages, achievements, programs, groups, coachGroupLines } from "@/lib/schema";
+import { athletes, coaches, users, userImages, achievements, programs, groups, coachGroupLines, sponsors } from "@/lib/schema";
 import { eq, asc } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
@@ -22,6 +22,28 @@ export const getSeniorStaff = async () => {
         return 0;
     });
     return seniorStaffWithUsers;
+}
+
+export const getJuniorStaff = async () => {
+    const juniorStaffWithUsers = await db.select({
+        coach: coaches,
+        user: users,
+        staffUrl: userImages.staffUrl
+    })
+    .from(coaches)
+    .innerJoin(users, eq(coaches.user, users.id))
+    .innerJoin(userImages, eq(users.id, userImages.user))
+    .where(eq(coaches.isSeniorStaff, false));
+
+    juniorStaffWithUsers.sort((a, b) => {
+        const dateA = a.coach.createdAt?.getTime();
+        const dateB = b.coach.createdAt?.getTime();
+        if (dateA && dateB) {
+            return dateA - dateB;
+        }
+        return 0;
+    });
+    return juniorStaffWithUsers;
 }
 
 export const getCoaches = async () => {
@@ -140,4 +162,19 @@ export const getGroups = async (programId: number) => {
         .where(eq(groups.program, programId))
         .orderBy(asc(groups.startDate));
     return groupsWithCoaches;
+}
+
+export const getSponsors = async () => {
+    const sortOrder = [
+        "Diamond", "Platinum", "Gold", "Silver", "Affiliate", ''
+    ];
+
+    const fetchedSponsors = await db.select().from(sponsors).orderBy(asc(sponsors.sponsorLevel));
+
+    fetchedSponsors.sort((a, b) => {
+        const aIndex = sortOrder.indexOf(a.sponsorLevel || '');
+        const bIndex = sortOrder.indexOf(b.sponsorLevel || '');
+        return aIndex - bIndex;
+    });
+    return fetchedSponsors;
 }

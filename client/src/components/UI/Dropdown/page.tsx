@@ -13,10 +13,10 @@ type DropdownProps = {
     id: number,
     name: string
   }>>,
-    selected?: {
+    selected: {
     id: number,
     name: string
-  } | undefined,
+  },
 }
 
 export default function Dropdown({ items, setSelected, selected }: DropdownProps) {
@@ -30,7 +30,7 @@ export default function Dropdown({ items, setSelected, selected }: DropdownProps
         <select
           ref={selectRef}
           className="appearance-none h-[38px] grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-black outline outline-1 -outline-offset-1 outline-[var(--border)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-[var(--primary)] sm:text-sm/6"
-          value={selected ? selected.id : ''}
+          value={selected.id}
           onChange={e => {
             const item = items.find(i => i.id === Number(e.target.value));
             if (item) setSelected(item);

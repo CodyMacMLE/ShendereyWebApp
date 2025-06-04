@@ -16,11 +16,11 @@ type Sponsor = {
   };
 
 const sponsorLevels = [
-    "Diamond",
-    "Platinum",
-    "Gold",
-    "Silver",
-    "Affiliate",
+    { id: 1, name: "Diamond" },
+    { id: 2, name: "Platinum" },
+    { id: 3, name: "Gold" },
+    { id: 4, name: "Silver" },
+    { id: 5, name: "Affiliate" },
 ]
 
 export default function AddSponsor({ setSponsors, setModalEnable }: { 
@@ -30,7 +30,7 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
     const [organization, setOrganization] = useState('');
     const [description, setDescription] = useState('');
     const [website, setWebsite] = useState('');
-    const [sponsorLevel, setSponsorLevel] = useState('Diamond');
+    const [sponsorLevel, setSponsorLevel] = useState(sponsorLevels[0]);
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
@@ -52,7 +52,7 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
         const formData = new FormData();
         formData.append('organization', organization);
         formData.append('description', description);
-        formData.append('sponsorLevel', sponsorLevel);
+        formData.append('sponsorLevel', sponsorLevel.name);
         formData.append('website', website);
         if (mediaFile) {
             formData.append('media', mediaFile);
@@ -110,7 +110,7 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
                         {/* Sponsor Level */}
                         <div className="sm:col-span-4">
                             <label htmlFor="sponsor-sponsorLevel" className="block text-sm/6 font-medium text-[var(--foreground)]">Sponsor Level</label>
-                            <Dropdown items={sponsorLevels} setItem={setSponsorLevel}/>
+                            <Dropdown items={sponsorLevels} setSelected={setSponsorLevel} selected={sponsorLevel}/>
                         </div>
 
                         {/* Website */}
