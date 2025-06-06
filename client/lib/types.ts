@@ -107,7 +107,7 @@ export type Testimonial = {
 
 // SPONSOR
 export type Sponsor = {
-    id: string,
+    id: number,
     organization: string,
     description: string,
     website: string,
@@ -117,11 +117,12 @@ export type Sponsor = {
 
 // EMPLOYMENT
 export type Employment = {
-    id: string,
+    id: number,
     position: string,
     description: string,
     requirements: string,
     contract: string,
+    hours: number,
     isFeatured: boolean,
     dateCreated: Date,
 };

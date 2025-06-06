@@ -6,6 +6,7 @@ import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@h
 import { ChevronUpDownIcon } from '@heroicons/react/16/solid'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import { useRouter } from "next/navigation";
+import ErrorModal from "@/components/UI/ErrorModal/page";
 
 const experienceLevel = [
   { id: 1, name: 'Recreational' },
@@ -42,6 +43,7 @@ export default function TryoutForm() {
         tryoutPreference: "No Preference",
         tryoutLevel: "",
         contactName: "",
+        contactRelationship: "",
         contactEmail: "",
         contactPhone: "",
         honeypot: "", // if this field is filled do not email (bot prevention)
@@ -70,10 +72,12 @@ export default function TryoutForm() {
         formData.tryoutPreference = formData.tryoutPreference.trim();
         formData.tryoutLevel = formData.tryoutLevel.trim();
         formData.contactName = formData.contactName.trim();
+        formData.contactRelationship = formData.contactRelationship.trim();
         formData.contactEmail = formData.contactEmail.trim();
+        formData.contactPhone = formData.contactPhone.trim();
 
         try {
-            const res = await fetch("/api/tryout", {
+            const res = await fetch("/api/tryouts", {
                 method: "POST",
                 body: JSON.stringify(formData),
             });
@@ -81,6 +85,13 @@ export default function TryoutForm() {
                 throw new Error("Failed to submit form");
             }
             const data = await res.json();
+            console.log(data);
+
+            if (data.message) { 
+                setErrorModalOpen(true);
+                setErrorMessage(data.message);
+            }
+
             if (data.success) {
                 router.push("/tryouts/success");
             } else {
@@ -89,6 +100,8 @@ export default function TryoutForm() {
 
         } catch (error) {
             console.error("Error submitting form:", error);
+            setErrorModalOpen(true);
+            setErrorMessage("An error occurred while submitting the form. Please try again.");
         }
     };
 
@@ -104,6 +117,9 @@ export default function TryoutForm() {
         setFormData((prev) => ({ ...prev, tryoutPreference: value.name })); // Update formData with the selected tryout level
     };
 
+    const [errorModalOpen, setErrorModalOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+
   return (
     <div className="bg-white py-10 sm:py-10">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -114,6 +130,15 @@ export default function TryoutForm() {
                 <h2 className="text-2xl text-balance font-semibold tracking-tight text-[var(--primary)] sm:text-5xl">Competitive Tryout Form</h2>
                 <p className="mt-4 text-lg/8 text-[var(--foreground)]">Fill out the form below to start your competitive career with Shenderey</p>
             </div>
+
+            {/* Error Modal */}
+            {errorModalOpen && (
+                <div className="mt-10">
+                <ErrorModal 
+                    errors={[{ msg: errorMessage }]}
+                />
+                </div>
+            )}
 
             <form onSubmit={handleSubmit}>
                 <div className="space-y-12">
@@ -405,6 +430,26 @@ export default function TryoutForm() {
                                             id="contactName"
                                             name="contactName"
                                             value={formData.contactName}
+                                            onChange={handleInputChange}
+                                            type="text"
+                                            className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Name */}
+                            <div className="sm:col-span-2">
+                                <label htmlFor="contactName" className="block text-sm/6 font-medium text-gray-900">
+                                    Relationship to Athlete
+                                </label>
+                                <div className="mt-2">
+                                    <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)]">
+                                        <input
+                                            id="contactRelationship"
+                                            name="contactRelationship"
+                                            value={formData.contactRelationship}
                                             onChange={handleInputChange}
                                             type="text"
                                             className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"

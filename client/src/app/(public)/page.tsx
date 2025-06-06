@@ -88,7 +88,7 @@ export default async function Home() {
         <div aria-hidden="true" className="absolute inset-0 bg-gray-900 opacity-70" />
         {/* Content of Hero Section */}
         <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-52 text-center sm:py-56 lg:px-0">
-          <p className="mt-4 text-xl text-magenta-600">Join the Legacy</p>
+          <p className="mt-4 text-xl text-[var(--primary)]">Join the Legacy</p>
           <h1 className="text-4xl font-bold tracking-tight text-white lg:text-6xl">Become a Part of The Shenderey Family!</h1>
           <p className="mt-4 text-xl text-white">
             Spots fill fast! Register today to secure your place in a club where dreams take flight.

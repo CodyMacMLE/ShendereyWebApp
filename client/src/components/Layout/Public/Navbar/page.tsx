@@ -24,12 +24,12 @@ import {
     UsersIcon,
     ClipboardDocumentCheckIcon,
     ClipboardDocumentIcon,
-    BookOpenIcon,
+    //BookOpenIcon,
     MegaphoneIcon,
     CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, } from '@heroicons/react/20/solid'
-import { IoAmericanFootballOutline, IoMedalOutline, IoShirtOutline, } from 'react-icons/io5'
+import { IoAmericanFootballOutline, IoMedalOutline, /* IoShirtOutline, */ } from 'react-icons/io5'
 import { LuUserRoundSearch, LuGraduationCap } from "react-icons/lu";
 import Link from 'next/link'
 import Image from 'next/image'
@@ -56,14 +56,14 @@ const programs = [
 ]
 
 const community = [
-    { name: 'Merchandise', description: 'Join our community by wearing our merch', href: '/merchandise', icon: IoShirtOutline },
+    //{ name: 'Merchandise', description: 'Join our community by wearing our merch', href: '/merchandise', icon: IoShirtOutline },
     { name: 'Resources', description: 'Documents and other info can be found here', href: '/resources', icon: ClipboardDocumentIcon },
-    { name: 'Employment', description: 'Current job postings', href: '/employment', icon: MegaphoneIcon },
     { name: 'Sponsors', description: 'Check out our wonderful sponsors helping our athletes', href: '/sponsors', icon: CurrencyDollarIcon },
+    { name: 'Employment', description: 'Current job postings', href: '/employment', icon: MegaphoneIcon },
 ]
 
 const media = [
-    { name: 'Blog', description: 'Check out our blog for news and information on gymnastics', href: '/blog', icon: BookOpenIcon },
+    //{ name: 'Blog', description: 'Check out our blog for news and information on gymnastics', href: '/blog', icon: BookOpenIcon },
     { name: 'Gallery', description: 'Media and videos of our athletes and gym', href: '/gallery', icon: PlayCircleIcon },
 ]
 

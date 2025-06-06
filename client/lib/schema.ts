@@ -140,6 +140,7 @@ export const employment = pgTable('employment', {
     description: text('description'),
     requirements: text('requirements'),
     contract: text('contract'),
+    hours: integer('hours'),
     isFeatured: boolean('isFeatured'),
     dateCreated: timestamp('dateCreated'),
 })

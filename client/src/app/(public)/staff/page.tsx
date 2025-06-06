@@ -1,4 +1,4 @@
-import { getCoaches, getSeniorStaff } from "@/lib/actions";
+import { getJuniorStaff, getSeniorStaff } from "@/lib/actions";
 import { Metadata } from "next";
 import Image from "next/image";
 
@@ -18,12 +18,12 @@ export const metadata: Metadata = {
 
 export default async function Staff() {
     const seniorStaff = await getSeniorStaff();
-    const coaches = await getCoaches();
+    const juniorStaff = await getJuniorStaff();
 
     return (
         <>
             {/* Certification and Quote From Leadership */}
-            <div className="bg-white pt-5 sm:pt-10">
+            <div className="px-4 pb-5 sm:px-6 lg:px-8 pt-20 bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="mx-auto grid max-w-2xl grid-cols-1 items-start gap-x-8 gap-y-16 sm:gap-y-24 lg:mx-0 lg:max-w-none lg:grid-cols-2">
                         <div className="lg:pr-4">
@@ -157,7 +157,7 @@ export default async function Staff() {
                         role="list"
                         className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6"
                     >
-                        {coaches.map((coach: any) => (
+                        {juniorStaff.map((coach: any) => (
                             <li key={coach.user.id}>
                                 <Image alt="" src={coach.staffUrl || '/default-profile.png'} className="mx-auto size-24 rounded-full" width={100} height={100} style={{ objectFit: 'cover', objectPosition: 'top'}}/>
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{formatName(coach.user.name)}</h3>

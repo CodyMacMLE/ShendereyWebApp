@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 
+import { policies } from '@/public/files/registrationPolicies'
+
 export const metadata: Metadata = {
   title: 'Register',
 };
@@ -87,16 +89,6 @@ const classes = [
   // More classes...
 ]
 
-const policies = [
-  { idx: 0, string: 'Payment is due at time of registration.' },
-  { idx: 1, string: 'All prices shown do not include taxes.' },
-  { idx: 2, string: 'Prices do not include the $50.00 annual registration fee (Valid until from July 1-June 30) or taxes.' },
-  { idx: 3, string: 'No refunds after session start date.  Refunds will not be issued for gym closures including, but not limited to , storms, power outages, heating failures, outbreaks, floods, or other unforeseen circumstances.'},
-  { idx: 4, string: 'Credit or refunds for missed classes will not be issued.  Make up classes will be allowed up to 2 classes only if availability allows it.  Due to high demand make up classes are not guaranteed.'},
-  { idx: 5, string: 'Make-up classes are not provided for planned closures as you have not been charged for these classes (e.g, Thanksgiving, Family day, Victoria Day, Events hosted by us).'},
-  // More people...
-]
-
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
@@ -128,14 +120,14 @@ function mapDaysToCalendar(name: string, day: string) {
 
 export default function Register() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 pt-20">
+    <div className="px-4 pb-5 sm:px-6 lg:px-8 pt-20 bg-white">
 
       {/* Decorative background image and gradient */}
       <div aria-hidden="true" className="absolute inset-0">
         <div className="absolute inset-0 mx-auto max-w-7xl overflow-hidden xl:px-8">
           <Image
             alt=""
-            src="/sgi_004.png"
+            src="/images/sgi_143.jpg"
             className="size-full object-cover"
             width={1920}
             height={1080}
@@ -151,7 +143,7 @@ export default function Register() {
         className="relative mx-auto flex max-w-7xl flex-col items-center px-4 pt-26 text-center sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-2xl lg:max-w-none">
-        <h2 className="text-base/7 font-semibold text-magenta-600">Register</h2>
+        <h2 className="text-base/7 font-semibold text-[var(--primary)]">Register</h2>
           <h2 id="sale-heading" className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
             Sign up for the {currentSession} session today
           </h2>
@@ -161,7 +153,7 @@ export default function Register() {
           <a
             href="https://shenderey-gymnastics-centre-newmarket.gymdesk.com/signup"
             target='_blank'
-            className="mt-6 inline-block w-full rounded-md border border-transparent bg-magenta-600 px-8 py-3 font-medium text-white hover:bg-magenta-500 sm:w-auto shadow-md"
+            className="mt-6 inline-block w-full rounded-md border border-transparent bg-[var(--primary)] px-8 py-3 font-medium text-white hover:bg-[var(--primary-hover)] sm:w-auto shadow-md"
           >
             New member sign up 
           </a>
@@ -269,7 +261,7 @@ export default function Register() {
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{person.time}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${person.cost}</td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
-                          <a href="#" className="text-magenta-600 hover:text-magenta-500">
+                          <a href="#" className="text-[var(--primary)] hover:text-[var(--primary-hover)]">
                             Register<span className="sr-only">, {person.coach}</span>
                           </a>
                         </td>
@@ -290,7 +282,7 @@ export default function Register() {
         </div>
       </div>
 
-      <div className="my-8 overflow-hidden bg-white shadow ring-1 ring-black/5 sm:rounded-lg">
+      <div className="mt-8 overflow-hidden bg-[var(--background)] shadow ring-1 ring-black/5 sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
                 <ol className='pl-3 list-disc'>
                   {policies.map(policy => (

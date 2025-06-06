@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(req: NextRequest, { params }: { params: { tryoutId: string } }) {
     try {
-        const { tryoutId } = params;
+        const { tryoutId } = await params;
         const { readStatus } = await req.json();
 
         const tryoutsData = await db.update(tryouts).set({ readStatus }).where(eq(tryouts.id, parseInt(tryoutId)));
@@ -23,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: { params: { tryoutId: st
 
 export async function DELETE(req: NextRequest, { params }: { params: { tryoutId: string } }) {
     try {
-        const { tryoutId } = params;
+        const { tryoutId } = await params;
         const tryoutsData = await db.delete(tryouts).where(eq(tryouts.id, parseInt(tryoutId)));
 
         if (!tryoutsData) {

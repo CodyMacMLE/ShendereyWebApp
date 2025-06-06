@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { athletes, coaches, users, userImages, achievements, programs, groups, coachGroupLines, sponsors } from "@/lib/schema";
-import { eq, asc } from "drizzle-orm";
+import { athletes, coaches, users, userImages, achievements, programs, groups, coachGroupLines, sponsors, employment } from "@/lib/schema";
+import { eq, asc, desc } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
     const seniorStaffWithUsers = await db.select({
@@ -55,7 +55,6 @@ export const getCoaches = async () => {
     .from(coaches)
     .innerJoin(users, eq(coaches.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .where(eq(coaches.isSeniorStaff, false));
 
     coachesWithUsers.sort((a, b) => {
         const dateA = a.coach.createdAt?.getTime();
@@ -165,16 +164,16 @@ export const getGroups = async (programId: number) => {
 }
 
 export const getSponsors = async () => {
-    const sortOrder = [
-        "Diamond", "Platinum", "Gold", "Silver", "Affiliate", ''
-    ];
+    const diamondSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Diamond"));
+    const goldSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Gold"));
+    const silverSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Silver"));
+    const affiliates = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Affiliate"));
 
-    const fetchedSponsors = await db.select().from(sponsors).orderBy(asc(sponsors.sponsorLevel));
+    const allSponsors = {diamondSponsors, goldSponsors, silverSponsors, affiliates};
+    return allSponsors;
+}
 
-    fetchedSponsors.sort((a, b) => {
-        const aIndex = sortOrder.indexOf(a.sponsorLevel || '');
-        const bIndex = sortOrder.indexOf(b.sponsorLevel || '');
-        return aIndex - bIndex;
-    });
-    return fetchedSponsors;
+export const getJobs = async () => {
+    const jobs = await db.select().from(employment).orderBy(desc(employment.dateCreated));
+    return jobs;
 }

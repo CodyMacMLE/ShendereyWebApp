@@ -19,7 +19,7 @@ const navigation = {
       { name: 'Sponsors', href: '/sponsors' },
     ],
     Media: [
-      { name: 'Blog', href: '/blog' },
+      //{ name: 'Blog', href: '/blog' },
       { name: 'Gallery', href: '/gallery' },
     ],
     Recruitment: [
@@ -64,7 +64,7 @@ const navigation = {
           <div className="mt-24 border-t border-gray-900/10 pt-12 xl:grid xl:grid-cols-3 xl:gap-8">
             <Image
               alt="Shenderey Gymnastics"
-              src="/sg_logo.png"
+              src="/logos/sg_logo.png"
               className="h-20"
               width={70}
               height={60}
@@ -148,7 +148,7 @@ const navigation = {
               ))}
             </div>
             <p className="mt-8 text-sm/6 text-gray-600 md:order-1 md:mt-0">
-              &copy; 2024 Shenderey Gymnastics Centre, Ltd. All rights reserved.
+              &copy; {new Date().getFullYear()} Shenderey Gymnastics Centre, Ltd. All rights reserved.
             </p>
           </div>
         </div>
