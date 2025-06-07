@@ -2,6 +2,11 @@ import Image from "next/image";
 
 import { SponsorsQuote } from "@/public/files/quotes"
 import { getSponsors } from "@/lib/actions";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Sponsors',
+};
 
 export default async function Sponsors() {
 

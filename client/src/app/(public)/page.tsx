@@ -67,8 +67,8 @@ export default async function Home() {
 
   const seniorStaff = await getSeniorStaff();
   const juniorStaff = await getJuniorStaff();
-  const sponsors = await getSponsors();
-
+  const fetchedSponsors = await getSponsors();
+  const sponsors = [...fetchedSponsors.diamondSponsors, ...fetchedSponsors.goldSponsors, ...fetchedSponsors.silverSponsors, ...fetchedSponsors.affiliates]
 
   return (
     <div className="bg-white">

@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect, Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { VideoCameraIcon, PhotoIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline"
 import { EditGalleryMedia } from "@/components/Form/EditGalleryMedia/page";
+import { Dialog, Transition } from "@headlessui/react";
+import { EllipsisVerticalIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 
-import Modal from "@/components/UI/Modal/page"
+import Modal from "@/components/UI/Modal/page";
 import imageCompression from 'browser-image-compression';
 
 import ErrorModal from "@/components/UI/ErrorModal/page";
@@ -21,7 +21,7 @@ type Media = {
     videoThumbnail: string
 }
 
-export default function Gallery() {
+export default function OldGallery() {
     // Add State
     const [addModalEnabled, setAddModalEnabled] = useState(false);
     const [media, setMedia] = useState<Media[] | []>([]);

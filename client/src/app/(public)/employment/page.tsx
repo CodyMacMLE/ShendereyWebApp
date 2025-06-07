@@ -3,6 +3,11 @@ import Image from "next/image";
 import { EmploymentQuote, SponsorsQuote } from "@/public/files/quotes"
 import { getCoaches, getJobs } from "@/lib/actions";
 import EmploymentTable from "@/components/UI/Tables/EmploymentTable/page";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Employment',
+};
 
 
 export default async function EmploymentPage() {

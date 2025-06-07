@@ -1,4 +1,9 @@
+import { Metadata } from "next";
 import StackedList from "./StackedList";
+
+export const metadata: Metadata = {
+    title: 'Resources',
+};
 
 export default function Resources() {
 
