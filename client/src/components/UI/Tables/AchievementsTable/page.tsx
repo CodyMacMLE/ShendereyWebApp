@@ -63,7 +63,7 @@ useEffect(() => {
                     setAthleteAchievements(data.body);
                 }
             } catch (error) {
-                console.error("Fetch error")
+                console.error("Fetch error", error);
             }
         }
         fetchAchievements();
@@ -128,7 +128,7 @@ useEffect(() => {
                             <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
                         </div> 
                     )}
-                    <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}'s Scores</h1>
+                    <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}&apos;s Scores</h1>
                 </div>
                 <div className="mt-10 sm:ml-16 sm:mt-0 sm:flex-none">
                     <button

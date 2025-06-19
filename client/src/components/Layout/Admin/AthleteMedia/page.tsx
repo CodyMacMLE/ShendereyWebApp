@@ -1,11 +1,11 @@
 "use client"
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import Modal from "@/components/UI/Modal/page"
-import AthleteGallery from '@/components/UI/AthleteGallery/page'
 import AddUserMedia from "@/components/Form/AddUserMedia/page";
+import AthleteGallery from '@/components/UI/AthleteGallery/page';
+import Modal from "@/components/UI/Modal/page";
 
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 
@@ -20,9 +20,10 @@ type Media = {
     id: string,
     name: string,
     description: string,
+    category: string,
     date: Date,
     mediaUrl: string,
-    mediaType: string
+    mediaType: string,
     videoThumbnail: string
 }
 
@@ -36,7 +37,7 @@ export default function AthleteMedia({ athlete } : { athlete : Athlete}) {
           }, [])
         
         useEffect(() => {
-            }, [athleteMedia]);
+        }, [athleteMedia]);
 
         // Get Media
         const fetchMedia = async () => {
@@ -58,7 +59,7 @@ export default function AthleteMedia({ athlete } : { athlete : Athlete}) {
         <>
             {addModalEnabled && (
                 <Modal title="Add Media" setModalEnable={setAddModalEnabled}>
-                    <AddUserMedia userId={athlete.userId} athleteId={athlete.athleteId} setAthleteMedia={setAthleteMedia} setModalEnable={setAddModalEnabled}/>
+                    <AddUserMedia userId={athlete.userId} athleteId={athlete.athleteId} setAthleteMedia={(media) => setAthleteMedia(media as Media[])} setModalEnable={setAddModalEnabled}/>
                 </Modal>
             )} 
 
@@ -81,7 +82,7 @@ export default function AthleteMedia({ athlete } : { athlete : Athlete}) {
                                 <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
                             </div> 
                         )}
-                        <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}'s Gallery</h1>
+                        <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}&apos;s Gallery</h1>
                     </div>
                     <div className="mt-10 sm:ml-16 sm:mt-0 sm:flex-none">
                         <button

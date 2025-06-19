@@ -251,7 +251,7 @@ export default function OldGallery() {
                         <div className="mt-6 flex items-center justify-end gap-x-6">
                             <button
                                 type="button"
-                                onClick={() => {setAddModalEnabled? setAddModalEnabled(false) : "" }}
+                                onClick={() => setAddModalEnabled(false)}
                                 className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
                             >
                                 Cancel

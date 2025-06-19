@@ -7,7 +7,7 @@ export default async function ProgramPage({ params }: { params: { programId: num
 
     const { programId } = await params;
     // Data
-    let fetchedProgram = await getProgram(programId);
+    const fetchedProgram = await getProgram(programId);
     const program = fetchedProgram[0];
     const groups = await getGroups(programId);
 

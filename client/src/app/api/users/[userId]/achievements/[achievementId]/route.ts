@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm/sql';
 import { db } from '@/lib/db';
-import { achievements, scores } from '@/lib/schema';
+import { achievements } from '@/lib/schema';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(

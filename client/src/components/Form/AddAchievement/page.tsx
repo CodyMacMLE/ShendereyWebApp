@@ -17,7 +17,6 @@ export default function AddAchievement({ athleteId, setAthleteAchievements, setM
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
-  const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
   const handleSubmit = async () => {
     const achievementData = { title, description, date };

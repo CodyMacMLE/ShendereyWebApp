@@ -30,7 +30,7 @@ export default function Sponsors() {
 
     const fetchSponsors = async () => {
         try {
-            let res = await fetch('/api/sponsors', {
+            const res = await fetch('/api/sponsors', {
                 method: 'GET'
             })
         
@@ -39,7 +39,7 @@ export default function Sponsors() {
                 return parsedData.body;
             }
         } catch (error) {
-            return new Error('Error fetching sponsors');
+            return new Error('Error fetching sponsors', error as Error);
         }
     }
 

@@ -1,7 +1,7 @@
-import { useState, Fragment, useEffect } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { VideoCameraIcon, PhotoIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline"
 import { EditUserMedia } from "@/components/Form/EditUserMedia/page";
+import { Dialog, Transition } from "@headlessui/react";
+import { EllipsisVerticalIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import { Fragment, useEffect, useState } from "react";
 
 type Athlete = {
     userId: number,
@@ -27,7 +27,11 @@ export default function AthleteGallery({ athlete, media }: { athlete: Athlete, m
     const [mediaItems, setMediaItems] = useState<Media[] | []>([]);
 
     useEffect(() => {
-        if (media.length > 0) setMediaItems(media);
+        if (media) {
+            if (media.length > 0) setMediaItems(media);
+        } else {
+            setMediaItems([]);
+        }
     }, [media])
 
     useEffect(() => {

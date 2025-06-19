@@ -127,7 +127,7 @@ export default function Program() {
             if (res.ok) {
                 const data = await res.json();
                 // Convert date strings to Date objects
-                const groupsWithDates = data.body.map((group: any) => ({
+                const groupsWithDates = data.body.map((group: Group) => ({
                     ...group,
                     startDate: new Date(group.startDate),
                     endDate: new Date(group.endDate),
@@ -198,10 +198,10 @@ export default function Program() {
 
     // Handle Submit
     const handleEditProgram = async () => {
-        let errors = [];
+        const errors = [];
 
         if (!programName.trim()) errors.push({msg: "Program name is required"});
-        let parsedCategory = programCategory === 'Competitive' ? 'competitive' : 'recreational'
+        const parsedCategory = programCategory === 'Competitive' ? 'competitive' : 'recreational'
         if (!programDescription.trim()) errors.push({msg: "Program description is required"});
         if (!programLength) errors.push({msg: "Program length is required"});
         if (!programAges.trim()) errors.push({msg: "Program ages are required"});
@@ -286,7 +286,7 @@ export default function Program() {
 
     // HANDLE GROUPS
     const handleAddGroup = async () => {
-        let errors = [];
+        const errors = [];
 
         if (!groupDay.name.trim()) errors.push({msg: "Group day is required"});
         if (!groupStartTime.trim()) errors.push({msg: "Group start time is required"});

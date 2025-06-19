@@ -1,4 +1,5 @@
 import { DocumentCheckIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export default function FormSuccess() {
     return (
@@ -14,12 +15,12 @@ export default function FormSuccess() {
                     Thank you for submitting your tryout form. We will review your information and get back to you soon.
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
-                    <a
+                    <Link
                         href="/"
                         className="rounded-md bg-[var(--primary)] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
                     >
                         Go back to home
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>

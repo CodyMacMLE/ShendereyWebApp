@@ -1,11 +1,11 @@
 "use client"
 
-import Image from "next/image";
-import { useState, useEffect } from "react";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
-import Modal from "@/components/UI/Modal/page"
 import AddScore from "@/components/Form/AddScore/page";
 import EditScore from "@/components/Form/EditScore/page";
+import Modal from "@/components/UI/Modal/page";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type Score =  {
     id: number,
@@ -152,7 +152,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                     <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
                 </div> 
             )}
-            <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}'s Scores</h1>
+            <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}&apos;s Scores</h1>
           </div>
           <div className="mt-10 sm:ml-16 sm:mt-0 sm:flex-none">
             <button
@@ -203,7 +203,9 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
-                    {athleteScores.map((score: Score) => { 
+                    {athleteScores
+                      .filter((score): score is Score => !!score && typeof score.id === 'number')
+                      .map((score: Score) => { 
                         const enabled = enabledStates[score.id] || false;
 
                         const handleDeleteClick = async () => {

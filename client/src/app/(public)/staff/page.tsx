@@ -134,7 +134,7 @@ export default async function Staff() {
                         role="list"
                         className="mx-auto mt-20 grid max-w-2xl grid-cols-1 gap-x-6 gap-y-20 sm:grid-cols-2 lg:max-w-4xl lg:gap-x-8 xl:max-w-none"
                     >
-                        {seniorStaff.map((person: any) => (
+                        {seniorStaff.map((person: Staff) => (
                             <li key={person.user.id} className="flex flex-col gap-6 xl:flex-row">
                                 <Image alt="" src={person.staffUrl || '/default-profile.png'} className="aspect-[4/5] w-52 flex-none rounded-2xl object-cover max-h-[300px]" width={600} height={300} style={{ objectFit: 'cover' }}/>
                                 <div className="flex-auto">
@@ -157,7 +157,7 @@ export default async function Staff() {
                         role="list"
                         className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6"
                     >
-                        {juniorStaff.map((coach: any) => (
+                        {juniorStaff.map((coach: Staff) => (
                             <li key={coach.user.id}>
                                 <Image alt="" src={coach.staffUrl || '/default-profile.png'} className="mx-auto size-24 rounded-full" width={100} height={100} style={{ objectFit: 'cover', objectPosition: 'top'}}/>
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{formatName(coach.user.name)}</h3>

@@ -3,7 +3,16 @@
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
 
-export default function StackedList({ resources }: { resources: any[] }) {
+interface Resource {
+    id: string | number
+    name: string
+    posted: string
+    size: string
+    downloads: number
+    link: string
+}
+
+export default function StackedList({ resources }: { resources: Resource[] }) {
 
     const [search, setSearch] = useState('')
     return (

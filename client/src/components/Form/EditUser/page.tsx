@@ -48,9 +48,6 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
     const [alumniGraduationYear, setAlumniGraduationYear] = useState('');
     const [alumniDescription, setAlumniDescription] = useState('');
 
-    // Form Errors
-    const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
-
     useEffect(() => {
         async function fetchUser() {
             setLoading(true);
@@ -59,7 +56,6 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                 if (!res.ok) throw new Error('Failed to fetch user');
                 const data = await res.json();
                 const body = data.body
-                console.log(body)
             
                 // User Info
                 setName(body.name ?? '');
@@ -1019,7 +1015,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                         <button 
                             type="button" 
                             className="text-sm/6 font-semibold text-[var(--foreground)] hover:text-red-600 cursor-pointer"
-                            onClick={() => {setModalEnable && setModalEnable(false)}}
+                            onClick={() => setModalEnable?.(false)}
                         >
                         Cancel
                         </button>

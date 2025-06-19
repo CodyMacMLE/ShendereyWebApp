@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 
 import Modal from "@/components/UI/Modal/page"
 import Gallery from '@/components/UI/AthleteGallery/page'
@@ -28,9 +28,6 @@ type Media = {
 export default function UserGallery({ athlete } : { athlete : Athlete}) {
         // Add State
         const [addModalEnabled, setAddModalEnabled] = useState(false);
-        // Edit State
-        const [editModalEnabled, setEditModalEnabled] = useState(false);
-        //const [selectedMediaItem, setSelectedMediaItem] = useState<Media | null>(null);
     
         const [athleteMedia, setAthleteMedia] = useState<Media[] | []>([]);
 
@@ -38,10 +35,6 @@ export default function UserGallery({ athlete } : { athlete : Athlete}) {
             fetchMedia();
           }, [])
         
-        useEffect(() => {
-            console.log(athleteMedia)
-            }, [athleteMedia]);
-
         // Get Media
         const fetchMedia = async () => {
             try {
@@ -85,7 +78,7 @@ export default function UserGallery({ athlete } : { athlete : Athlete}) {
                                 <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
                             </div> 
                         )}
-                        <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}'s Gallery</h1>
+                        <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}&apos;s Gallery</h1>
                     </div>
                     <div className="mt-10 sm:ml-16 sm:mt-0 sm:flex-none">
                         <button

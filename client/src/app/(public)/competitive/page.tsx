@@ -29,7 +29,7 @@ export default async function Competitive() {
                                     Pathway to Excellence
                                 </p>
                                 <p className="mt-6 text-lg/8 text-gray-600">
-                                    Shenderey Gymnastics is well known for it's high-performance training environment focused on developing gymnasts to excel at national and international levels. These programs emphasize technical skill mastery, strength, flexibility, and artistry while fostering mental resilience and discipline.
+                                    Shenderey Gymnastics is well known for it&apos;s high-performance training environment focused on developing gymnasts to excel at national and international levels. These programs emphasize technical skill mastery, strength, flexibility, and artistry while fostering mental resilience and discipline.
                                 </p>
                                 <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
                                     {CompetitiveFeatures.map((feature) => (

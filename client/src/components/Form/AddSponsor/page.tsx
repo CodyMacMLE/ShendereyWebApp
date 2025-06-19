@@ -32,7 +32,6 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
     const [website, setWebsite] = useState('');
     const [sponsorLevel, setSponsorLevel] = useState(sponsorLevels[0]);
     const [mediaFile, setMediaFile] = useState<File | null>(null);
-    const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
     const handleSubmit = async () => {
         const errors: { msg: string }[] = [];

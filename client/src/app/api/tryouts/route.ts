@@ -3,7 +3,7 @@ import { tryouts } from '@/lib/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const tryoutsData = await db.select().from(tryouts);
         if (!tryoutsData) {

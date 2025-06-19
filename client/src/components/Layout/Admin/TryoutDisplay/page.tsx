@@ -1,5 +1,3 @@
-import { PaperClipIcon } from '@heroicons/react/20/solid'
-
 type Tryout = {
   id: number;
   athleteName: string;

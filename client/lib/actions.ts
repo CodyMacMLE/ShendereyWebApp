@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { athletes, coaches, users, userImages, achievements, programs, groups, coachGroupLines, sponsors, employment, gallery } from "@/lib/schema";
-import { eq, asc, desc } from "drizzle-orm";
+import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, scores, sponsors, userImages, users } from "@/lib/schema";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
     const seniorStaffWithUsers = await db.select({
@@ -94,7 +94,7 @@ export const getCurrentAthletes = async () => {
     .from(athletes)
     .innerJoin(users, eq(athletes.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .where(eq(athletes.isActive, true));
+    .where(and(eq(athletes.isActive, true), eq(users.isAlumni, false)));
 
     athletesWithUsers.sort((a, b) => {
       const aIndex = sortOrder.indexOf(a.athlete.level || '');
@@ -181,4 +181,51 @@ export const getJobs = async () => {
 export const getGallery = async () => {
     const galleryItems = await db.select().from(gallery).orderBy(desc(gallery.date));
     return galleryItems;
+}
+
+export const getAlumni = async () => {
+    const alumniData = await db.select()
+    .from(alumni)
+    .innerJoin(users, eq(alumni.user, users.id))
+    .innerJoin(userImages, eq(users.id, userImages.user));
+    return alumniData;
+}
+
+export const getProspects = async () => {
+    const prospectsData = await db.select()
+    .from(prospects)
+    .innerJoin(users, eq(prospects.user, users.id))
+    .innerJoin(userImages, eq(users.id, userImages.user))
+    .innerJoin(athletes, eq(prospects.user, athletes.user));
+    return prospectsData;
+}
+
+export const getProspect = async (prospectId: number) => {
+    const prospect = await db.select()
+    .from(prospects)
+    .innerJoin(users, eq(prospects.user, users.id))
+    .innerJoin(userImages, eq(users.id, userImages.user))
+    .innerJoin(athletes, eq(prospects.user, athletes.user))
+    .where(eq(prospects.id, prospectId));
+    return prospect[0];
+}
+
+export const getAthleteScores = async (athleteId: number) => {
+    const athleteScores = await db.select().from(scores).where(eq(scores.athlete, athleteId)).orderBy(desc(scores.date));
+    return athleteScores;
+}
+
+export const getAthleteMedia = async (athleteId: number) => {
+    const athleteMedia = await db.select().from(media).where(eq(media.athlete, athleteId)).orderBy(desc(media.date));
+    return athleteMedia;
+}
+
+export const getAthleteAchievements = async (athleteId: number) => {
+    const athleteAchievements = await db.select().from(achievements).where(eq(achievements.athlete, athleteId)).orderBy(desc(achievements.date));
+    return athleteAchievements;
+}
+
+export const getGalleryMedia = async () => {
+    const galleryMedia = await db.select().from(gallery).orderBy(desc(gallery.date));
+    return galleryMedia;
 }

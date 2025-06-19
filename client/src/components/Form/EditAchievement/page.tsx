@@ -25,7 +25,6 @@ export default function EditAchievement({
     const parsed = new Date(achievement.date);
     return parsed.toISOString().split('T')[0];
   });
-  const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
   const handleSubmit = async () => {
     const updatedData = { title, description, date };

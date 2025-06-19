@@ -18,13 +18,13 @@ export default function Users() {
 
     const fetchUsers = async () => {
         try {
-            let res = await fetch('/api/users', {
+            const res = await fetch('/api/users', {
                 method: 'GET'
             })
         
             if (res.ok) {
                 const parsedData = await res.json();
-                const transformedData = parsedData.data.map((user: any) => ({
+                const transformedData = parsedData.data.map((user: User) => ({
                     ...user,
                     isActive: user.isActive ?? false,
                     isAthlete: user.isAthlete ?? false,
@@ -39,7 +39,7 @@ export default function Users() {
                 return transformedData;
             }
         } catch (error) {
-            return new Error('Error fetching users');
+            return new Error('Error fetching users', error as Error);
         }
     }
 

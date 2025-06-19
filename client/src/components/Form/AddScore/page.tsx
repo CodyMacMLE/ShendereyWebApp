@@ -35,7 +35,6 @@ export default function AddScore({ athleteId, setModalEnable, refreshScores }:
     const [overallScore, setOverallScore] = useState('0.000');
 
     // Form Errors
-    const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
     useEffect(() => {
         const vault = parseFloat(vaultScore) || 0;

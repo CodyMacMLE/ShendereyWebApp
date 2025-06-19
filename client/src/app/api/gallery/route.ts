@@ -49,7 +49,7 @@ export async function POST(
       const arrayBuffer = await mediaRaw.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const { path: tmpVideoPath, cleanup } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
+      const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
       await fs.writeFile(tmpVideoPath, buffer);
 
       const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
@@ -128,9 +128,7 @@ export async function POST(
   }
 }
 
-export async function GET(
-  req: NextRequest
-) {
+export async function GET() {
     try {
         const fetchedMedia = await db.select().from(gallery);
         return NextResponse.json({ success: true, body: fetchedMedia });

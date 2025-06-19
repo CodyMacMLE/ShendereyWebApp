@@ -16,9 +16,6 @@ export default async function EmploymentPage() {
     const fetchedStaff = await getCoaches();
     const numEmployees = fetchedStaff.length;
 
-    console.log("Staff: ", fetchedStaff);
-    console.log("Number of employees: ", numEmployees);
-
     const fetchedJobs = await getJobs();
     const formattedJobs = fetchedJobs.map(job => ({
       ...job,
@@ -102,7 +99,7 @@ export default async function EmploymentPage() {
                                         Chris. With over 60 years of combined experience, their leadership has shaped not only provincial and national champions but also a culture rooted in passion, precision, and athlete development.
                                     </p>
                                     <p className="mt-6">
-                                        Under their guidance, coaches are empowered to grow professionally while contributing to programs that have earned recognition across Ontario and beyond. Whether you're a seasoned coach or a rising 
+                                        Under their guidance, coaches are empowered to grow professionally while contributing to programs that have earned recognition across Ontario and beyond. Whether you&apos;re a seasoned coach or a rising 
                                         professional, Shenderey offers a supportive, high-performance environment where mentorship and innovation drive success at every level.
                                     </p> 
                                 </div>

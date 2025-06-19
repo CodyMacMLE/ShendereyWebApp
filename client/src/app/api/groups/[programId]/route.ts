@@ -19,11 +19,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prog
             const coachLinks = await db.select().from(coachGroupLines).where(eq(coachGroupLines.groupId, group.id));
             const coachIds = coachLinks.map(link => link.coachId).filter((id): id is number => id !== null);
 
-            let coachList = <any>[];
+            let coachList: { user: number | null }[] = [];
             if (coachIds.length > 0) {
                 coachList = await db.select().from(coaches).where(inArray(coaches.id, coachIds));
             }
-            let userList = <any>[];
+            let userList: { name: string }[] = [];
             if (coachList.length > 0) {
                 const userIds = coachList.map((coach: { user: number | null }) => coach.user).filter((id: number | null): id is number => id !== null);
                 userList = await db.select({ name: users.name }).from(users).where(inArray(users.id, userIds));

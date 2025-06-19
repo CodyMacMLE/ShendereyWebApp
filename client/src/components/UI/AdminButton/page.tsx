@@ -1,5 +1,5 @@
 "use client";
-import { ChevronUpIcon, UserIcon } from "@heroicons/react/24/solid";
+import { UserIcon } from "@heroicons/react/24/solid";
 import { redirect } from "next/navigation";
 
 export default function AdminButton() {

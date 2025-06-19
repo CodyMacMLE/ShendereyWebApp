@@ -22,7 +22,7 @@ async function uploadToS3(file: File, keyPrefix: string) {
   return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const allSponsors = await db.select().from(sponsors)
     

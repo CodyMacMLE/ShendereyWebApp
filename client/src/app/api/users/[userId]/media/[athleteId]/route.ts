@@ -52,7 +52,7 @@ export async function POST(
       const arrayBuffer = await mediaRaw.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const { path: tmpVideoPath, cleanup } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
+      const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
       await fs.writeFile(tmpVideoPath, buffer);
 
       const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
@@ -154,8 +154,7 @@ export async function GET(
 }
 
 export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<{ athleteId: string, mediaId: string }> }
+  req: NextRequest
 ) {
   const { searchParams } = req.nextUrl;
   const mediaId = searchParams.get('mediaId');
@@ -188,8 +187,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  context: { params: Promise<{ userId: string, athleteId: string }> }
+  req: NextRequest
 ) {
   const { searchParams } = req.nextUrl;
   const mediaId = searchParams.get('mediaId');

@@ -9,7 +9,6 @@ const s3 = new S3Client({ region: process.env.AWS_REGION });
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME
 
 export async function GET(
-  req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   const { userId } = await params;
@@ -28,8 +27,6 @@ export async function GET(
 
     const userData = userArray[0];
     const imagesData = imagesArray[0];
-
-    let coachData, athleteData, prospectData, alumniData;
 
     const subqueries = [];
 
@@ -87,10 +84,10 @@ export async function GET(
 
     const [coachArray, athleteArray, prospectArray, alumniArray] = await Promise.all(subqueries);
 
-    coachData = coachArray?.[0];
-    athleteData = athleteArray?.[0];
-    prospectData = prospectArray?.[0];
-    alumniData = alumniArray?.[0];
+    const coachData = coachArray?.[0];
+    const athleteData = athleteArray?.[0];
+    const prospectData = prospectArray?.[0];
+    const alumniData = alumniArray?.[0];
 
     let scoresData, videosData, achievementsData;
 

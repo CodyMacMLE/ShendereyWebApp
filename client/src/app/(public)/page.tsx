@@ -1,4 +1,4 @@
-import { SparklesIcon, StarIcon, EnvelopeOpenIcon, GlobeAmericasIcon, GlobeEuropeAfricaIcon, GlobeAltIcon, ShieldCheckIcon, BoltIcon } from '@heroicons/react/20/solid'
+import { SparklesIcon, StarIcon, EnvelopeOpenIcon, GlobeAmericasIcon, GlobeAltIcon } from '@heroicons/react/20/solid'
 import { BuildingOffice2Icon, EnvelopeIcon, PhoneIcon, ClockIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 

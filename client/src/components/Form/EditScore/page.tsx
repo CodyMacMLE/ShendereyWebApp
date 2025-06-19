@@ -35,9 +35,6 @@ export default function EditScore({ athleteId, score, setModalEnable, refreshSco
     const [floorScore, setFloorScore] = useState(score.floor.toString());
     const [overallScore, setOverallScore] = useState(score.overall.toString());
 
-    // Form Errors
-    const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
-
     useEffect(() => {
         const vault = parseFloat(vaultScore) || 0;
         const bars = parseFloat(barsScore) || 0;
@@ -246,7 +243,7 @@ export default function EditScore({ athleteId, score, setModalEnable, refreshSco
                 <button 
                     type="button" 
                     className="text-sm/6 font-semibold text-[var(--foreground)] hover:text-red-600 cursor-pointer"
-                    onClick={() => setModalEnable ? setModalEnable(false) : {}}
+                    onClick={() => setModalEnable?.(false)}
                 >
                     Cancel
                 </button>

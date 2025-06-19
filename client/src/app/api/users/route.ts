@@ -22,13 +22,13 @@ async function uploadToS3(file: File, keyPrefix: string) {
   return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const allUsers = await db.select().from(users)
     const allImages = await db.select().from(userImages);
 
     const userImagesMap = new Map(
-      allImages.map(({ id, user, ...rest }) => [user, rest])
+      allImages.map(({ user, ...rest }) => [user, rest])
     );
 
     const userData = allUsers.map(user => ({

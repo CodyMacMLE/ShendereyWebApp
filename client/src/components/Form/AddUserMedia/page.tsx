@@ -1,10 +1,10 @@
 'use client';
 
-import React, { Dispatch, SetStateAction, useState } from 'react';
 import imageCompression from 'browser-image-compression';
+import { Dispatch, SetStateAction, useState } from 'react';
 
-import ErrorModal from '@/components/UI/ErrorModal/page';
 import Dropdown from '@/components/UI/Dropdown/page';
+import ErrorModal from '@/components/UI/ErrorModal/page';
 
 type Media = {
     id: string,
@@ -17,11 +17,11 @@ type Media = {
 }
 
 const categories = [
-    "Vault",
-    "Bars",
-    "Beam",
-    "Floor",
-    "Other",
+    { id: 1, name: "Vault" },
+    { id: 2, name: "Bars" },
+    { id: 3, name: "Beam" },
+    { id: 4, name: "Floor" },
+    { id: 5, name: "Other" },
 ]
 
 export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setModalEnable }: { 
@@ -32,7 +32,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
 }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('Vault');
+    const [category, setCategory] = useState({ id: 1, name: "Vault" });
     const [date, setDate] = useState('');
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
@@ -54,7 +54,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
         const formData = new FormData();
         formData.append('name', name);
         formData.append('description', description);
-        formData.append('category', category);
+        formData.append('category', category.name);
         formData.append('date', date);
         if (mediaFile) {
             formData.append('media', mediaFile);
@@ -130,7 +130,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                         {/* Category */}
                         <div className="sm:col-span-4">
                             <label htmlFor="media-category" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                            <Dropdown items={categories} setItem={setCategory}/>
+                            <Dropdown items={categories} setSelected={setCategory} selected={category}/>
                         </div>
 
                         {/* Description */}
@@ -200,7 +200,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
             <div className="mt-6 flex items-center justify-end gap-x-6">
                 <button
                     type="button"
-                    onClick={() => {setModalEnable? setModalEnable(false) : "" }}
+                    onClick={() => setModalEnable?.(false)}
                     className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
                 >
                     Cancel
