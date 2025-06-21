@@ -4,7 +4,11 @@ import Image from 'next/image';
 import { PiInstagramLogoLight, PiYoutubeLogoLight } from "react-icons/pi";
 import ProspectSubNav from './ProspectSubNav';
 
-export default async function ProspectPage({ params }: { params: { prospectId: string } }) {
+interface PageProps {
+    params: Promise<{ prospectId: string }>;
+}
+
+export default async function ProspectPage({ params }: PageProps) {
     const { prospectId } = await params;
     const prospect = await getProspect(parseInt(prospectId));
     const athleteScores = await getAthleteScores(prospect.athletes.id);
