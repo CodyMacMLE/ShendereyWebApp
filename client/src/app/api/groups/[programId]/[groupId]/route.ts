@@ -1,9 +1,9 @@
 import { db } from '@/lib/db';
-import { groups, coachGroupLines} from '@/lib/schema';
+import { coachGroupLines, groups } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function DELETE(req: NextRequest, { params }: { params: { programId: string, groupId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ programId: string, groupId: string }> }) {
     const { groupId } = await params;
     
     try {
@@ -18,7 +18,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { programId
     }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { programId: string; groupId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ programId: string; groupId: string }> }) {
     const { groupId } = await params;
     try {
         const formData = await req.formData();
