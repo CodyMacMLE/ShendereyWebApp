@@ -3,13 +3,13 @@ import { getGroups, getProgram } from "@/lib/actions";
 import Link from "next/link";
 
 
-export default async function ProgramPage({ params }: { params: { programId: number } }) {
+export default async function ProgramPage({ params }: { params: Promise<{ programId: string }> }) {
 
     const { programId } = await params;
     // Data
-    const fetchedProgram = await getProgram(programId);
+    const fetchedProgram = await getProgram(parseInt(programId));
     const program = fetchedProgram[0];
-    const groups = await getGroups(programId);
+    const groups = await getGroups(parseInt(programId));
 
     return (
         <div className="bg-white">
