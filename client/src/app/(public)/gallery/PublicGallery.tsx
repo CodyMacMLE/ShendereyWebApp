@@ -3,18 +3,26 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
-export default function PublicGallery({ galleryMedia }: { galleryMedia: any[] }) {
-    const [media, setMedia] = useState(galleryMedia ?? []);
+interface GalleryMedia {
+    id: string;
+    name: string;
+    mediaUrl: string;
+    mediaType: string;
+    videoThumbnail?: string;
+}
+
+export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryMedia[] }) {
+    const [media, setMedia] = useState<GalleryMedia[]>(galleryMedia ?? []);
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedMedia, setSelectedMedia] = useState<any>(null);
+    const [selectedMedia, setSelectedMedia] = useState<GalleryMedia | null>(null);
 
 
     useEffect(() => {
         setMedia(galleryMedia ?? []);
     }, [galleryMedia]);
 
-    const openModal = (item: any) => {
+    const openModal = (item: GalleryMedia) => {
         setSelectedMedia(item);
         setModalOpen(true);
     };
@@ -29,7 +37,7 @@ export default function PublicGallery({ galleryMedia }: { galleryMedia: any[] })
                 {media.length > 0 ? (
                     <>
                     <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                        {media.map((item: any) => (
+                        {media.map((item: GalleryMedia) => (
                             <div
                                 key={item.id}
                                 onClick={() => openModal(item)}

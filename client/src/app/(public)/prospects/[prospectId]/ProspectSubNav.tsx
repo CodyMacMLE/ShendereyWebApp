@@ -3,6 +3,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 import { Fragment, useEffect, useState } from "react";
+import { Score, Media, Achievement } from "@/lib/types";
 
 enum NavPages {
     Scores = 'Scores',
@@ -10,18 +11,18 @@ enum NavPages {
     Achievements = 'Achievements',
 }
 
-export default function ProspectSubNav({ prospect, athleteScores, athleteMedia, athleteAchievements }: { prospect: any, athleteScores: any[], athleteMedia: any[], athleteAchievements: any[] }) {
+export default function ProspectSubNav({ athleteScores, athleteMedia, athleteAchievements }: { athleteScores: Score[], athleteMedia: Media[], athleteAchievements: Achievement[] }) {
 
     const [isGallery, setIsGallery] = useState(true);
     const [isScores, setIsScores] = useState(false);
     const [isAchievements, setIsAchievements] = useState(false);
 
-    const [media, setMedia] = useState(athleteMedia ?? []);
-    const [scores, setScores] = useState(athleteScores ?? []);
-    const [achievements, setAchievements] = useState(athleteAchievements ?? []);
+    const [media, setMedia] = useState<Media[]>(athleteMedia ?? []);
+    const [scores, setScores] = useState<Score[]>(athleteScores ?? []);
+    const [achievements, setAchievements] = useState<Achievement[]>(athleteAchievements ?? []);
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedMedia, setSelectedMedia] = useState<any>(null);
+    const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
     
 
     function setNav(newPage: NavPages) {
@@ -30,7 +31,7 @@ export default function ProspectSubNav({ prospect, athleteScores, athleteMedia, 
         setIsAchievements(newPage === NavPages.Achievements);
     }
     
-    const openModal = (item: any) => {
+    const openModal = (item: Media) => {
         setSelectedMedia(item);
         setModalOpen(true);
     };
@@ -117,7 +118,7 @@ export default function ProspectSubNav({ prospect, athleteScores, athleteMedia, 
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border)] bg-[#eeeeee]">
-                        {scores.map((score: any) => { 
+                        {scores.map((score: Score) => { 
     
                             return (
                                 <tr key={score.id} className="transition-colors duration-150">
@@ -290,7 +291,7 @@ export default function ProspectSubNav({ prospect, athleteScores, athleteMedia, 
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[var(--border)] bg-[#eeeeee]">
-                                        {achievements.map((achievement: any) => { 
+                                        {achievements.map((achievement: Achievement) => { 
     
                                             return (
                                                 <tr key={achievement.id} className="transition-colors duration-150">

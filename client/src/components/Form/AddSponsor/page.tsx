@@ -32,6 +32,7 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
     const [website, setWebsite] = useState('');
     const [sponsorLevel, setSponsorLevel] = useState(sponsorLevels[0]);
     const [mediaFile, setMediaFile] = useState<File | null>(null);
+    const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
     const handleSubmit = async () => {
         const errors: { msg: string }[] = [];
@@ -43,8 +44,8 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
         if (!mediaFile) errors.push({ msg: 'Media file is required.' });
 
         if (errors.length > 0) {
-        setFormErrors(errors);
-        return;
+            setFormErrors(errors);
+            return;
         }
 
         try {
@@ -198,7 +199,7 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
             <div className="mt-6 flex items-center justify-end gap-x-6">
                 <button
                     type="button"
-                    onClick={() => {setModalEnable? setModalEnable(false) : "" }}
+                    onClick={() => {setModalEnable?.(false)}}
                     className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
                 >
                     Cancel
