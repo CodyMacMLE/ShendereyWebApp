@@ -3,9 +3,9 @@ import { getGroups, getProgram } from "@/lib/actions";
 import Link from "next/link";
 
 
-export default async function ProgramPage({ params }: { params: { programId: string } }) {
+export default async function ProgramPage({ params }: { params: Promise<{ programId: string }> }) {
 
-    const { programId } = params;
+    const { programId } = await params;
     // Data
     const fetchedProgram = await getProgram(parseInt(programId));
     const program = fetchedProgram[0];
