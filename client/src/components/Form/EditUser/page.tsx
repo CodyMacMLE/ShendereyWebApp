@@ -1,13 +1,14 @@
 'use client';
  
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import ErrorModal from '@/components/UI/ErrorModal/page';
-import { UserCircleIcon } from '@heroicons/react/24/solid'
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import imageCompression from 'browser-image-compression';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 export default function EditUser({ userId, setModalEnable }: { userId: number, setModalEnable?: Dispatch<SetStateAction<boolean>> }) {
 
     const [loading, setLoading] = useState(true);
+    const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
     // Roles
     const [isStaff, setIsStaff] = useState(true);
