@@ -1,11 +1,29 @@
 'use client'
 
 import UserTable from "@/components/UI/Tables/UserTable/page";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Users() {
-    const [users, setUsers] = useState([])
+    const [users, setUsers] = useState<User[]>([])
     const [isLoading, setIsLoading] = useState(true)
+
+    type User = {
+        User: User,
+        isActive: boolean | null,
+        isAthlete: boolean | null,
+        isCoach: boolean | null,
+        isProspect: boolean | null,
+        isScouted: boolean | null,
+        isAlumni: boolean | null,
+        createdAt: Date | null,
+        updatedAt: Date | null,
+        images: {
+            staffUrl: string | null,
+            athleteUrl: string | null,
+            prospectUrl: string | null,
+            alumniUrl: string | null
+        }
+    }
 
     useEffect(() => {
         const loadUsers = async () => {
