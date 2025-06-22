@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db'
-import { users, userImages, coaches, athletes, prospects, alumni, scores, media, achievements } from '@/lib/schema'
-import { eq } from 'drizzle-orm/sql'
-import { S3Client, DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { db } from '@/lib/db';
+import { achievements, alumni, athletes, coaches, media, prospects, scores, userImages, users } from '@/lib/schema';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm/sql';
+import { NextRequest, NextResponse } from 'next/server';
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME
 
 export async function GET(
+  req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   const { userId } = await params;
