@@ -1,5 +1,6 @@
 import NotFound from '@/app/not-found';
 import { getAthleteAchievements, getAthleteMedia, getAthleteScores, getProspect } from '@/lib/actions';
+import { Achievement, Media, Score } from '@/lib/types';
 import Image from 'next/image';
 import { PiInstagramLogoLight, PiYoutubeLogoLight } from "react-icons/pi";
 import ProspectSubNav from './ProspectSubNav';
@@ -11,9 +12,14 @@ interface PageProps {
 export default async function ProspectPage({ params }: PageProps) {
     const { prospectId } = await params;
     const prospect = await getProspect(parseInt(prospectId));
-    const athleteScores = await getAthleteScores(prospect.athletes.id);
-    const athleteMedia = await getAthleteMedia(prospect.athletes.id);
-    const athleteAchievements = await getAthleteAchievements(prospect.athletes.id);
+    const rawAthleteScores = await getAthleteScores(prospect.athletes.id);
+    const rawAthleteMedia = await getAthleteMedia(prospect.athletes.id);
+    const rawAthleteAchievements = await getAthleteAchievements(prospect.athletes.id);
+
+    // Filter out any records with null athlete field to match TypeScript types
+    const athleteScores: Score[] = rawAthleteScores.filter(score => score.athlete !== null) as Score[];
+    const athleteMedia: Media[] = rawAthleteMedia.filter(media => media.athlete !== null) as Media[];
+    const athleteAchievements: Achievement[] = rawAthleteAchievements.filter(achievement => achievement.athlete !== null) as Achievement[];
 
     if (!prospect) {
         return <NotFound />;
@@ -66,7 +72,7 @@ export default async function ProspectPage({ params }: PageProps) {
                 </div>
                 {/* Prospect Sub Nav */}
                 <div className="mt-10">
-                    <ProspectSubNav prospect={prospect} athleteScores={athleteScores} athleteMedia={athleteMedia} athleteAchievements={athleteAchievements} />
+                    <ProspectSubNav athleteScores={athleteScores} athleteMedia={athleteMedia} athleteAchievements={athleteAchievements} />
                 </div>
             </div>
         </div>
