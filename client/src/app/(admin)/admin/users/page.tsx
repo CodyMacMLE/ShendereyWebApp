@@ -1,29 +1,12 @@
 'use client'
 
 import UserTable from "@/components/UI/Tables/UserTable/page";
+import { User } from '@/lib/types';
 import { useEffect, useState } from 'react';
 
 export default function Users() {
     const [users, setUsers] = useState<User[]>([])
     const [isLoading, setIsLoading] = useState(true)
-
-    type User = {
-        User: User,
-        isActive: boolean | null,
-        isAthlete: boolean | null,
-        isCoach: boolean | null,
-        isProspect: boolean | null,
-        isScouted: boolean | null,
-        isAlumni: boolean | null,
-        createdAt: Date | null,
-        updatedAt: Date | null,
-        images: {
-            staffUrl: string | null,
-            athleteUrl: string | null,
-            prospectUrl: string | null,
-            alumniUrl: string | null
-        }
-    }
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -42,22 +25,24 @@ export default function Users() {
         
             if (res.ok) {
                 const parsedData = await res.json();
-                const transformedData = parsedData.data.map((user: User) => ({
-                    ...user,
+                const transformedData = parsedData.data.map((user: any) => ({
+                    id: user.id,
+                    name: user.name,
                     isActive: user.isActive ?? false,
                     isAthlete: user.isAthlete ?? false,
                     isCoach: user.isCoach ?? false,
                     isProspect: user.isProspect ?? false,
                     isScouted: user.isScouted ?? false,
                     isAlumni: user.isAlumni ?? false,
-                    createdAt: user.createdAt ?? new Date(),
-                    updatedAt: user.updatedAt ?? new Date(),
+                    createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+                    updatedAt: user.updatedAt ? new Date(user.updatedAt) : new Date(),
                     images: user.images ?? undefined
                 }));
                 return transformedData;
             }
         } catch (error) {
-            return new Error('Error fetching users', error as Error);
+            console.error('Error fetching users:', error);
+            return [];
         }
     }
 

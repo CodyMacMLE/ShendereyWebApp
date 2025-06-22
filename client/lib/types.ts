@@ -1,6 +1,6 @@
 // USERS
 export type User = {
-    id: string,
+    id: number,
     name: string,
     isActive: boolean,
     isAthlete: boolean,
@@ -14,8 +14,8 @@ export type User = {
 
 // USER IMAGES
 export type UserImages = {
-    id: string,
-    user: string,
+    id: number,
+    user: number,
     staffUrl: string,
     athleteUrl: string,
     prospectUrl: string,
@@ -24,15 +24,15 @@ export type UserImages = {
 
 // ATHLETE
 export type Athlete = {
-    id: string,
-    user: string,
+    id: number,
+    user: number,
     level: string,
 };
 
 // ALUMNI
 export type Alumni = {
-    id: string,
-    user: string,
+    id: number,
+    user: number,
     school: string,
     year: Date,
     description: string,
@@ -40,8 +40,8 @@ export type Alumni = {
 
 // PROSPECT
 export type Prospect = {
-    id: string,
-    user: string,
+    id: number,
+    user: number,
     graduationYear: Date,
     description: string,
     gpa: number,
@@ -53,8 +53,8 @@ export type Prospect = {
 
 // COACH
 export type Coach = {
-    id: string,
-    user: string,
+    id: number,
+    user: number,
     title: string,
     description: string,
     isSeniorStaff: boolean,
@@ -62,8 +62,8 @@ export type Coach = {
 
 // SCORES
 export type Score = {
-    id: string,
-    athlete: string,
+    id: number,
+    athlete: number,
     competition: string,
     date: Date,
     category: string,
@@ -76,8 +76,8 @@ export type Score = {
 
 // MEDIA
 export type Media = {
-    id: string,
-    athlete: string,
+    id: number,
+    athlete: number,
     name: string,
     description: string,
     category: string,
@@ -89,8 +89,8 @@ export type Media = {
 
 // ACHIEVEMENT
 export type Achievement = {
-    id: string,
-    athlete: string,
+    id: number,
+    athlete: number,
     title: string,
     description: string,
     date: Date,

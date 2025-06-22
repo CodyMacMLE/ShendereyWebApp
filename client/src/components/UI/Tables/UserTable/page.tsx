@@ -5,34 +5,23 @@ import { useState } from 'react';
 
 import Link from "next/link";
 
-import UserTableSkeleton from './UserTableSkeleton';
-import { Role, RoleTag } from "@/components/UI/RoleTag/page";
-import Image from "next/image";
-import StatusTag from "@/components/UI/StatusTag/page";
-import Modal from "@/components/UI/Modal/page";
 import EditUser from "@/components/Form/EditUser/page";
-
-type User = {
-  id: number;
-  name: string;
-  isActive: boolean;
-  isCoach: boolean;
-  isAthlete: boolean;
-  isProspect: boolean;
-  isScouted: boolean;
-  isAlumni: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  images?: {
-    staffUrl: string | null;
-    athleteUrl: string | null;
-    prospectUrl: string | null;
-    alumniUrl: string | null;
-  };
-};
+import Modal from "@/components/UI/Modal/page";
+import { Role, RoleTag } from "@/components/UI/RoleTag/page";
+import StatusTag from "@/components/UI/StatusTag/page";
+import { User } from '@/lib/types';
+import Image from "next/image";
+import UserTableSkeleton from './UserTableSkeleton';
 
 interface Props {
-    users: User[];
+    users: (User & {
+        images?: {
+            staffUrl: string | null;
+            athleteUrl: string | null;
+            prospectUrl: string | null;
+            alumniUrl: string | null;
+        };
+    })[];
     isLoading?: boolean
 }
 
@@ -108,7 +97,7 @@ export default function UserTable({ users, isLoading }: Props) {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
-                      {users.map((person: User) => (
+                      {users.map((person) => (
                           <tr
                             key={person.id}
                             className="transition-colors duration-150 cursor-pointer"
