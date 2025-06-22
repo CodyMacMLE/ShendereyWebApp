@@ -1,10 +1,10 @@
 'use client';
 
-import React, { Dispatch, SetStateAction, useState } from 'react';
 import imageCompression from 'browser-image-compression';
+import { Dispatch, SetStateAction, useState } from 'react';
 
-import ErrorModal from '@/components/UI/ErrorModal/page';
 import Dropdown from '@/components/UI/Dropdown/page';
+import ErrorModal from '@/components/UI/ErrorModal/page';
 
 type Sponsor = {
     id: number;
@@ -16,11 +16,11 @@ type Sponsor = {
   };
 
 const sponsorLevels = [
-    "Diamond",
-    "Platinum",
-    "Gold",
-    "Silver",
-    "Affiliate",
+    { id: 1, name: "Diamond" },
+    { id: 2, name: "Platinum" },
+    { id: 3, name: "Gold" },
+    { id: 4, name: "Silver" },
+    { id: 5, name: "Affiliate" },
 ]
 
 export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: { 
@@ -31,7 +31,10 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
     const [organization, setOrganization] = useState(sponsor.organization);
     const [description, setDescription] = useState(sponsor.description);
     const [website, setWebsite] = useState(sponsor.website);
-    const [sponsorLevel, setSponsorLevel] = useState(sponsor.sponsorLevel);
+    const [sponsorLevel, setSponsorLevel] = useState(() => {
+        const level = sponsorLevels.find(level => level.name === sponsor.sponsorLevel);
+        return level || sponsorLevels[0];
+    });
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
@@ -52,7 +55,7 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
         const formData = new FormData();
         formData.append('organization', organization);
         formData.append('description', description);
-        formData.append('sponsorLevel', sponsorLevel);
+        formData.append('sponsorLevel', sponsorLevel.name);
         formData.append('website', website);
         if (mediaFile) {
             formData.append('media', mediaFile);
@@ -110,7 +113,7 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
                         {/* Sponsor Level */}
                         <div className="sm:col-span-4">
                             <label htmlFor="sponsor-sponsorLevel" className="block text-sm/6 font-medium text-[var(--foreground)]">Sponsor Level</label>
-                            <Dropdown items={sponsorLevels} setItem={setSponsorLevel}/>
+                            <Dropdown items={sponsorLevels} setSelected={setSponsorLevel} selected={sponsorLevel}/>
                         </div>
 
                         {/* Website */}
