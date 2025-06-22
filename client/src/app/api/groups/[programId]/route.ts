@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { groups, coachGroupLines, coaches, users } from '@/lib/schema';
+import { coachGroupLines, coaches, groups, users } from '@/lib/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prog
     }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { programId: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ programId: string }> }) {
     const { programId } = await params;
     try {
         const formData = await req.formData();
