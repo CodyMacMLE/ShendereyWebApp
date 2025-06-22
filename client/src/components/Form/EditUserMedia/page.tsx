@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import ErrorModal from '@/components/UI/ErrorModal/page';
 import Dropdown from '@/components/UI/Dropdown/page';
+import ErrorModal from '@/components/UI/ErrorModal/page';
 
 type Athlete = {
     userId: number,
@@ -22,11 +22,11 @@ type Media = {
 }
 
 const categories = [
-    "Vault",
-    "Bars",
-    "Beam",
-    "Floor",
-    "Other",
+    { id: 1, name: "Vault" },
+    { id: 2, name: "Bars" },
+    { id: 3, name: "Beam" },
+    { id: 4, name: "Floor" },
+    { id: 5, name: "Other" },
 ]
 
 export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
@@ -37,7 +37,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
 }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState<{ id: number, name: string }>({ id: 1, name: "Vault" });
     const [date, setDate] = useState('');
 
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
@@ -47,7 +47,8 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
         if (media) {
             setName(media.name || '');
             setDescription(media.description || '');
-            setCategory(media.category || 'Vault');
+            const categoryObj = categories.find(cat => cat.name === media.category) || categories[0];
+            setCategory(categoryObj);
             setDate(media.date ? new Date(media.date).toISOString().split('T')[0] : '');
         }
     }, [media]);
@@ -68,7 +69,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
             const formData = new FormData();
             formData.append('name', name);
             formData.append('description', description);
-            formData.append('category', category);
+            formData.append('category', category.name);
             formData.append('date', date);
 
             const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}?mediaId=${media.id}`, {
@@ -81,7 +82,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
                     ...media,
                     name,
                     description,
-                    category,
+                    category: category.name,
                     date,
                 };
                 onSuccess(updatedMedia);
@@ -146,7 +147,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
                         {/* Category */}
                         <div className="sm:col-span-4">
                             <label htmlFor="media-category" className="block text-sm/6 font-medium text-[var(--foreground)]">Category</label>
-                            <Dropdown items={categories} setItem={setCategory} currentItem={category} />
+                            <Dropdown items={categories} setSelected={setCategory} selected={category} />
                         </div>
 
                         {/* Description */}
