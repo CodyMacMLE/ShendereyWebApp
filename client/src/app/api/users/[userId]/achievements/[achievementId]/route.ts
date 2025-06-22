@@ -1,11 +1,11 @@
-import { and, eq } from 'drizzle-orm/sql';
 import { db } from '@/lib/db';
 import { achievements } from '@/lib/schema';
+import { and, eq } from 'drizzle-orm/sql';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { userId: string, achievementId: string } }
+    { params }: { params: Promise<{ userId: string, achievementId: string }> }
   ) {
     const { userId, achievementId } = await params;
 

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sponsors } from "@/lib/schema";
-import { eq } from "drizzle-orm";
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
+import { eq } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
@@ -31,7 +31,7 @@ async function deleteFromS3(url: string) {
     }));
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { sponsorId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ sponsorId: string }> }) {
     const { sponsorId } = await params;
     const id = parseInt(sponsorId);
 
@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { sponsorId
     }
 } 
 
-export async function PUT(req: NextRequest, { params }: { params: { sponsorId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ sponsorId: string }> }) {
     const { sponsorId } = await params;
     const id = parseInt(sponsorId);
     const formData = await req.formData();

@@ -1,11 +1,11 @@
-import { eq } from 'drizzle-orm/sql';
 import { db } from '@/lib/db';
 import { achievements } from '@/lib/schema';
+import { eq } from 'drizzle-orm/sql';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
   ) {
     const { userId } = await params;
     const id = parseInt(userId);
@@ -25,7 +25,7 @@ export async function GET(
 
   export async function POST(
     req: NextRequest,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
   ) {
     const { userId } = await params;
     const id = parseInt(userId);

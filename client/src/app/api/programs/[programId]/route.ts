@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { coachGroupLines, groups, programs } from '@/lib/schema';
-import { PutObjectCommand, DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import { eq, inArray } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -108,7 +108,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ prog
 
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { programId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ programId: string }> }) {
     const { programId } = await params;
     const id = parseInt(programId);
 

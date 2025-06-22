@@ -3,7 +3,7 @@ import { tryouts } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function PUT(req: NextRequest, { params }: { params: { tryoutId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ tryoutId: string }> }) {
     try {
         const { tryoutId } = await params;
         const { readStatus } = await req.json();
@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest, { params }: { params: { tryoutId: st
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { tryoutId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ tryoutId: string }> }) {
     try {
         const { tryoutId } = await params;
         const tryoutsData = await db.delete(tryouts).where(eq(tryouts.id, parseInt(tryoutId)));
