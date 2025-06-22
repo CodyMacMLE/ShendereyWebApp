@@ -227,5 +227,8 @@ export const getAthleteAchievements = async (athleteId: number) => {
 
 export const getGalleryMedia = async () => {
     const galleryMedia = await db.select().from(gallery).orderBy(desc(gallery.date));
-    return galleryMedia;
+    return galleryMedia.map(item => ({
+        ...item,
+        id: item.id.toString()
+    }));
 }

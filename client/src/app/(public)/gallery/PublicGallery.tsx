@@ -5,10 +5,10 @@ import { Fragment, useEffect, useState } from "react";
 
 interface GalleryMedia {
     id: string;
-    name: string;
-    mediaUrl: string;
-    mediaType: string;
-    videoThumbnail?: string;
+    name: string | null;
+    mediaUrl: string | null;
+    mediaType: string | null;
+    videoThumbnail?: string | null;
 }
 
 export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryMedia[] }) {
@@ -45,18 +45,18 @@ export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryM
                             >
                                 {/* Media Section */}
                                 <div className="relative flex-grow">
-                                    {item.mediaType.startsWith("video/") ? (
+                                    {item.mediaType?.startsWith("video/") ? (
                                         <img
                                             key={`thumb-${item.id}`}
-                                            src={item.videoThumbnail}
-                                            alt={item.name}
+                                            src={item.videoThumbnail || ''}
+                                            alt={item.name || 'Video thumbnail'}
                                             className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
                                         />
                                     ) : (
                                         <img
                                             key={`img-${item.id}`}
-                                            src={item.mediaUrl}
-                                            alt={item.name}
+                                            src={item.mediaUrl || ''}
+                                            alt={item.name || 'Gallery image'}
                                             className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
                                         />
                                     )}
@@ -95,15 +95,15 @@ export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryM
                                             {selectedMedia && (
                                                 <>
                                                     <div className="w-full">
-                                                        {selectedMedia.mediaType.startsWith("video/") ? (
+                                                        {selectedMedia.mediaType?.startsWith("video/") ? (
                                                             <video controls className="w-full h-auto rounded">
-                                                                <source src={selectedMedia.mediaUrl} type={selectedMedia.mediaType} />
+                                                                <source src={selectedMedia.mediaUrl || ''} type={selectedMedia.mediaType || ''} />
                                                                 Your browser does not support the video tag.
                                                             </video>
                                                         ) : (
                                                             <img
-                                                                src={selectedMedia.mediaUrl}
-                                                                alt={selectedMedia.name}
+                                                                src={selectedMedia.mediaUrl || ''}
+                                                                alt={selectedMedia.name || 'Gallery image'}
                                                                 className="w-full h-auto rounded"
                                                             />
                                                         )}
