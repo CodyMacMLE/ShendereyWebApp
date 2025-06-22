@@ -1,8 +1,23 @@
 'use client'
 
 import UserTable from "@/components/UI/Tables/UserTable/page";
-import { User } from '@/lib/types';
+import { User, UserImages } from '@/lib/types';
 import { useEffect, useState } from 'react';
+
+// Type for the API response user data
+type ApiUser = {
+    id: number;
+    name: string;
+    isActive: boolean;
+    isAthlete: boolean;
+    isCoach: boolean;
+    isProspect: boolean;
+    isScouted: boolean;
+    isAlumni: boolean;
+    createdAt: string;
+    updatedAt: string;
+    images: UserImages | null;
+};
 
 export default function Users() {
     const [users, setUsers] = useState<User[]>([])
@@ -25,7 +40,7 @@ export default function Users() {
         
             if (res.ok) {
                 const parsedData = await res.json();
-                const transformedData = parsedData.data.map((user: any) => ({
+                const transformedData = parsedData.data.map((user: ApiUser) => ({
                     id: user.id,
                     name: user.name,
                     isActive: user.isActive ?? false,
