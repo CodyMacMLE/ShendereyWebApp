@@ -1,6 +1,7 @@
 import { EditUserMedia } from "@/components/Form/EditUserMedia/page";
 import { Dialog, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import Image from 'next/image';
 import { Fragment, useEffect, useState } from "react";
 
 type Athlete = {
@@ -82,16 +83,20 @@ export default function AthleteGallery({ athlete, media }: { athlete: Athlete, m
                         {/* Media Section */}
                         <div className="relative flex-grow">
                             {item.mediaType.startsWith("video/") ? (
-                                <img
+                                <Image
                                     src={item.videoThumbnail}
                                     alt={item.name}
                                     className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
+                                    width={1000}
+                                    height={1000}
                                 />
                             ) : (
-                                <img
+                                <Image
                                     src={item.mediaUrl}
                                     alt={item.name}
                                     className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
+                                    width={1000}
+                                    height={1000}
                                 />
                             )}
                         </div>
@@ -144,10 +149,12 @@ export default function AthleteGallery({ athlete, media }: { athlete: Athlete, m
                                                         Your browser does not support the video tag.
                                                     </video>
                                                 ) : (
-                                                    <img
+                                                    <Image
                                                         src={selectedMedia.mediaUrl}
                                                         alt={selectedMedia.name}
                                                         className="w-full h-auto rounded"
+                                                        width={1000}
+                                                        height={1000}
                                                     />
                                                 )}
                                             </div>

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, scores, sponsors, userImages, users } from "@/lib/schema";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
     const seniorStaffWithUsers = await db.select({
@@ -94,7 +94,7 @@ export const getCurrentAthletes = async () => {
     .from(athletes)
     .innerJoin(users, eq(athletes.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .where(and(eq(athletes.isActive, true), eq(users.isAlumni, false)));
+    .where(eq(users.isAlumni, false));
 
     athletesWithUsers.sort((a, b) => {
       const aIndex = sortOrder.indexOf(a.athlete.level || '');

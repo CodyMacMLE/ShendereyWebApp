@@ -5,7 +5,7 @@ import EditScore from "@/components/Form/EditScore/page";
 import Modal from "@/components/UI/Modal/page";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type Score =  {
     id: number,
@@ -41,9 +41,25 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
   const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
   const [athleteScores, setAthleteScores] = useState<Score[] | []>([]);
 
+  // Read Score
+  const fetchScores = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/users/${athlete.id}/score`, {
+        method: 'GET',
+      })
+
+      if (res.ok) {
+        const data = await res.json();
+        setAthleteScores(data.body || []);
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }, [athlete.id]);
+
   useEffect(() => {
     fetchScores();
-  }, [])
+  }, [fetchScores])
 
   useEffect(() => {}, [athleteScores])
 
@@ -65,22 +81,6 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
   // Create Score
   const addScore = ({ score }: { score: Score }) => {
     setAthleteScores(prev => [...prev, score]);
-  }
-
-  // Read Score
-  const fetchScores = async () => {
-    try {
-      const res = await fetch(`/api/users/${athlete.id}/score`, {
-        method: 'GET',
-      })
-
-      if (res.ok) {
-        const data = await res.json();
-        setAthleteScores(data.body || []);
-      }
-    } catch (error) {
-      console.error(error)
-    }
   }
 
   // Add Update Here
