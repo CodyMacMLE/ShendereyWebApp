@@ -10,6 +10,7 @@ import Modal from "@/components/UI/Modal/page";
 import imageCompression from 'browser-image-compression';
 
 import ErrorModal from "@/components/UI/ErrorModal/page";
+import Image from "next/image";
 
 type Media = {
     id: number,
@@ -299,13 +300,15 @@ export default function OldGallery() {
                                 {/* Media Section */}
                                 <div className="relative flex-grow">
                                     {item.mediaType.startsWith("video/") ? (
-                                        <img
+                                        <Image
                                             src={item.videoThumbnail}
                                             alt={item.name}
                                             className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
+                                            width={1000}
+                                            height={1000}
                                         />
                                     ) : (
-                                        <img
+                                        <Image
                                             src={item.mediaUrl}
                                             alt={item.name}
                                             className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
@@ -361,10 +364,12 @@ export default function OldGallery() {
                                                                 Your browser does not support the video tag.
                                                             </video>
                                                         ) : (
-                                                            <img
+                                                            <Image
                                                                 src={selectedMedia.mediaUrl}
                                                                 alt={selectedMedia.name}
                                                                 className="w-full h-auto rounded"
+                                                                width={1000}
+                                                                height={1000}
                                                             />
                                                         )}
                                                     </div>

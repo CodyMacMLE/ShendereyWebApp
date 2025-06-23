@@ -1,16 +1,15 @@
 "use client"
 
-import { redirect, useParams } from "next/navigation"
-import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
 import imageCompression from "browser-image-compression";
+import Image from "next/image";
+import { redirect, useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
-import Modal from "@/components/UI/Modal/page";
-import ErrorModal from "@/components/UI/ErrorModal/page";
 import Dropdown from "@/components/UI/Dropdown/page";
+import ErrorModal from "@/components/UI/ErrorModal/page";
+import Modal from "@/components/UI/Modal/page";
 
-import { ChevronLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, ExclamationTriangleIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 type Program = {
     id: number,
@@ -103,7 +102,7 @@ export default function Program() {
     const [groupBeingEdited, setGroupBeingEdited] = useState<Group | null>(null);
 
     // Fetching
-    const fetchProgram = async () => {
+    const fetchProgram = useCallback(async () => {
         try {
             const res = await fetch(`/api/programs/${programId}`,{
                 method: 'GET'
@@ -116,9 +115,9 @@ export default function Program() {
         } catch (err) {
             console.error('Fetch error:', err);
         }
-    };
+    }, [programId]);
 
-    const fetchGroups = async () => {
+    const fetchGroups = useCallback(async () => {
         try {
             const res = await fetch(`/api/groups/${programId}`,{
                 method: 'GET'
@@ -138,9 +137,9 @@ export default function Program() {
         } catch (err) {
             console.error('Fetch error:', err);
         }
-    };
+    }, [programId]);
 
-    const fetchCoaches = async () => {
+    const fetchCoaches = useCallback(async () => {
         try {
             const res = await fetch(`/api/coach`, {
                 method: 'GET'
@@ -157,9 +156,9 @@ export default function Program() {
         } catch (err) {
             console.error('Fetch error:', err);
         }
-    };
+    }, []);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             await Promise.all([
                 fetchProgram(),
@@ -171,14 +170,14 @@ export default function Program() {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [fetchProgram, fetchGroups, fetchCoaches]);
 
     // Reload state
 
     // On load
     useEffect(() => {
         fetchData(); 
-    }, []);
+    }, [fetchData]);
 
     // Sync form state with program when it loads
     useEffect(() => {
@@ -263,7 +262,7 @@ export default function Program() {
 
     useEffect(() => {
         fetchGroups();
-      }, [groupDeleted]);
+      }, [groupDeleted, fetchGroups]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -638,10 +637,12 @@ export default function Program() {
                                     <label htmlFor="media-item" className="block text-sm/6 font-medium text-[var(--foreground)]">Media</label>
                                     <div className="mt-2 flex items-center gap-x-3">
                                     <div className="h-28 w-28 rounded-full bg-white overflow-hidden shadow-md">
-                                        <img
+                                        <Image
                                         src={programImgFile ? URL.createObjectURL(programImgFile) : program?.programImgUrl !== "" ? program!.programImgUrl  : "/sg_logo.png"}
                                         alt="Preview"
                                         className="h-full w-full object-cover rounded-full"
+                                        width={1000}
+                                        height={1000}
                                         />
                                     </div>
                                         <input
@@ -912,10 +913,12 @@ export default function Program() {
                                 </div>
                                 {/* Program Image and Description Row */}
                                 <div className="flex flex-col sm:flex-row gap-4 items-center py-10 px-4 sm:px-6 lg:px-8">
-                                    <img
+                                    <Image
                                         src={program?.programImgUrl?.trim() ? program.programImgUrl : "/logos/sg_logo.png"}
-                                        alt={program?.name}
+                                        alt={program?.name || "Program Image"}
                                         className="w-20 h-20 rounded-full bg-white shadow-md"
+                                        width={1000}
+                                        height={1000}
                                     />
                                     {/* Description */}
                                     <div className="flex-1 text-sm text-[var(--muted)]">

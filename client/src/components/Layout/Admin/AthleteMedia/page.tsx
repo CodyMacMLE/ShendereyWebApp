@@ -33,27 +33,27 @@ export default function AthleteMedia({ athlete } : { athlete : Athlete}) {
         const [athleteMedia, setAthleteMedia] = useState<Media[] | []>([]);
 
         useEffect(() => {
+            // Get Media
+            const fetchMedia = async () => {
+                try {
+                const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}`, {
+                    method: 'GET',
+                })
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setAthleteMedia(data.body || []);
+                }
+                } catch (error) {
+                console.error(error)
+                }
+            }
+            
             fetchMedia();
-          }, [])
+        }, [athlete.userId, athlete.athleteId])
         
         useEffect(() => {
         }, [athleteMedia]);
-
-        // Get Media
-        const fetchMedia = async () => {
-            try {
-            const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}`, {
-                method: 'GET',
-            })
-
-            if (res.ok) {
-                const data = await res.json();
-                setAthleteMedia(data.body || []);
-            }
-            } catch (error) {
-            console.error(error)
-            }
-        }
 
     return (
         <>

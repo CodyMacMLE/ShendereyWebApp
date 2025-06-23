@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useEffect } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-auto-scroll'
+import useEmblaCarousel from 'embla-carousel-react'
+import Image from 'next/image'
+import { useEffect } from 'react'
 import './carousel.css'
 
 export default function EmblaCarousel({ images }: { images: { url: string, alt: string, href: string }[] }) {
@@ -20,7 +21,10 @@ export default function EmblaCarousel({ images }: { images: { url: string, alt: 
         {images.map((image, index) => (
           <div className="embla__slide" key={index}>
             <a href={image.href} target="_blank" rel="noopener noreferrer">
-              <img className="embla__slide__img" src={image.url} alt={image.alt} />
+              <Image className="embla__slide__img" src={image.url} alt={image.alt}
+                width={1000}
+                height={1000}
+              />
             </a>
           </div>
         ))}

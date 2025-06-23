@@ -1,9 +1,9 @@
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import Modal from "@/components/UI/Modal/page"
-import Gallery from '@/components/UI/AthleteGallery/page'
 import AddUserMedia from "@/components/Form/AddUserMedia/page";
+import Gallery from '@/components/UI/AthleteGallery/page';
+import Modal from "@/components/UI/Modal/page";
 
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 
@@ -32,24 +32,24 @@ export default function UserGallery({ athlete } : { athlete : Athlete}) {
         const [athleteMedia, setAthleteMedia] = useState<Media[] | []>([]);
 
         useEffect(() => {
-            fetchMedia();
-          }, [])
-        
-        // Get Media
-        const fetchMedia = async () => {
-            try {
-            const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}`, {
-                method: 'GET',
-            })
+            // Get Media
+            const fetchMedia = async () => {
+                try {
+                const res = await fetch(`/api/users/${athlete.userId}/media/${athlete.athleteId}`, {
+                    method: 'GET',
+                })
 
-            if (res.ok) {
-                const data = await res.json();
-                setAthleteMedia(data.body || []);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAthleteMedia(data.body || []);
+                }
+                } catch (error) {
+                console.error(error)
+                }
             }
-            } catch (error) {
-            console.error(error)
-            }
-        }
+            
+            fetchMedia();
+          }, [athlete.userId, athlete.athleteId])
 
     return (
         <>

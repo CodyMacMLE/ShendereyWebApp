@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react';
 import { redirect, useParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 import DisplayUser from '@/components/Layout/Admin/DisplayUser/page';
-import ScoresTable from '@/components/UI/Tables/ScoresTable/page';
 import AchievementsTable from '@/components/UI/Tables/AchievementsTable/page';
+import ScoresTable from '@/components/UI/Tables/ScoresTable/page';
 
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import AthleteMedia from '@/components/Layout/Admin/AthleteMedia/page';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 type UserData = {
     id: number,
@@ -80,7 +80,7 @@ export default function UserPage() {
         setIsAchievements(newPage === NavPages.Achievements);
     }
 
-    const fetchUser = async () => {
+    const fetchUser = useCallback(async () => {
         try {
             const res = await fetch(`/api/users/${userId}`,{
                 method: 'GET'
@@ -98,12 +98,12 @@ export default function UserPage() {
         } catch (err) {
             console.error('Fetch error:', err);
         }
-    };
+    }, [userId, userData]);
 
     useEffect(() => {
         if (!userId || typeof window === 'undefined') return;
         fetchUser();
-    }, [userId]);
+    }, [userId, fetchUser]);
 
     return (
         <>

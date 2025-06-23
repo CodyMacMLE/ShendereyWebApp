@@ -1,9 +1,10 @@
 'use client';
  
-import React, { useState, useEffect } from 'react';
 import ErrorModal from '@/components/UI/ErrorModal/page';
-import { UserCircleIcon } from '@heroicons/react/24/solid'
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import imageCompression from 'browser-image-compression';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 export default function CreateUserForm() {
 
@@ -491,14 +492,20 @@ export default function CreateUserForm() {
                                 </label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                     {!isSeniorStaff && (staffPhotoPreview ? (
-                                    <img src={staffPhotoPreview} alt="Staff" className="h-12 w-12 rounded-full object-cover" />
+                                    <Image src={staffPhotoPreview} alt="Staff" className="h-12 w-12 rounded-full object-cover" 
+                                        width={1000}
+                                        height={1000}
+                                    />
                                     ) : (
                                     <div className='flex items-center justify-center h-12 w-12 rounded-full'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
                                     </div>
                                     ))}
                                     {isSeniorStaff && (staffPhotoPreview ? (
-                                    <img src={staffPhotoPreview} alt="Staff" className="h-[225px] w-[150px] rounded-md object-cover" />
+                                    <Image src={staffPhotoPreview} alt="Staff" className="h-[225px] w-[150px] rounded-md object-cover" 
+                                        width={1000}
+                                        height={1000}
+                                    />
                                     ) : (
                                     <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
@@ -581,7 +588,10 @@ export default function CreateUserForm() {
                                 <label htmlFor="athlete-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Athlete Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                     {athletePhotoPreview ? (
-                                    <img src={athletePhotoPreview} alt="Athlete" className="h-12 w-12 rounded-full object-cover" />
+                                    <Image src={athletePhotoPreview} alt="Athlete" className="h-12 w-12 rounded-full object-cover" 
+                                        width={1000}
+                                        height={1000}
+                                    />
                                     ) : (
                                     <div className='flex items-center justify-center h-12 w-12 rounded-full'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
@@ -655,7 +665,10 @@ export default function CreateUserForm() {
                               <label htmlFor="prospect-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Prospect Photo</label>
                               <div className="mt-2 flex items-center gap-x-3">
                               {prospectPhotoPreview ? (
-                                <img src={prospectPhotoPreview} alt="Prospect" className="h-[225px] w-[150px] rounded-md object-cover" />
+                                <Image src={prospectPhotoPreview} alt="Prospect" className="h-[225px] w-[150px] rounded-md object-cover" 
+                                    width={1000}
+                                    height={1000}
+                                />
                                 ) : (
                                 <div className='flex items-center justify-center h-[225px] w-[150px] bg-[var(--border)] rounded-md'>
                                     <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
@@ -845,7 +858,10 @@ export default function CreateUserForm() {
                                 <label htmlFor="alumni-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Alumni Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                 {alumniPhotoPreview ? (
-                                    <img src={alumniPhotoPreview} alt="Alumni" className="h-[225px] w-[150px] rounded-md object-cover" />
+                                    <Image src={alumniPhotoPreview} alt="Alumni" className="h-[225px] w-[150px] rounded-md object-cover" 
+                                        width={1000}
+                                        height={1000}
+                                    />
                                     ) : (
                                     <div className='flex items-center justify-center h-[225px] w-[150px] bg-[var(--border)] rounded-md'>
                                         <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />

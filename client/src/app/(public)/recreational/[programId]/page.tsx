@@ -1,7 +1,7 @@
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { getGroups, getProgram } from "@/lib/actions";
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import Image from "next/image";
 import Link from "next/link";
-
 
 export default async function ProgramPage({ params }: { params: Promise<{ programId: string }> }) {
 
@@ -49,10 +49,12 @@ export default async function ProgramPage({ params }: { params: Promise<{ progra
                         </div>
                         {/* Program Image and Description Row */}
                         <div className="flex flex-col sm:flex-row gap-4 items-center py-10 px-4 sm:px-6 lg:px-8">
-                            <img
+                            <Image
                                 src={program?.programImgUrl?.trim() ? program.programImgUrl : "/logos/sg_logo.png"}
                                 alt={program.name || "Program Image"}
                                 className="w-20 h-20 rounded-full bg-white shadow-md"
+                                width={1000}
+                                height={1000}
                             />
                             {/* Description */}
                             <div className="flex-1 text-sm text-[var(--muted)]">

@@ -1,12 +1,13 @@
 "use client"
 
+import imageCompression from 'browser-image-compression';
+import Image from 'next/image';
 import { redirect } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import imageCompression from 'browser-image-compression';
 
-import Modal from "@/components/UI/Modal/page";
-import ErrorModal from "@/components/UI/ErrorModal/page";
 import Dropdown from '@/components/UI/Dropdown/page';
+import ErrorModal from "@/components/UI/ErrorModal/page";
+import Modal from "@/components/UI/Modal/page";
 
 type Program = {
     id: number,
@@ -195,10 +196,12 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                                 <label htmlFor="media-item" className="block text-sm/6 font-medium text-[var(--foreground)]">Media</label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                   <div className="h-28 w-28 rounded-full bg-white overflow-hidden shadow-md">
-                                    <img
+                                    <Image
                                       src={programImgFile ? URL.createObjectURL(programImgFile) : "/logos/sg_logo.png"}
                                       alt="Preview"
                                       className="h-full w-full object-cover rounded-full"
+                                      width={1000}
+                                      height={1000}
                                     />
                                   </div>
                                     <input
@@ -284,10 +287,12 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                          className="col-span-1 flex flex-col divide-y divide-[var(--border)] rounded-lg bg-[var(--card-bg)] text-center shadow"
                        >
                          <div className="flex flex-1 flex-col p-8">
-                           <img
+                           <Image
                              alt=""
                              src={program.programImgUrl?.trim() ? program.programImgUrl : "/logos/sg_logo.png"}
                              className="mx-auto size-32 shrink-0 rounded-full shadow-md"
+                             width={1000}
+                             height={1000}
                            />
                            <h3 className="mt-6 text-sm font-medium text-[var(--foreground)]">{program.name}</h3>
                            <dl className="mt-1 flex grow flex-col justify-between">

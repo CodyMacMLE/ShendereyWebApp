@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
+import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 
 interface GalleryMedia {
@@ -46,18 +47,22 @@ export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryM
                                 {/* Media Section */}
                                 <div className="relative flex-grow">
                                     {item.mediaType?.startsWith("video/") ? (
-                                        <img
+                                        <Image
                                             key={`thumb-${item.id}`}
                                             src={item.videoThumbnail || ''}
                                             alt={item.name || 'Video thumbnail'}
                                             className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
+                                            width={1000}
+                                            height={1000}
                                         />
                                     ) : (
-                                        <img
+                                        <Image
                                             key={`img-${item.id}`}
                                             src={item.mediaUrl || ''}
                                             alt={item.name || 'Gallery image'}
                                             className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
+                                            width={1000}
+                                            height={1000}
                                         />
                                     )}
                                 </div>
@@ -101,10 +106,12 @@ export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryM
                                                                 Your browser does not support the video tag.
                                                             </video>
                                                         ) : (
-                                                            <img
+                                                            <Image
                                                                 src={selectedMedia.mediaUrl || ''}
                                                                 alt={selectedMedia.name || 'Gallery image'}
                                                                 className="w-full h-auto rounded"
+                                                                width={1000}
+                                                                height={1000}
                                                             />
                                                         )}
                                                     </div>

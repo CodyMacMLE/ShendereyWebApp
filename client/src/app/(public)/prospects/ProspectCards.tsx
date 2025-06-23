@@ -7,6 +7,7 @@ import {
     MenuItems
 } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { Athlete } from './page';
 
@@ -92,10 +93,10 @@ export default function ProspectCards({athletes}: {athletes: Athlete[]}) {
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
                 {prospects.map((athlete) => (
                 <a key={athlete.id} href={`/prospects/${athlete.id}`} className="group">
-                    <img
+                    <Image
                         alt={athlete.name}
                         src={athlete.imageSrc || '/images/placeholder.png'}
-                        width={800}
+                        width={1000}
                         height={1000}
                         className="aspect-square w-full rounded-lg object-cover group-hover:opacity-75 sm:aspect-[2/3]"
                     />

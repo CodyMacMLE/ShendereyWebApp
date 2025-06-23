@@ -1,6 +1,7 @@
 "use client"
 
 import { Program } from "@/lib/types";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export default function ProgramLayout({ programs, category }: { programs: Program[], category: string }) {
@@ -16,10 +17,12 @@ export default function ProgramLayout({ programs, category }: { programs: Progra
                          className="col-span-1 flex flex-col divide-y divide-[var(--border)] rounded-lg bg-[var(--card-bg)] text-center shadow"
                        >
                          <div className="flex flex-1 flex-col p-8">
-                           <img
+                           <Image
                              alt=""
                              src={program.programImgUrl?.trim() ? program.programImgUrl : "/logos/sg_logo.png"}
                              className="mx-auto size-32 shrink-0 rounded-full shadow-md"
+                             width={1000}
+                             height={1000}
                            />
                            <h3 className="mt-6 text-sm font-medium text-[var(--foreground)]">{program.name}</h3>
                            <dl className="mt-1 flex grow flex-col justify-between">
