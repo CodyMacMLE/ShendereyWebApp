@@ -17,6 +17,7 @@
     "@heroicons/react": "^2.2.0",
     "@kinde-oss/kinde-auth-nextjs": "^2.6.2",
     "@material-tailwind/react": "^3.0.0-beta.24",
+    "@vercel/speed-insights": "^1.2.0",
     "browser-image-compression": "^2.0.2",
     "drizzle-orm": "^0.29.3",
     "embla-carousel-auto-scroll": "^8.6.0",
