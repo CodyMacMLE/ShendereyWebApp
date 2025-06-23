@@ -1,14 +1,14 @@
 import {
+    boolean,
+    doublePrecision,
+    integer,
+    pgEnum,
     pgTable,
     serial,
     text,
-    integer,
-    boolean,
-    timestamp,
     time,
-    doublePrecision,
-    pgEnum,
-  } from 'drizzle-orm/pg-core'
+    timestamp,
+} from 'drizzle-orm/pg-core';
   
 // ENUMS
 export const categoryEnum = pgEnum('category', ['competitive', 'recreational'])
@@ -52,6 +52,7 @@ export const alumni = pgTable('alumni', {
     school: text('school'),
     year: timestamp('year'),
     description: text('description'),
+    isActive: boolean('isActive').default(true),
 })
 
 // PROSPECT
@@ -65,6 +66,7 @@ export const prospects = pgTable('prospects', {
     institution: text('institution'),
     instagramLink: text('instagramLink'),
     youtubeLink: text('youtubeLink'),
+    isActive: boolean('isActive').default(true),
 })
 
 // COACH
@@ -76,6 +78,7 @@ export const coaches = pgTable('coaches', {
     isSeniorStaff: boolean('isSeniorStaff').default(false),
     createdAt: timestamp('createdAt').defaultNow(),
     updatedAt: timestamp('updatedAt').defaultNow(),
+    isActive: boolean('isActive').default(true),
 })
 
 // SCORES
