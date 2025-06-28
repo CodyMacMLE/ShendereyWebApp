@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
 import { tryouts } from '@/lib/schema';
-import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
     try {
@@ -17,7 +17,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-    const formData = await req.json();
+    let formData;
+    try {
+        formData = await req.json();
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to submit tryout form' }, { status: 500 });
+    }
     
     try {
         const { athleteName, DoB, about, experienceProgram, experienceLevel, experienceYears, hoursPerWeek, currentClub, currentCoach, tryoutPreference, tryoutLevel, contactName, contactRelationship, contactEmail, contactPhone, honeypot } = formData;
