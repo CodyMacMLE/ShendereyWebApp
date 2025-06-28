@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     try {
         formData = await req.json();
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to submit tryout form' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to submit tryout form - ' + error }, { status: 500 });
     }
     
     try {
