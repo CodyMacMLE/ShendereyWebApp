@@ -23,7 +23,10 @@ export const metadata: Metadata = {
     default: 'Shenderey Gymnastics',
   },
   icons: {
-    icon: { url: "/favicon.ico", type: "image/x-icon" },
+    icon: [
+      { url: "/favicon.ico", type: "image/x-icon" },
+      { url: "/favicon.png", type: "image/png" }
+    ],
   },
 };
 
