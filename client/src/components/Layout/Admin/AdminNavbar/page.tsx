@@ -1,36 +1,35 @@
 'use client'
 
-import React from 'react'
-import { Suspense, useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
-  TransitionChild,
   Switch,
+  TransitionChild,
 } from '@headlessui/react'
 import {
+  ArrowLeftStartOnRectangleIcon,
   Bars3Icon,
+  ClipboardDocumentIcon,
+  CurrencyDollarIcon,
+  CursorArrowRaysIcon,
   DocumentDuplicateIcon,
   HomeIcon,
-  XMarkIcon,
-  UsersIcon,
-  CursorArrowRaysIcon,
-  PlayCircleIcon,
-  ArrowLeftStartOnRectangleIcon,
   MagnifyingGlassIcon,
-  CurrencyDollarIcon,
-  ClipboardDocumentIcon,
+  PlayCircleIcon,
+  UsersIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
-import { IoShirtOutline } from 'react-icons/io5';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/solid';
+import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import React, { Suspense, useState } from 'react'
+import { IoShirtOutline } from 'react-icons/io5'
 
-import { useTheme } from '@/components/Theme/page';
+import { useTheme } from '@/components/Theme/page'
 
-import {LogoutLink} from "@kinde-oss/kinde-auth-nextjs/components";
+import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components"
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
@@ -137,7 +136,7 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
             <div className={`flex h-12 shrink-0 items-center justify-center ${ theme === 'dark' ? 'bg-[#eeeeee]' : ''} rounded-md m-3`}>
               <Image
                 alt="Shenderey Gymnastics"
-                src="/sg_logo.png"
+                src="/logos/sg_logo.png"
                 className="h-18 w-auto"
                 width={70}
                 height={60}
