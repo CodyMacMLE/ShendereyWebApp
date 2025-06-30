@@ -24,10 +24,10 @@ return (
                 <div aria-hidden="true" className="absolute inset-0 overflow-hidden max-w-[1920px]">
                     <Image
                         alt=""
-                        src="/images/Shenderey_2024-2025.jpg"
+                        src="/images/Shenderey_2024-2025.JPG"
                         className="size-full object-cover"
                         width={1920}
-                        height={100}
+                        height={1080}
                     />
                 </div>
                 <div aria-hidden="true" className="absolute inset-0 bg-gray-900 opacity-70" />
