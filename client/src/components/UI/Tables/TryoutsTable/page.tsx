@@ -260,7 +260,7 @@ export default function TryoutsTable({ tryouts, setTryouts, isLoading }: Props) 
 
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] w-full sm:w-1 md:w-1/6">
                               <div className="flex items-center gap-3">
-                                {new Date(tryout.athleteDOB).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                {new Date(tryout.athleteDOB + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                               </div>
                             </td>
 

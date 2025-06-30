@@ -33,7 +33,7 @@ export default function TryoutDisplay({ tryout }: { tryout: Tryout }) {
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">Name</dt>
                             <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{tryout.athleteName}</dd>
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">Date of Birth</dt>
-                            <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{ `${new Date(tryout.athleteDOB).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().getFullYear() - new Date(tryout.athleteDOB).getFullYear()}y)` }</dd>
+                            <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{ `${new Date(tryout.athleteDOB + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().getFullYear() - new Date(tryout.athleteDOB + 'T00:00:00').getFullYear()}y)` }</dd>
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">About</dt>
                             <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">
                                 {tryout.athleteAbout}
