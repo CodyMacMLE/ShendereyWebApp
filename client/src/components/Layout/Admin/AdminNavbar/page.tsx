@@ -87,7 +87,7 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                 <div className="flex h-16 shrink-0 items-center justify-center">
                   <Image
                     alt="Shenderey Gymnastics"
-                    src="/sg_logo.png"
+                    src="/logos/sg_logo.png"
                     className="h-8 w-auto"
                     width={70}
                     height={60}

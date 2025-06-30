@@ -3,36 +3,55 @@ import { media } from '@/lib/schema';
 import { eq } from 'drizzle-orm/sql';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
-import { file as tmpFile } from 'tmp-promise';
-import path from 'path';
-import fs from 'fs/promises';
-const ffmpegPath = '/opt/homebrew/bin/ffmpeg'
 import Ffmpeg from 'fluent-ffmpeg';
+import fs from 'fs/promises';
+import path from 'path';
+import { file as tmpFile } from 'tmp-promise';
+const ffmpegPath = '/opt/homebrew/bin/ffmpeg'
 
 if (!ffmpegPath) {
   throw new Error('ffmpeg binary not found');
 }
 Ffmpeg.setFfmpegPath(ffmpegPath);
 
-const s3 = new S3Client({ region: process.env.AWS_REGION });
+// Validate required environment variables
+if (!process.env.AWS_REGION) {
+  throw new Error('AWS_REGION environment variable is required');
+}
+if (!process.env.AWS_BUCKET_NAME) {
+  throw new Error('AWS_BUCKET_NAME environment variable is required');
+}
+
+const s3 = new S3Client({ 
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  }
+});
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
 
 async function uploadToS3(file: File, keyPrefix: string) {
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const key = `${keyPrefix}/${randomUUID()}-${file.name}`;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const key = `${keyPrefix}/${randomUUID()}-${file.name}`;
 
-  await s3.send(new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-    Body: buffer,
-    ContentType: file.type
-  }));
+    await s3.send(new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: buffer,
+      ContentType: file.type
+    }));
 
-  return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  } catch (error) {
+    console.error('S3 upload error:', error);
+    throw new Error(`Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 export async function POST(

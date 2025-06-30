@@ -1,25 +1,38 @@
 import { db } from '@/lib/db';
-import { users, coaches, athletes, prospects, alumni, userImages } from '@/lib/schema';
-import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { alumni, athletes, coaches, prospects, userImages, users } from '@/lib/schema';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Validate required environment variables
+if (!process.env.AWS_REGION) {
+  throw new Error('AWS_REGION environment variable is required');
+}
+if (!process.env.AWS_BUCKET_NAME) {
+  throw new Error('AWS_BUCKET_NAME environment variable is required');
+}
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
 
 async function uploadToS3(file: File, keyPrefix: string) {
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const key = `${keyPrefix}/${randomUUID()}-${file.name}`;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const key = `${keyPrefix}/${randomUUID()}-${file.name}`;
 
-  await s3.send(new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-    Body: buffer,
-    ContentType: file.type,
-  }));
+    await s3.send(new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: buffer,
+      ContentType: file.type,
+    }));
 
-  return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  } catch (error) {
+    console.error('S3 upload error:', error);
+    throw new Error(`Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 export async function GET() {

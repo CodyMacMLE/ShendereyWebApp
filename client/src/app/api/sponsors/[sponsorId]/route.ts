@@ -5,10 +5,25 @@ import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-const s3 = new S3Client({ region: process.env.AWS_REGION });
+// Validate required environment variables
+if (!process.env.AWS_REGION) {
+  throw new Error('AWS_REGION environment variable is required');
+}
+if (!process.env.AWS_BUCKET_NAME) {
+  throw new Error('AWS_BUCKET_NAME environment variable is required');
+}
+
+const s3 = new S3Client({ 
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  }
+});
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
 
 async function uploadToS3(file: File, keyPrefix: string) {
+  try {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const key = `${keyPrefix}/${randomUUID()}-${file.name}`;
@@ -21,7 +36,11 @@ async function uploadToS3(file: File, keyPrefix: string) {
     }));
   
     return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  } catch (error) {
+    console.error('S3 upload error:', error);
+    throw new Error(`Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+}
 
 async function deleteFromS3(url: string) {
     const key = url.substring(1);
