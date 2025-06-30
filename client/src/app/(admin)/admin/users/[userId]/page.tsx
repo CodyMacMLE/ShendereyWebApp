@@ -1,6 +1,6 @@
 'use client'
 
-import { redirect, useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import DisplayUser from '@/components/Layout/Admin/DisplayUser/page';
@@ -64,6 +64,7 @@ enum NavPages {
 export default function UserPage() {
 
     const { userId } = useParams();
+    const router = useRouter();
     const [userData, setUserData] = useState<UserData | null>(null);
 
     const [isProfile, setIsProfile] = useState(true);
@@ -89,16 +90,15 @@ export default function UserPage() {
             if (res.ok) {
                 const data = await res.json();
                 setUserData(data.body);
-            }
-
-            if (userData === null) {
-                redirect("/admin/users/create-user")
+            } else if (res.status === 404) {
+                // If user not found, redirect to create user page
+                router.push("/admin/users/create-user");
             }
             
         } catch (err) {
             console.error('Fetch error:', err);
         }
-    }, [userId, userData]);
+    }, [userId, router]);
 
     useEffect(() => {
         if (!userId || typeof window === 'undefined') return;
@@ -110,7 +110,7 @@ export default function UserPage() {
             {/* Back Button */}
             <div className="px-6 mb-10">
                 <div className="flex">
-                    <div onClick={() => redirect("/admin/users") } className="group flex items-center cursor-pointer">
+                    <div onClick={() => router.push("/admin/users") } className="group flex items-center cursor-pointer">
                         <ChevronLeftIcon className="h-4 w-4 mr-2 text-[var(--muted)] group-hover:text-[var(--primary)]" />
                         <span className="text-[var(--muted)] group-hover:text-[var(--primary)] font-semibold items-center">Back</span>
                     </div>
