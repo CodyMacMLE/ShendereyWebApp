@@ -131,10 +131,17 @@ export default function CreateUserForm() {
           const data = await res.json();
           if (data.redirect) window.location.href = data.redirect;
         } else {
-          console.error('Error submitting form');
+          const errorData = await res.json().catch(() => ({ error: 'Unknown error occurred' }));
+          console.error('Error submitting form:', errorData);
+          setFormErrors([{ msg: errorData.error || 'Failed to create user. Please try again.' }]);
         }
       } catch (err) {
         console.error('Submission failed', err);
+        if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
+          setFormErrors([{ msg: 'Authentication required. Please log in again.' }]);
+        } else {
+          setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
+        }
       }
     };
 

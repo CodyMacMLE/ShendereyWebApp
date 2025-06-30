@@ -3,8 +3,8 @@ import "../../globals.css";
 
 import AdminNavbar from "../../../components/Layout/Admin/AdminNavbar/page";
 
-import {getKindeServerSession} from "@kinde-oss/kinde-auth-nextjs/server";
-import {redirect} from "next/navigation";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -21,7 +21,7 @@ export default async function Admin({
   const {isAuthenticated} = getKindeServerSession();
 
   if (!(await isAuthenticated())) {
-    redirect("/api/auth/login?post_login_redirect_url=/login");
+    redirect("/api/auth/login?post_login_redirect_url=/admin");
   }
 
   return (
