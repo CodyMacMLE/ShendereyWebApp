@@ -33,7 +33,18 @@ export default function TryoutDisplay({ tryout }: { tryout: Tryout }) {
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">Name</dt>
                             <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{tryout.athleteName}</dd>
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">Date of Birth</dt>
-                            <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{ `${new Date(tryout.athleteDOB).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().getFullYear() - new Date(tryout.athleteDOB).getFullYear()}y)` }</dd>
+                            <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{(() => {
+                              const date = new Date(tryout.athleteDOB);
+                              const today = new Date();
+                              const age = today.getFullYear() - date.getFullYear();
+                              const monthDiff = today.getMonth() - date.getMonth();
+                              const dayDiff = today.getDate() - date.getDate();
+                              
+                              // Adjust age if birthday hasn't occurred yet this year
+                              const adjustedAge = (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) ? age - 1 : age;
+                              
+                              return `${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (${adjustedAge}y)`;
+                            })()}</dd>
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">About</dt>
                             <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">
                                 {tryout.athleteAbout}
