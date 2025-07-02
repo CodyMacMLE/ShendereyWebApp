@@ -34,7 +34,9 @@ export default function TryoutDisplay({ tryout }: { tryout: Tryout }) {
                             <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{tryout.athleteName}</dd>
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">Date of Birth</dt>
                             <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">{(() => {
-                              const date = new Date(tryout.athleteDOB);
+                              // Parse the date string and create a date in local timezone
+                              const [year, month, day] = tryout.athleteDOB.split('-').map(Number);
+                              const date = new Date(year, month - 1, day); // month is 0-indexed
                               const today = new Date();
                               const age = today.getFullYear() - date.getFullYear();
                               const monthDiff = today.getMonth() - date.getMonth();
