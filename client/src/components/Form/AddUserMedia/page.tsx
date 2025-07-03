@@ -67,11 +67,25 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
         });
 
         if (res.ok) {
-            const data = await res.json();
-            if (setModalEnable) setModalEnable(false);
-            if (setAthleteMedia && data.body) setAthleteMedia(data.body);
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await res.json();
+                if (setModalEnable) setModalEnable(false);
+                if (setAthleteMedia && data.body) setAthleteMedia(data.body);
+            } else {
+                console.error('Unexpected response type:', contentType);
+                setFormErrors([{ msg: 'Server returned an unexpected response format.' }]);
+            }
         } else {
-            console.error('Upload failed.', await res.json());
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await res.json();
+                console.error('Upload failed:', errorData);
+                setFormErrors([{ msg: errorData.error || 'Upload failed. Please try again.' }]);
+            } else {
+                console.error('Upload failed with non-JSON response');
+                setFormErrors([{ msg: 'Upload failed. The file may be too large or the server encountered an error.' }]);
+            }
         }
         } catch (err) {
         console.error('Error submitting form', err);

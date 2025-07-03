@@ -3,6 +3,10 @@ import { media } from '@/lib/schema';
 import { eq } from 'drizzle-orm/sql';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Configure route to handle larger file uploads
+export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // 5 minutes timeout
+
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
