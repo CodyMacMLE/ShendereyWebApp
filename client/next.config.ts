@@ -10,11 +10,11 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    serverComponentsExternalPackages: ['fluent-ffmpeg'],
     serverActions: {
       bodySizeLimit: '100mb',
     },
   },
+  serverExternalPackages: ['fluent-ffmpeg'],
   async headers() {
     return [
       {

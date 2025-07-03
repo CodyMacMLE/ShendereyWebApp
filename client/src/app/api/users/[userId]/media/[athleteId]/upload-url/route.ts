@@ -22,10 +22,8 @@ const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
 
 export async function POST(
   req: NextRequest,
-  context: { params: Promise<{ userId: string, athleteId: string }> }
 ) {
   try {
-    const { athleteId } = await context.params;
     const { fileName, fileType } = await req.json();
 
     if (!fileName || !fileType) {
