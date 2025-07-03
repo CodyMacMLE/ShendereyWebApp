@@ -120,9 +120,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
   const id = parseInt(userId);
   const formData = await req.formData();
 
-  console.log(formData);
-
   try {
+    const user = await db.select().from(users).where(eq(users.id, id));
+    console.log(user);
+
     const name = formData.get('name') as string;
     const isCoach = formData.get('isCoach') === 'true';
     const isAthlete = formData.get('isAthlete') === 'true';
@@ -268,8 +269,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
 
     if (isProspect) {
       try {
-        await db.update(prospects)
-          .set({
+        // Delete alumni if prospect is updated to not be a prospect
+        if (user[0].isAlumni) {
+          await db.delete(alumni).where(eq(alumni.user, id));
+          await db.insert(prospects).values({
+            user: id,
             gpa: prospectGPA ? parseFloat(prospectGPA) : null,
             major: prospectMajor,
             institution: prospectInstitution,
@@ -277,8 +281,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
             graduationYear: prospectGraduationYear ? new Date(`${prospectGraduationYear}-01-01`) : null,
             instagramLink: prospectInstagram,
             youtubeLink: prospectYoutube,
-          })
-          .where(eq(prospects.user, id));
+          });
+        }
+
+        if (user[0].isProspect) {
+          await db.update(prospects)
+            .set({
+              gpa: prospectGPA ? parseFloat(prospectGPA) : null,
+              major: prospectMajor,
+              institution: prospectInstitution,
+              description: prospectDescription,
+              graduationYear: prospectGraduationYear ? new Date(`${prospectGraduationYear}-01-01`) : null,
+              instagramLink: prospectInstagram,
+              youtubeLink: prospectYoutube,
+            })
+            .where(eq(prospects.user, id));
+        }
       } catch (err) {
         console.error('Error updating prospect:', err);
       }
@@ -286,13 +304,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
 
     if (isAlumni) {
       try {
-        await db.update(alumni)
-          .set({
+        if (user[0].isProspect) {
+          await db.delete(prospects).where(eq(prospects.user, id));
+          await db.insert(alumni).values({
+            user: id,
             school: alumniSchool,
             year: alumniGraduationYear ? new Date(`${alumniGraduationYear}-01-01`) : null,
             description: alumniDescription,
-          })
-          .where(eq(alumni.user, id));
+          });
+        }
+
+        if (user[0].isAlumni) {
+          await db.update(alumni).set({
+            school: alumniSchool,
+            year: alumniGraduationYear ? new Date(`${alumniGraduationYear}-01-01`) : null,
+            description: alumniDescription,
+          }).where(eq(alumni.user, id));
+        }
       } catch (err) {
         console.error('Error updating alumni:', err);
       }
