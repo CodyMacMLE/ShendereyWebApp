@@ -63,11 +63,52 @@ export async function POST(
   context: { params: Promise<{ userId: string, athleteId: string }> }
 ) {
   const { athleteId } = await context.params;
-  const formData = await req.formData();
-  try {
-    const mediaType = formData.get('mediaType');
-    const mediaRaw = formData.get('media');
-    const mediaUrl = mediaRaw instanceof File ? await uploadToS3(mediaRaw, 'athlete/media') : '';
+  
+  // Check if this is a JSON request (for direct S3 upload) or FormData request
+  const contentType = req.headers.get('content-type');
+  
+  if (contentType?.includes('application/json')) {
+    // Handle JSON request (direct S3 upload)
+    const body = await req.json();
+    const { name, description, category, date, mediaType, mediaUrl } = body;
+    
+    try {
+      let thumbnailUrl = '';
+
+      // Generate thumbnail for video files
+      if (mediaType?.startsWith('video/')) {
+        // For direct S3 upload, we'll need to download the file to generate thumbnail
+        // This is a simplified approach - in production you might want to use a separate service
+        thumbnailUrl = ''; // We'll handle this later if needed
+      }
+
+      await db.insert(media).values({
+        athlete: parseInt(athleteId),
+        name: name || '',
+        description: description || '',
+        category: category || '',
+        date: date ? new Date(date) : null,
+        mediaType: mediaType || '',
+        mediaUrl: mediaUrl || '',
+        videoThumbnail: thumbnailUrl || ''
+      });
+
+      const fetchedMedia = await db.select().from(media).where(eq(media.athlete, parseInt(athleteId)));
+
+      return NextResponse.json({ success: true, body: fetchedMedia });
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
+  } else {
+    // Handle FormData request (legacy upload)
+    const formData = await req.formData();
+    try {
+      const mediaType = formData.get('mediaType');
+      const mediaRaw = formData.get('media');
+      const mediaUrl = mediaRaw instanceof File ? await uploadToS3(mediaRaw, 'athlete/media') : '';
 
     let thumbnailUrl = '';
 
@@ -156,6 +197,7 @@ export async function POST(
       { success: false, error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
+  }
   }
 }
 

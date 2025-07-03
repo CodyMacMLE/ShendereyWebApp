@@ -1,0 +1,20 @@
+{
+  "functions": {
+    "src/app/api/users/[userId]/media/[athleteId]/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/users/[userId]/media/[athleteId]/upload-url/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/users/(.*)/media/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      }
+    }
+  ]
+} 

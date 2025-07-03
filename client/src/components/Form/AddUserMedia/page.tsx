@@ -51,44 +51,80 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
         }
 
         try {
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('description', description);
-        formData.append('category', category.name);
-        formData.append('date', date);
-        if (mediaFile) {
-            formData.append('media', mediaFile);
-            formData.append('mediaType', mediaFile.type)
-        }
+            // Step 1: Get presigned URL for direct S3 upload
+            const presignedRes = await fetch(`/api/users/${userId}/media/${athleteId}/upload-url`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    fileName: mediaFile?.name,
+                    fileType: mediaFile?.type,
+                }),
+            });
 
-        const res = await fetch(`/api/users/${userId}/media/${athleteId}`, {
-            method: 'POST',
-            body: formData,
-        });
+            if (!presignedRes.ok) {
+                const errorData = await presignedRes.json();
+                setFormErrors([{ msg: errorData.error || 'Failed to get upload URL.' }]);
+                return;
+            }
 
-        if (res.ok) {
-            const contentType = res.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const data = await res.json();
-                if (setModalEnable) setModalEnable(false);
-                if (setAthleteMedia && data.body) setAthleteMedia(data.body);
-            } else {
-                console.error('Unexpected response type:', contentType);
-                setFormErrors([{ msg: 'Server returned an unexpected response format.' }]);
+            const { uploadUrl, mediaUrl } = await presignedRes.json();
+
+            // Step 2: Upload file directly to S3
+            const uploadRes = await fetch(uploadUrl, {
+                method: 'PUT',
+                body: mediaFile,
+                headers: {
+                    'Content-Type': mediaFile?.type || 'application/octet-stream',
+                },
+            });
+
+            if (!uploadRes.ok) {
+                setFormErrors([{ msg: 'Failed to upload file to S3.' }]);
+                return;
             }
-        } else {
-            const contentType = res.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const errorData = await res.json();
-                console.error('Upload failed:', errorData);
-                setFormErrors([{ msg: errorData.error || 'Upload failed. Please try again.' }]);
+
+            // Step 3: Save media record to database
+            const saveRes = await fetch(`/api/users/${userId}/media/${athleteId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    description,
+                    category: category.name,
+                    date,
+                    mediaType: mediaFile?.type,
+                    mediaUrl,
+                }),
+            });
+
+            if (saveRes.ok) {
+                const contentType = saveRes.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await saveRes.json();
+                    if (setModalEnable) setModalEnable(false);
+                    if (setAthleteMedia && data.body) setAthleteMedia(data.body);
+                } else {
+                    console.error('Unexpected response type:', contentType);
+                    setFormErrors([{ msg: 'Server returned an unexpected response format.' }]);
+                }
             } else {
-                console.error('Upload failed with non-JSON response');
-                setFormErrors([{ msg: 'Upload failed. The file may be too large or the server encountered an error.' }]);
+                const contentType = saveRes.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await saveRes.json();
+                    console.error('Save failed:', errorData);
+                    setFormErrors([{ msg: errorData.error || 'Failed to save media record.' }]);
+                } else {
+                    console.error('Save failed with non-JSON response');
+                    setFormErrors([{ msg: 'Failed to save media record.' }]);
+                }
             }
-        }
         } catch (err) {
         console.error('Error submitting form', err);
+        setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
         }
     };
 
