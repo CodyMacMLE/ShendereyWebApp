@@ -120,6 +120,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
   const id = parseInt(userId);
   const formData = await req.formData();
 
+  console.log(formData);
+
   try {
     const name = formData.get('name') as string;
     const isCoach = formData.get('isCoach') === 'true';
