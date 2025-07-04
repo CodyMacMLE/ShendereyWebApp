@@ -28,15 +28,35 @@ if (!process.env.AWS_REGION) {
 if (!process.env.AWS_BUCKET_NAME) {
   throw new Error('AWS_BUCKET_NAME environment variable is required');
 }
+if (!process.env.AWS_ACCESS_KEY_ID) {
+  throw new Error('AWS_ACCESS_KEY_ID environment variable is required');
+}
+if (!process.env.AWS_SECRET_ACCESS_KEY) {
+  throw new Error('AWS_SECRET_ACCESS_KEY environment variable is required');
+}
 
 const s3 = new S3Client({ 
   region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   }
 });
-const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+// Helper function to test S3 connectivity and permissions
+async function testS3Access() {
+  try {
+    // Try to list objects in the bucket to test access
+    const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+    await s3.send(new ListObjectsV2Command({ Bucket: BUCKET_NAME, MaxKeys: 1 }));
+    console.log('S3 access test successful');
+    return true;
+  } catch (error) {
+    console.error('S3 access test failed:', error);
+    return false;
+  }
+}
 
 async function uploadToS3(file: File, keyPrefix: string) {
   try {
@@ -224,8 +244,6 @@ export async function PUT(
   const { searchParams } = req.nextUrl;
   const mediaId = searchParams.get('mediaId');
 
-  
-
   const formData = await req.formData();
   const name = formData.get('name')?.toString() || '';
   const category = formData.get('category')?.toString() || '';
@@ -262,35 +280,85 @@ export async function DELETE(
   }
 
   try {
+    // Test S3 access first
+    const s3AccessOk = await testS3Access();
+    if (!s3AccessOk) {
+      console.error('S3 access test failed - cannot proceed with deletion');
+      return NextResponse.json({ success: false, error: 'S3 access test failed' }, { status: 500 });
+    }
+
     const [target] = await db.select().from(media).where(eq(media.id, parseInt(mediaId)));
+    
     if (!target) {
       return NextResponse.json({ success: false, error: 'Media not found' }, { status: 404 });
     }
 
+    console.log('Target media record:', {
+      id: target.id,
+      mediaUrl: target.mediaUrl,
+      videoThumbnail: target.videoThumbnail,
+      mediaType: target.mediaType
+    });
+
     const commands = [];
+    const deletionResults = [];
+
+    // Helper function to extract S3 key from URL
+    function extractS3Key(url: string): string | null {
+      try {
+        const urlObj = new URL(url);
+        // Remove leading slash from pathname
+        return urlObj.pathname.substring(1);
+      } catch (error) {
+        console.error('Failed to parse URL:', url, error);
+        return null;
+      }
+    }
 
     if (target.mediaUrl) {
-      const mediaKey = target.mediaUrl.split('.com/')[1];
+      const mediaKey = extractS3Key(target.mediaUrl);
       if (mediaKey) {
+        console.log(`Attempting to delete media file with key: ${mediaKey}`);
         commands.push(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: mediaKey }));
+        deletionResults.push({ type: 'media', key: mediaKey });
+      } else {
+        console.warn(`Could not extract key from mediaUrl: ${target.mediaUrl}`);
       }
     }
 
     if (target.videoThumbnail && target.mediaType?.startsWith('video/')) {
-      const thumbKey = target.videoThumbnail.split('.com/')[1];
+      const thumbKey = extractS3Key(target.videoThumbnail);
       if (thumbKey) {
+        console.log(`Attempting to delete thumbnail with key: ${thumbKey}`);
         commands.push(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: thumbKey }));
+        deletionResults.push({ type: 'thumbnail', key: thumbKey });
+      } else {
+        console.warn(`Could not extract key from videoThumbnail: ${target.videoThumbnail}`);
       }
     }
 
+    // Execute S3 deletions with better error handling
     for (const cmd of commands) {
-      await s3.send(cmd);
+      try {
+        await s3.send(cmd);
+        console.log(`Successfully deleted S3 object: ${cmd.input.Key}`);
+      } catch (s3Error) {
+        console.error(`Failed to delete S3 object ${cmd.input.Key}:`, s3Error);
+        // Continue with other deletions even if one fails
+      }
     }
 
+    // Delete from database
     await db.delete(media).where(eq(media.id, parseInt(mediaId)));
+    console.log(`Successfully deleted media record from database: ${mediaId}`);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true, 
+      deletedFiles: deletionResults,
+      message: `Deleted ${deletionResults.length} file(s) from S3 and database record`
+    });
   } catch (error) {
+    console.error('DELETE operation failed:', error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
