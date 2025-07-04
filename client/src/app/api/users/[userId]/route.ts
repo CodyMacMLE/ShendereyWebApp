@@ -271,7 +271,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
       try {
         // Delete alumni if prospect is updated to not be a prospect
         if (user[0].isAlumni) {
+          const images = await db.select().from(userImages).where(eq(userImages.user, id));
+          if (images[0].alumniUrl) {
+            await s3.send(new DeleteObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: images[0].alumniUrl.split('/').slice(3).join('/'),
+            }));
+          }
           await db.delete(alumni).where(eq(alumni.user, id));
+
           await db.insert(prospects).values({
             user: id,
             gpa: prospectGPA ? parseFloat(prospectGPA) : null,
@@ -305,6 +313,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
     if (isAlumni) {
       try {
         if (user[0].isProspect) {
+          const images = await db.select().from(userImages).where(eq(userImages.user, id));
+          if (images[0].prospectUrl) {
+            await s3.send(new DeleteObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: images[0].prospectUrl.split('/').slice(3).join('/'),
+            }));
+          }
           await db.delete(prospects).where(eq(prospects.user, id));
           await db.insert(alumni).values({
             user: id,
