@@ -14,12 +14,27 @@ import Ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs/promises';
 import path from 'path';
 import { file as tmpFile } from 'tmp-promise';
-const ffmpegPath = '/opt/homebrew/bin/ffmpeg'
+// FFmpeg configuration - only set paths if binaries exist
+const ffmpegPath = process.env.FFMPEG_PATH || '/opt/homebrew/bin/ffmpeg';
+const ffprobePath = process.env.FFPROBE_PATH || '/opt/homebrew/bin/ffprobe';
 
-if (!ffmpegPath) {
-  throw new Error('ffmpeg binary not found');
+// Check if we're in a Vercel environment
+const isVercel = process.env.VERCEL === '1';
+
+if (!isVercel) {
+  // Only set FFmpeg paths in development/local environment
+  try {
+    const fs = require('fs');
+    if (fs.existsSync(ffmpegPath)) {
+      Ffmpeg.setFfmpegPath(ffmpegPath);
+    }
+    if (fs.existsSync(ffprobePath)) {
+      Ffmpeg.setFfprobePath(ffprobePath);
+    }
+  } catch (error) {
+    console.warn('FFmpeg not available, thumbnail generation will be skipped');
+  }
 }
-Ffmpeg.setFfmpegPath(ffmpegPath);
 
 // Validate required environment variables
 if (!process.env.AWS_REGION) {
@@ -97,88 +112,94 @@ export async function POST(
 
       // Generate thumbnail for video files
       if (mediaType?.startsWith('video/')) {
-        try {
-          // Download the video from S3 to generate thumbnail
-          const { GetObjectCommand } = await import('@aws-sdk/client-s3');
-          const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
-          
-          // Extract S3 key from mediaUrl
-          const urlObj = new URL(mediaUrl);
-          const s3Key = urlObj.pathname.substring(1);
-          
-          // Create a presigned URL for downloading the video
-          const getObjectCommand = new GetObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: s3Key
-          });
-          
-          const downloadUrl = await getSignedUrl(s3, getObjectCommand, { expiresIn: 3600 });
-          
-          // Download the video file
-          const response = await fetch(downloadUrl);
-          const arrayBuffer = await response.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-          
-          // Create temporary file for the video
-          const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(s3Key) });
-          await fs.writeFile(tmpVideoPath, buffer);
-          
-          // Get video dimensions
-          const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
-            return new Promise((resolve, reject) => {
-              Ffmpeg.ffprobe(tmpVideoPath, (err, metadata) => {
-                if (err) return reject(err);
-                const stream = metadata.streams.find(s => s.width && s.height);
-                if (!stream) return reject(new Error('No video stream found'));
-                resolve({ width: stream.width!, height: stream.height! });
-              });
-            });
-          };
-          
-          const { width, height } = await getVideoDimensions();
-          const isPortrait = height > width;
-          const thumbnailSize = isPortrait ? '360x640' : '640x360';
-          
-          // Generate thumbnail
-          const tmpThumb = await tmpFile({ postfix: '.jpg' });
-          const thumbPath = tmpThumb.path;
-          
-          await new Promise((resolve, reject) => {
-            if (!thumbPath) {
-              return reject(new Error('Thumbnail path is null'));
-            }
+        // Skip thumbnail generation on Vercel (FFmpeg not available)
+        if (isVercel) {
+          console.log('Skipping thumbnail generation on Vercel - FFmpeg not available');
+          thumbnailUrl = '';
+        } else {
+          try {
+            // Download the video from S3 to generate thumbnail
+            const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+            const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
             
-            Ffmpeg(tmpVideoPath)
-              .on('end', resolve)
-              .on('error', reject)
-              .screenshots({
-                timestamps: ['5'],
-                filename: path.basename(thumbPath),
-                folder: path.dirname(thumbPath),
-                size: thumbnailSize,
+            // Extract S3 key from mediaUrl
+            const urlObj = new URL(mediaUrl);
+            const s3Key = urlObj.pathname.substring(1);
+            
+            // Create a presigned URL for downloading the video
+            const getObjectCommand = new GetObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: s3Key
+            });
+            
+            const downloadUrl = await getSignedUrl(s3, getObjectCommand, { expiresIn: 3600 });
+            
+            // Download the video file
+            const response = await fetch(downloadUrl);
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            
+            // Create temporary file for the video
+            const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(s3Key) });
+            await fs.writeFile(tmpVideoPath, buffer);
+            
+            // Get video dimensions
+            const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
+              return new Promise((resolve, reject) => {
+                Ffmpeg.ffprobe(tmpVideoPath, (err, metadata) => {
+                  if (err) return reject(err);
+                  const stream = metadata.streams.find(s => s.width && s.height);
+                  if (!stream) return reject(new Error('No video stream found'));
+                  resolve({ width: stream.width!, height: stream.height! });
+                });
               });
-          });
-          
-          // Upload thumbnail to S3
-          const thumbBuffer = await fs.readFile(thumbPath);
-          const thumbKey = `athlete/media/thumbnails/${randomUUID()}.jpg`;
-          
-          await s3.send(new PutObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: thumbKey,
-            Body: thumbBuffer,
-            ContentType: 'image/jpeg'
-          }));
-          
-          thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
-          
-          // Clean up temporary files
-          await tmpThumb.cleanup();
-          await fs.unlink(tmpVideoPath);
-          
-        } catch (error) {
-          console.error('Failed to generate thumbnail for video:', error);
-          thumbnailUrl = ''; // Fallback to empty thumbnail
+            };
+            
+            const { width, height } = await getVideoDimensions();
+            const isPortrait = height > width;
+            const thumbnailSize = isPortrait ? '360x640' : '640x360';
+            
+            // Generate thumbnail
+            const tmpThumb = await tmpFile({ postfix: '.jpg' });
+            const thumbPath = tmpThumb.path;
+            
+            await new Promise((resolve, reject) => {
+              if (!thumbPath) {
+                return reject(new Error('Thumbnail path is null'));
+              }
+              
+              Ffmpeg(tmpVideoPath)
+                .on('end', resolve)
+                .on('error', reject)
+                .screenshots({
+                  timestamps: ['5'],
+                  filename: path.basename(thumbPath),
+                  folder: path.dirname(thumbPath),
+                  size: thumbnailSize,
+                });
+            });
+            
+            // Upload thumbnail to S3
+            const thumbBuffer = await fs.readFile(thumbPath);
+            const thumbKey = `athlete/media/thumbnails/${randomUUID()}.jpg`;
+            
+            await s3.send(new PutObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: thumbKey,
+              Body: thumbBuffer,
+              ContentType: 'image/jpeg'
+            }));
+            
+            thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
+            
+            // Clean up temporary files
+            await tmpThumb.cleanup();
+            await fs.unlink(tmpVideoPath);
+            
+          } catch (error) {
+            console.error('Failed to generate thumbnail for video:', error);
+            thumbnailUrl = ''; // Fallback to empty thumbnail
+          }
         }
       }
 
@@ -213,61 +234,72 @@ export async function POST(
     let thumbnailUrl = '';
 
     if (mediaRaw instanceof File && mediaType?.toString().startsWith('video/')) {
-      const arrayBuffer = await mediaRaw.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      // Skip thumbnail generation on Vercel (FFmpeg not available)
+      if (isVercel) {
+        console.log('Skipping thumbnail generation on Vercel - FFmpeg not available');
+        thumbnailUrl = '';
+      } else {
+        try {
+          const arrayBuffer = await mediaRaw.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
 
-      const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
-      await fs.writeFile(tmpVideoPath, buffer);
+          const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
+          await fs.writeFile(tmpVideoPath, buffer);
 
-      const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
-        return new Promise((resolve, reject) => {
-          Ffmpeg.ffprobe(tmpVideoPath, (err, metadata) => {
-            if (err) return reject(err);
-            const stream = metadata.streams.find(s => s.width && s.height);
-            if (!stream) return reject(new Error('No video stream found'));
-            resolve({ width: stream.width!, height: stream.height! });
+          const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
+            return new Promise((resolve, reject) => {
+              Ffmpeg.ffprobe(tmpVideoPath, (err, metadata) => {
+                if (err) return reject(err);
+                const stream = metadata.streams.find(s => s.width && s.height);
+                if (!stream) return reject(new Error('No video stream found'));
+                resolve({ width: stream.width!, height: stream.height! });
+              });
+            });
+          };
+
+          const { width, height } = await getVideoDimensions();
+          const isPortrait = height > width;
+          const thumbnailSize = isPortrait ? '360x640' : '640x360';
+
+          const tmpThumb = await tmpFile({ postfix: '.jpg' });
+          const thumbPath = tmpThumb.path;
+
+          await new Promise((resolve, reject) => {
+            // Ensure thumbPath is not null
+            if (!thumbPath) {
+              return reject(new Error('Thumbnail path is null'));
+            }
+
+            
+            Ffmpeg(tmpVideoPath)
+              .on('end', resolve)
+              .on('error', reject)
+              .screenshots({
+                timestamps: ['5'],
+                filename: path.basename(thumbPath),
+                folder: path.dirname(thumbPath),
+                size: thumbnailSize,
+              });
           });
-        });
-      };
 
-      const { width, height } = await getVideoDimensions();
-      const isPortrait = height > width;
-      const thumbnailSize = isPortrait ? '360x640' : '640x360';
+          const thumbBuffer = await fs.readFile(thumbPath);
+          const thumbKey = `athlete/media/thumbnails/${randomUUID()}.jpg`;
 
-      const tmpThumb = await tmpFile({ postfix: '.jpg' });
-      const thumbPath = tmpThumb.path;
+          await s3.send(new PutObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: thumbKey,
+            Body: thumbBuffer,
+            ContentType: 'image/jpeg'
+          }));
 
-      await new Promise((resolve, reject) => {
-        // Ensure thumbPath is not null
-        if (!thumbPath) {
-          return reject(new Error('Thumbnail path is null'));
+          thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
+
+          await tmpThumb.cleanup();
+        } catch (error) {
+          console.error('Failed to generate thumbnail for video:', error);
+          thumbnailUrl = '';
         }
-
-        
-        Ffmpeg(tmpVideoPath)
-          .on('end', resolve)
-          .on('error', reject)
-          .screenshots({
-            timestamps: ['5'],
-            filename: path.basename(thumbPath),
-            folder: path.dirname(thumbPath),
-            size: thumbnailSize,
-          });
-      });
-
-      const thumbBuffer = await fs.readFile(thumbPath);
-      const thumbKey = `athlete/media/thumbnails/${randomUUID()}.jpg`;
-
-      await s3.send(new PutObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: thumbKey,
-        Body: thumbBuffer,
-        ContentType: 'image/jpeg'
-      }));
-
-      thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
-
-      await tmpThumb.cleanup();
+      }
     }
     
 
