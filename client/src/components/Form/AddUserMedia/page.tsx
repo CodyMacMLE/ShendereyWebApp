@@ -85,6 +85,23 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                 return;
             }
 
+            // Step 2.5: Generate video thumbnail if media is a video
+            let videoThumbnail = '';
+            if (mediaFile?.type?.startsWith('video/')) {
+                const thumbRes = await fetch(`/api/users/media/${athleteId}/upload-thumbnail`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mediaUrl }),
+                });
+
+                if (thumbRes.ok) {
+                    const thumbData = await thumbRes.json();
+                    videoThumbnail = thumbData.thumbnailUrl;
+                } else {
+                    console.warn('Failed to generate thumbnail.');
+                }
+            }
+
             // Step 3: Save media record to database
             const saveRes = await fetch(`/api/users/${userId}/media/${athleteId}`, {
                 method: 'POST',
@@ -98,6 +115,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                     date,
                     mediaType: mediaFile?.type,
                     mediaUrl,
+                    videoThumbnail,
                 }),
             });
 
