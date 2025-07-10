@@ -11,6 +11,7 @@ import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client
 import { randomUUID } from 'crypto';
 
 import Ffmpeg from 'fluent-ffmpeg';
+import { existsSync } from 'fs';
 // FFmpeg configuration - only set paths if binaries exist
 const ffmpegPath = process.env.FFMPEG_PATH || '/opt/homebrew/bin/ffmpeg';
 const ffprobePath = process.env.FFPROBE_PATH || '/opt/homebrew/bin/ffprobe';
@@ -21,14 +22,13 @@ const isVercel = process.env.VERCEL === '1';
 if (!isVercel) {
   // Only set FFmpeg paths in development/local environment
   try {
-    const fs = require('fs');
-    if (fs.existsSync(ffmpegPath)) {
+    if (existsSync(ffmpegPath)) {
       Ffmpeg.setFfmpegPath(ffmpegPath);
     }
-    if (fs.existsSync(ffprobePath)) {
+    if (existsSync(ffprobePath)) {
       Ffmpeg.setFfprobePath(ffprobePath);
     }
-  } catch (error) {
+  } catch {
     console.warn('FFmpeg not available, thumbnail generation will be skipped');
   }
 }
@@ -107,7 +107,7 @@ export async function POST(
     try {
       // The client is now responsible for thumbnail generation and upload.
       // We still default to an empty thumbnailUrl if the client does not send one.
-      let thumbnailUrl = '';
+      const thumbnailUrl = '';
 
       await db.insert(media).values({
         athlete: parseInt(athleteId),
@@ -139,7 +139,7 @@ export async function POST(
 
     // The client is now responsible for thumbnail generation and upload.
     // We still default to an empty thumbnailUrl if the client does not send one.
-    let thumbnailUrl = '';
+    const thumbnailUrl = '';
 
     const title = formData.get('name');
     const description = formData.get('description');
