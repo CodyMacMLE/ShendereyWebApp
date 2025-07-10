@@ -109,7 +109,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                             try {
                                 // Seek to 2 seconds into the video
                                 video.currentTime = 2;
-                            } catch (e) {
+                            } catch {
                                 // If seeking fails, try at 0 seconds
                                 video.currentTime = 0;
                             }
