@@ -88,17 +88,90 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
             // Step 2.5: Generate video thumbnail if media is a video
             let videoThumbnail = '';
             if (mediaFile?.type?.startsWith('video/')) {
-                const thumbRes = await fetch(`/api/users/media/${athleteId}/upload-thumbnail`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mediaUrl }),
-                });
-
-                if (thumbRes.ok) {
-                    const thumbData = await thumbRes.json();
-                    videoThumbnail = thumbData.thumbnailUrl;
-                } else {
-                    console.warn('Failed to generate thumbnail.');
+                try {
+                    // Create a video element to generate thumbnail
+                    const video = document.createElement('video');
+                    video.crossOrigin = 'anonymous';
+                    video.muted = true;
+                    video.playsInline = true;
+                    
+                    // Create a canvas to capture the thumbnail
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Set canvas size for thumbnail
+                    canvas.width = 640;
+                    canvas.height = 360;
+                    
+                    // Create a promise to handle video loading and thumbnail generation
+                    const generateThumbnail = new Promise<string>((resolve, reject) => {
+                        video.onloadeddata = () => {
+                            try {
+                                // Seek to 2 seconds into the video
+                                video.currentTime = 2;
+                            } catch (e) {
+                                // If seeking fails, try at 0 seconds
+                                video.currentTime = 0;
+                            }
+                        };
+                        
+                        video.onseeked = () => {
+                            try {
+                                if (ctx) {
+                                    // Draw the video frame to canvas
+                                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                                    
+                                    // Convert canvas to blob
+                                    canvas.toBlob((blob) => {
+                                        if (blob) {
+                                            // Create a file from the blob
+                                            const thumbnailFile = new File([blob], 'thumbnail.jpg', { type: 'image/jpeg' });
+                                            
+                                            // Upload thumbnail to API
+                                            const formData = new FormData();
+                                            formData.append('thumbnail', thumbnailFile);
+                                            
+                                            fetch(`/api/users/${userId}/media/${athleteId}/upload-thumbnail`, {
+                                                method: 'POST',
+                                                body: formData,
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    resolve(data.thumbnailUrl);
+                                                } else {
+                                                    console.warn('Failed to upload thumbnail:', data.error);
+                                                    resolve('');
+                                                }
+                                            })
+                                            .catch(err => {
+                                                console.warn('Failed to upload thumbnail:', err);
+                                                resolve('');
+                                            });
+                                        } else {
+                                            reject(new Error('Failed to create thumbnail blob'));
+                                        }
+                                    }, 'image/jpeg', 0.8);
+                                } else {
+                                    reject(new Error('Canvas context not available'));
+                                }
+                            } catch (err) {
+                                reject(err);
+                            }
+                        };
+                        
+                        video.onerror = () => reject(new Error('Failed to load video'));
+                        
+                        // Set video source
+                        video.src = URL.createObjectURL(mediaFile);
+                    });
+                    
+                    // Wait for thumbnail generation and upload
+                    videoThumbnail = await generateThumbnail;
+                    
+                } catch (error) {
+                    console.warn('Failed to generate thumbnail:', error);
+                    videoThumbnail = '';
                 }
             }
 

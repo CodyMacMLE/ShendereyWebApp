@@ -102,12 +102,11 @@ export async function POST(
   if (contentType?.includes('application/json')) {
     // Handle JSON request (direct S3 upload)
     const body = await req.json();
-    const { name, description, category, date, mediaType, mediaUrl } = body;
+    const { name, description, category, date, mediaType, mediaUrl, videoThumbnail } = body;
     
     try {
-      // The client is now responsible for thumbnail generation and upload.
-      // We still default to an empty thumbnailUrl if the client does not send one.
-      const thumbnailUrl = '';
+      // Use the thumbnail URL provided by the client, or default to empty string
+      const thumbnailUrl = videoThumbnail || '';
 
       await db.insert(media).values({
         athlete: parseInt(athleteId),
@@ -117,7 +116,7 @@ export async function POST(
         date: date ? new Date(date) : null,
         mediaType: mediaType || '',
         mediaUrl: mediaUrl || '',
-        videoThumbnail: thumbnailUrl || ''
+        videoThumbnail: thumbnailUrl
       });
 
       const fetchedMedia = await db.select().from(media).where(eq(media.athlete, parseInt(athleteId)));
