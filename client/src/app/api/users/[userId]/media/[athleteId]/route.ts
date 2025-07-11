@@ -129,44 +129,44 @@ export async function POST(
       );
     }
   } else {
-    // Handle FormData request (legacy upload)
+    // Handle FormData request (legacy upload - keeping for backward compatibility)
     const formData = await req.formData();
     try {
       const mediaType = formData.get('mediaType');
       const mediaRaw = formData.get('media');
       const mediaUrl = mediaRaw instanceof File ? await uploadToS3(mediaRaw, 'athlete/media') : '';
+      
+      // Handle videoThumbnail - ensure it's a string
+      const thumbnailRaw = formData.get('videoThumbnail');
+      const thumbnailUrl = typeof thumbnailRaw === 'string' ? thumbnailRaw : '';
 
-    // The client is now responsible for thumbnail generation and upload.
-    // We still default to an empty thumbnailUrl if the client does not send one.
-    const thumbnailUrl = '';
+      const title = formData.get('name');
+      const description = formData.get('description');
+      const category = formData.get('category');
+      const dateRaw = formData.get('date');
+      const date = typeof dateRaw === 'string' ? new Date(dateRaw) : null;
 
-    const title = formData.get('name');
-    const description = formData.get('description');
-    const category = formData.get('category');
-    const dateRaw = formData.get('date');
-    const date = typeof dateRaw === 'string' ? new Date(dateRaw) : null;
+      await db.insert(media).values({
+        athlete: parseInt(athleteId),
+        name: title?.toString() || '',
+        description: description?.toString() || '',
+        category: category?.toString() || '',
+        date: date,
+        mediaType: mediaType?.toString() || '',
+        mediaUrl: mediaUrl,
+        videoThumbnail: thumbnailUrl
+      });
 
-    await db.insert(media).values({
-      athlete: parseInt(athleteId),
-      name: title?.toString() || '',
-      description: description?.toString() || '',
-      category: category?.toString() || '',
-      date: date,
-      mediaType: mediaType?.toString() || '',
-      mediaUrl: mediaUrl,
-      videoThumbnail: thumbnailUrl || ''
-    })
+      const fetchedMedia = await db.select().from(media).where(eq(media.athlete, parseInt(athleteId)));
 
-    const fetchedMedia = await db.select().from(media).where(eq(media.athlete, parseInt(athleteId)))
-
-    return NextResponse.json({ success: true, body: fetchedMedia });
+      return NextResponse.json({ success: true, body: fetchedMedia });
     
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
-  }
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
   }
 }
 

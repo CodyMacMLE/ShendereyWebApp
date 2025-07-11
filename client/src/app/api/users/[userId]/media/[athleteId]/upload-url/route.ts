@@ -25,6 +25,8 @@ export async function POST(
 ) {
   try {
     const { fileName, fileType } = await req.json();
+    const { searchParams } = new URL(req.url);
+    const prefix = searchParams.get('prefix') || 'athlete/media/';
 
     if (!fileName || !fileType) {
       return NextResponse.json(
@@ -33,7 +35,7 @@ export async function POST(
       );
     }
 
-    const key = `athlete/media/${randomUUID()}-${fileName}`;
+    const key = `${prefix}${randomUUID()}-${fileName}`;
     
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,

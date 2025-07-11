@@ -51,7 +51,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
         }
 
         try {
-            // Step 1: Get presigned URL for direct S3 upload
+            // Step 1: Upload the media item
             const presignedRes = await fetch(`/api/users/${userId}/media/${athleteId}/upload-url`, {
                 method: 'POST',
                 headers: {
@@ -85,7 +85,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                 return;
             }
 
-            // Step 2.5: Generate video thumbnail if media is a video
+            // Step 3: Check if the media item is a video and generate thumbnail
             let videoThumbnail = '';
             if (mediaFile?.type?.startsWith('video/')) {
                 try {
@@ -122,32 +122,45 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                                     
                                     // Convert canvas to blob
-                                    canvas.toBlob((blob) => {
+                                    canvas.toBlob(async (blob) => {
                                         if (blob) {
                                             // Create a file from the blob
                                             const thumbnailFile = new File([blob], 'thumbnail.jpg', { type: 'image/jpeg' });
                                             
-                                            // Upload thumbnail to API
-                                            const formData = new FormData();
-                                            formData.append('thumbnail', thumbnailFile);
-                                            
-                                            fetch(`/api/users/${userId}/media/${athleteId}/upload-thumbnail`, {
+                                            // Get presigned URL for thumbnail upload using the same route with prefix
+                                            const thumbnailPresignedRes = await fetch(`/api/users/${userId}/media/${athleteId}/upload-url?prefix=athlete/media/thumbnails/`, {
                                                 method: 'POST',
-                                                body: formData,
-                                            })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                if (data.success) {
-                                                    resolve(data.thumbnailUrl);
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    fileName: thumbnailFile.name,
+                                                    fileType: thumbnailFile.type,
+                                                }),
+                                            });
+
+                                            if (thumbnailPresignedRes.ok) {
+                                                const { uploadUrl: thumbnailUploadUrl, mediaUrl: thumbnailMediaUrl } = await thumbnailPresignedRes.json();
+                                                
+                                                // Upload thumbnail to S3
+                                                const thumbnailUploadRes = await fetch(thumbnailUploadUrl, {
+                                                    method: 'PUT',
+                                                    body: thumbnailFile,
+                                                    headers: {
+                                                        'Content-Type': thumbnailFile.type,
+                                                    },
+                                                });
+
+                                                if (thumbnailUploadRes.ok) {
+                                                    resolve(thumbnailMediaUrl);
                                                 } else {
-                                                    console.warn('Failed to upload thumbnail:', data.error);
+                                                    console.warn('Failed to upload thumbnail to S3');
                                                     resolve('');
                                                 }
-                                            })
-                                            .catch(err => {
-                                                console.warn('Failed to upload thumbnail:', err);
+                                            } else {
+                                                console.warn('Failed to get thumbnail upload URL');
                                                 resolve('');
-                                            });
+                                            }
                                         } else {
                                             reject(new Error('Failed to create thumbnail blob'));
                                         }
@@ -175,7 +188,7 @@ export default function AddUserMedia({ userId, athleteId, setAthleteMedia, setMo
                 }
             }
 
-            // Step 3: Save media record to database
+            // Step 4: Save media record to database with both media and thumbnail URLs
             const saveRes = await fetch(`/api/users/${userId}/media/${athleteId}`, {
                 method: 'POST',
                 headers: {
