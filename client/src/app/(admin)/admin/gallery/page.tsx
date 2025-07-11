@@ -72,6 +72,14 @@ export default function OldGallery() {
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
+    const resetForm = () => {
+        setName('');
+        setDescription('');
+        setDate('');
+        setMediaFile(null);
+        setFormErrors([]);
+    };
+
     const handleSubmit = async () => {
         const errors: { msg: string }[] = [];
 
@@ -243,6 +251,7 @@ export default function OldGallery() {
                 const data = await saveRes.json();
                 if (setMedia && data.body) setMedia([...media, data.body]);
                 if (setAddModalEnabled) setAddModalEnabled(false);
+                resetForm();
             } else {
                 const errorData = await saveRes.json();
                 console.error('Save failed:', errorData);
@@ -394,7 +403,10 @@ export default function OldGallery() {
                         <div className="mt-6 flex items-center justify-end gap-x-6">
                             <button
                                 type="button"
-                                onClick={() => setAddModalEnabled(false)}
+                                onClick={() => {
+                                    setAddModalEnabled(false);
+                                    resetForm();
+                                }}
                                 className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
                             >
                                 Cancel
