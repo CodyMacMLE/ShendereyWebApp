@@ -56,94 +56,125 @@ async function uploadToS3(file: File, keyPrefix: string) {
 export async function POST(
   req: NextRequest
 ) {
-  const formData = await req.formData();
-  try {
-    const mediaType = formData.get('mediaType');
-    const mediaRaw = formData.get('media');
-    const mediaUrl = mediaRaw instanceof File ? await uploadToS3(mediaRaw, 'gallery') : '';
+  // Check if this is a JSON request (for direct S3 upload) or FormData request
+  const contentType = req.headers.get('content-type');
+  
+  if (contentType?.includes('application/json')) {
+    // Handle JSON request (direct S3 upload)
+    const body = await req.json();
+    const { name, description, date, mediaType, mediaUrl, videoThumbnail } = body;
+    
+    try {
+      // Use the thumbnail URL provided by the client, or default to empty string
+      const thumbnailUrl = videoThumbnail || '';
 
-    let thumbnailUrl = '';
+      const fetchedMedia = await db.insert(gallery).values({
+        name: name || '',
+        description: description || '',
+        date: date ? new Date(date) : null,
+        mediaType: mediaType || '',
+        mediaUrl: mediaUrl || '',
+        videoThumbnail: thumbnailUrl
+      }).returning();
 
-    if (mediaRaw instanceof File && mediaType?.toString().startsWith('video/')) {
-      const arrayBuffer = await mediaRaw.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
-      await fs.writeFile(tmpVideoPath, buffer);
-
-      const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
-        return new Promise((resolve, reject) => {
-          Ffmpeg.ffprobe(tmpVideoPath, (err, metadata) => {
-            if (err) return reject(err);
-            const stream = metadata.streams.find(s => s.width && s.height);
-            if (!stream) return reject(new Error('No video stream found'));
-            resolve({ width: stream.width!, height: stream.height! });
-          });
-        });
-      };
-
-      const { width, height } = await getVideoDimensions();
-      const isPortrait = height > width;
-      const thumbnailSize = isPortrait ? '360x640' : '640x360';
-
-      const tmpThumb = await tmpFile({ postfix: '.jpg' });
-      const thumbPath = tmpThumb.path;
-
-      await new Promise((resolve, reject) => {
-        // Ensure thumbPath is not null
-        if (!thumbPath) {
-          return reject(new Error('Thumbnail path is null'));
-        }
-
-        
-        Ffmpeg(tmpVideoPath)
-          .on('end', resolve)
-          .on('error', reject)
-          .screenshots({
-            timestamps: ['5'],
-            filename: path.basename(thumbPath),
-            folder: path.dirname(thumbPath),
-            size: thumbnailSize,
-          });
-      });
-
-      const thumbBuffer = await fs.readFile(thumbPath);
-      const thumbKey = `gallery/thumbnails/${randomUUID()}.jpg`;
-
-      await s3.send(new PutObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: thumbKey,
-        Body: thumbBuffer,
-        ContentType: 'image/jpeg'
-      }));
-
-      thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
-
-      await tmpThumb.cleanup();
+      return NextResponse.json({ success: true, body: fetchedMedia[0] });
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
     }
-    
+  } else {
+    // Handle FormData request (legacy upload)
+    const formData = await req.formData();
+    try {
+      const mediaType = formData.get('mediaType');
+      const mediaRaw = formData.get('media');
+      const mediaUrl = mediaRaw instanceof File ? await uploadToS3(mediaRaw, 'gallery') : '';
 
-    const name = formData.get('name');
-    const description = formData.get('description');
-    const dateRaw = formData.get('date');
-    const date = typeof dateRaw === 'string' ? new Date(dateRaw) : null;
+      let thumbnailUrl = '';
 
-    const fetchedMedia = await db.insert(gallery).values({
-      name: name?.toString() || '',
-      description: description?.toString() || '',
-      date: date,
-      mediaType: mediaType?.toString() || '',
-      mediaUrl: mediaUrl,
-      videoThumbnail: thumbnailUrl || ''
-    }).returning();
+      if (mediaRaw instanceof File && mediaType?.toString().startsWith('video/')) {
+        const arrayBuffer = await mediaRaw.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
 
-    return NextResponse.json({ success: true, body: fetchedMedia[0] });
-    
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+        const { path: tmpVideoPath } = await tmpFile({ postfix: path.extname(mediaRaw.name) });
+        await fs.writeFile(tmpVideoPath, buffer);
+
+        const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
+          return new Promise((resolve, reject) => {
+            Ffmpeg.ffprobe(tmpVideoPath, (err, metadata) => {
+              if (err) return reject(err);
+              const stream = metadata.streams.find(s => s.width && s.height);
+              if (!stream) return reject(new Error('No video stream found'));
+              resolve({ width: stream.width!, height: stream.height! });
+            });
+          });
+        };
+
+        const { width, height } = await getVideoDimensions();
+        const isPortrait = height > width;
+        const thumbnailSize = isPortrait ? '360x640' : '640x360';
+
+        const tmpThumb = await tmpFile({ postfix: '.jpg' });
+        const thumbPath = tmpThumb.path;
+
+        await new Promise((resolve, reject) => {
+          // Ensure thumbPath is not null
+          if (!thumbPath) {
+            return reject(new Error('Thumbnail path is null'));
+          }
+
+          
+          Ffmpeg(tmpVideoPath)
+            .on('end', resolve)
+            .on('error', reject)
+            .screenshots({
+              timestamps: ['5'],
+              filename: path.basename(thumbPath),
+              folder: path.dirname(thumbPath),
+              size: thumbnailSize,
+            });
+        });
+
+        const thumbBuffer = await fs.readFile(thumbPath);
+        const thumbKey = `gallery/thumbnails/${randomUUID()}.jpg`;
+
+        await s3.send(new PutObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: thumbKey,
+          Body: thumbBuffer,
+          ContentType: 'image/jpeg'
+        }));
+
+        thumbnailUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbKey}`;
+
+        await tmpThumb.cleanup();
+      }
+      
+
+      const name = formData.get('name');
+      const description = formData.get('description');
+      const dateRaw = formData.get('date');
+      const date = typeof dateRaw === 'string' ? new Date(dateRaw) : null;
+
+      const fetchedMedia = await db.insert(gallery).values({
+        name: name?.toString() || '',
+        description: description?.toString() || '',
+        date: date,
+        mediaType: mediaType?.toString() || '',
+        mediaUrl: mediaUrl,
+        videoThumbnail: thumbnailUrl || ''
+      }).returning();
+
+      return NextResponse.json({ success: true, body: fetchedMedia[0] });
+      
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
   }
 }
 
