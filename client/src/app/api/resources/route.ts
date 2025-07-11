@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
         const resourceUrl = await uploadToS3(resourceFile, 'resources');
         
         const newResource = await db.insert(resources).values({
+            name: name,
             size: size,
             downloads: downloads,
             resourceUrl: resourceUrl,
