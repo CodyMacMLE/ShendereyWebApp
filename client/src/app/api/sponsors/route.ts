@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
         // Handle S3 uploads for each image field with type checking
         const sponsorImgRaw = formData.get('media');
-        const sponsorImgUrl = sponsorImgRaw instanceof File ? await uploadToS3(sponsorImgRaw, 'sponsor') : '';
+        const sponsorImgUrl = sponsorImgRaw instanceof File ? await uploadToS3(sponsorImgRaw, 'sponsors') : '';
 
         // Insert Data into DB
         const insertedSponsor = await db.insert(sponsors).values({
