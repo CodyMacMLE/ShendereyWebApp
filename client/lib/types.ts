@@ -172,7 +172,9 @@ export type Gallery = {
 export type Resource = {
     id: string,
     name: string,
-    date: Date,
+    size: number,
+    downloads: number,
+    createdAt: Date,
     resourceUrl: string,
 };
 

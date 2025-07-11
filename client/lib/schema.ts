@@ -193,7 +193,9 @@ export const gallery = pgTable('gallery', {
 export const resources = pgTable('resources', {
     id: serial('id').primaryKey(),
     name: text('name'),
-    date: timestamp('date'),
+    size: integer('size'),
+    downloads: integer('downloads').default(0),
+    createdAt: timestamp('createdAt').defaultNow(),
     resourceUrl: text('resourceUrl'),
 })
 
