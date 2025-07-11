@@ -1,3 +1,5 @@
+"use client"
+
 import ResourceTable from "@/components/UI/Tables/ResourcesTable/page";
 import { Resource } from "@/lib/types";
 import { useEffect, useState } from "react";
