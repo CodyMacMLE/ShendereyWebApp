@@ -138,6 +138,12 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                     </thead>
                     <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
                       {resources.map((resource: Resource, idx: number) => {
+                        // Skip resources without an ID or with invalid data
+                        if (!resource || typeof resource.id === 'undefined' || resource.id === null) {
+                          console.warn('Invalid resource:', resource);
+                          return null;
+                        }
+                        
                         const enabled = enabledStates[resource.id.toString()] || false;
 
                         const handleDeleteClick = async () => {

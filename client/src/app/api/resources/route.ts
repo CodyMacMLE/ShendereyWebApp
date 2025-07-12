@@ -77,12 +77,12 @@ export async function POST(req: NextRequest) {
 
         const resourceUrl = await uploadToS3(resourceFile, 'resources');
         
-        const newResource = await db.insert(resources).values({
+        const [newResource] = await db.insert(resources).values({
             name: name,
             size: size,
             downloads: downloads,
             resourceUrl: resourceUrl,
-        })
+        }).returning();
 
         return NextResponse.json({success: true, body: newResource}, {status: 200})
     } catch (error) {
@@ -131,16 +131,16 @@ export async function PUT(req: NextRequest) {
             }
             resourceUrl = await uploadToS3(resourceFile, 'resources');
 
-            updatedResource = await db.update(resources).set({
+            [updatedResource] = await db.update(resources).set({
                 name: name,
                 size: size,
                 resourceUrl: resourceUrl || null,
-            }).where(eq(resources.id, id));
+            }).where(eq(resources.id, id)).returning();
         } else {
-            updatedResource = await db.update(resources).set({
+            [updatedResource] = await db.update(resources).set({
                 name: name,
                 size: size
-            }).where(eq(resources.id, id));
+            }).where(eq(resources.id, id)).returning();
         }
 
         return NextResponse.json({success: true, body: updatedResource}, {status: 200})
