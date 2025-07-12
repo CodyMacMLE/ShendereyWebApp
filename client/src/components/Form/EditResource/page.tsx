@@ -25,8 +25,6 @@ export default function EditResource({ resource, setResources, setModalEnable }:
             // Use existing resource size if no new file
             formData.append('size', resource.size.toString());
         }
-        
-        formData.append('downloads', resource.downloads.toString());
 
         const res = await fetch('/api/resources', {
             method: 'PUT',
