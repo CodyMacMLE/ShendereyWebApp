@@ -22,10 +22,10 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
     const [enabledStates, setEnabledStates] = useState<{ [key: string]: boolean }>({});
 
     // Toggle enabled state for delete confirmation
-    const toggleEnabled = (resourceId: string) => {
+    const toggleEnabled = (resourceId: number) => {
         setEnabledStates(prev => ({
             ...prev,
-            [resourceId]: !prev[resourceId]
+            [resourceId.toString()]: !prev[resourceId.toString()]
         }));
     };
 
@@ -44,7 +44,7 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
     }, []);
 
     // Delete Resource
-    const deleteResource = async (resourceId : string) => {
+    const deleteResource = async (resourceId : number) => {
         try {
             const res = await fetch(`/api/resources/${resourceId}`, {
                 method: 'DELETE',
@@ -138,7 +138,7 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                     </thead>
                     <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
                       {resources.map((resource: Resource, idx: number) => {
-                        const enabled = enabledStates[resource.id] || false;
+                        const enabled = enabledStates[resource.id.toString()] || false;
 
                         const handleDeleteClick = async () => {
                           if (!enabled) {
