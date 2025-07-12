@@ -192,63 +192,9 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                               <div className="flex items-center justify-center gap-3">
                                 <button 
                                     onClick={() => {
-                                        // Use Google Docs Viewer for better PDF display across all browsers
+                                        // Open PDF in new tab using Google Docs Viewer
                                         const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(resource.resourceUrl)}&embedded=true`;
-                                        const pdfWindow = window.open('', '_blank', 'width=1000,height=800,scrollbars=yes,resizable=yes');
-                                        if (pdfWindow) {
-                                            pdfWindow.document.write(`
-                                                <html>
-                                                    <head>
-                                                        <title>${resource.name}</title>
-                                                        <style>
-                                                            body { 
-                                                                margin: 0; 
-                                                                padding: 0; 
-                                                                height: 100vh; 
-                                                                font-family: Arial, sans-serif;
-                                                                background-color: #f5f5f5;
-                                                            }
-                                                            .header {
-                                                                background-color: #333;
-                                                                color: white;
-                                                                padding: 10px 20px;
-                                                                display: flex;
-                                                                justify-content: space-between;
-                                                                align-items: center;
-                                                            }
-                                                            .close-btn {
-                                                                background: #ff4444;
-                                                                color: white;
-                                                                border: none;
-                                                                padding: 5px 10px;
-                                                                border-radius: 3px;
-                                                                cursor: pointer;
-                                                            }
-                                                            .close-btn:hover {
-                                                                background: #cc0000;
-                                                            }
-                                                            iframe { 
-                                                                width: 100%; 
-                                                                height: calc(100vh - 60px); 
-                                                                border: none; 
-                                                                background: white;
-                                                            }
-                                                        </style>
-                                                    </head>
-                                                    <body>
-                                                        <div class="header">
-                                                            <h2>${resource.name}</h2>
-                                                            <button class="close-btn" onclick="window.close()">Close</button>
-                                                        </div>
-                                                        <iframe src="${googleDocsUrl}" 
-                                                                width="100%" 
-                                                                height="100%">
-                                                        </iframe>
-                                                    </body>
-                                                </html>
-                                            `);
-                                            pdfWindow.document.close();
-                                        }
+                                        window.open(googleDocsUrl, '_blank');
                                     }}
                                     className="text-[var(--primary)] bg-[var(--card-bg)] hover:text-[var(--background)] hover:bg-[var(--primary)] cursor-pointer rounded-full ring-1 ring-[var(--border)] py-1 px-3">
                                     Open<span className="sr-only">, {resource.name}</span>
