@@ -186,12 +186,68 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] max-w-xs truncate">
                                 {resource.downloads}
                             </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] w-full sm:w-1/3 md:w-1/4 min-w-[160px]">
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] text-center w-full sm:w-1/3 md:w-1/4 min-w-[160px]">
                               <div className="flex items-center gap-3">
                                 <button onClick={() => {
-                                    window.open(resource.resourceUrl, '_blank');
+                                    // Open PDF in new window with specific features for inline viewing
+                                    const pdfWindow = window.open('', '_blank', 'width=1000,height=800,scrollbars=yes,resizable=yes');
+                                    if (pdfWindow) {
+                                        pdfWindow.document.write(`
+                                            <html>
+                                                <head>
+                                                    <title>${resource.name}</title>
+                                                    <style>
+                                                        body { 
+                                                            margin: 0; 
+                                                            padding: 0; 
+                                                            height: 100vh; 
+                                                            font-family: Arial, sans-serif;
+                                                            background-color: #f5f5f5;
+                                                        }
+                                                        .header {
+                                                            background-color: #333;
+                                                            color: white;
+                                                            padding: 10px 20px;
+                                                            display: flex;
+                                                            justify-content: space-between;
+                                                            align-items: center;
+                                                        }
+                                                        .close-btn {
+                                                            background: #ff4444;
+                                                            color: white;
+                                                            border: none;
+                                                            padding: 5px 10px;
+                                                            border-radius: 3px;
+                                                            cursor: pointer;
+                                                        }
+                                                        .close-btn:hover {
+                                                            background: #cc0000;
+                                                        }
+                                                        iframe { 
+                                                            width: 100%; 
+                                                            height: calc(100vh - 60px); 
+                                                            border: none; 
+                                                            background: white;
+                                                        }
+                                                    </style>
+                                                </head>
+                                                <body>
+                                                    <div class="header">
+                                                        <h2>${resource.name}</h2>
+                                                        <button class="close-btn" onclick="window.close()">Close</button>
+                                                    </div>
+                                                    <iframe src="${resource.resourceUrl}#toolbar=0&navpanes=0&scrollbar=0" 
+                                                            type="application/pdf" 
+                                                            width="100%" 
+                                                            height="100%">
+                                                    </iframe>
+                                                </body>
+                                            </html>
+                                        `);
+                                        pdfWindow.document.close();
+                                    }
                                 }}>
-                                  Open
+                                    Open
                                 </button>
                               </div>
                             </td>
