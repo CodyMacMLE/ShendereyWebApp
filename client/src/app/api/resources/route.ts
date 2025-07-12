@@ -72,7 +72,6 @@ export async function POST(req: NextRequest) {
         const formData = await req.formData();
         const name = formData.get('name') as string;
         const size = formData.get('size') as unknown as number;
-        const downloads = formData.get('downloads') as unknown as number || 0;
         const resourceFile = formData.get('resourceFile') as unknown as File;
 
         const resourceUrl = await uploadToS3(resourceFile, 'resources');
@@ -80,7 +79,6 @@ export async function POST(req: NextRequest) {
         const [newResource] = await db.insert(resources).values({
             name: name,
             size: size,
-            downloads: downloads,
             resourceUrl: resourceUrl,
         }).returning();
 

@@ -173,7 +173,7 @@ export type Resource = {
     id: number,
     name: string,
     size: number,
-    downloads: number,
+    views: number,
     createdAt: Date,
     resourceUrl: string,
 };

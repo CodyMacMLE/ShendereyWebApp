@@ -194,7 +194,7 @@ export const resources = pgTable('resources', {
     id: serial('id').primaryKey(),
     name: text('name'),
     size: integer('size'),
-    downloads: integer('downloads').default(0),
+    views: integer('views').default(0),
     createdAt: timestamp('createdAt').defaultNow(),
     resourceUrl: text('resourceUrl'),
 })

@@ -115,8 +115,7 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                         <tr>
                           <th className="pl-3 pr-3.5 text-left text-sm font-semibold text-[var(--foreground)] sm:pl-6 w-1/4 sm:w-1/3 md:w-1/4">Name</th>
                           <th className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">Size</th>
-                                                      <th className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">Description</th>
-                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">Downloads</th>
+                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">Views</th>
                             <th className="px-3 py-3.5 text-center text-sm font-semibold text-[var(--foreground)]">View</th>
                           <th className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Edit</span></th>
                         </tr>
@@ -142,7 +141,7 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                           Size
                         </th>
                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
-                          Downloads
+                          Views
                         </th>
                         <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-[var(--foreground)]">
                           View
@@ -186,7 +185,7 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                               </div>
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] max-w-xs truncate">
-                                {resource.downloads}
+                                {resource.views}
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] text-center w-full sm:w-1/3 md:w-1/4 min-w-[160px]">
                               <div className="flex items-center justify-center gap-3">
