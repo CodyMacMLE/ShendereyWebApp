@@ -192,7 +192,7 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                                 <button 
                                     onClick={() => {
                                         // Open PDF directly in Google Docs Viewer
-                                        window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(resource.resourceUrl)}&embedded=true`, '_blank');
+                                        window.open(`https://docs.google.com/viewer?url=${resource.resourceUrl}`, '_blank');
                                     }}
                                     className="text-[var(--primary)] bg-[var(--card-bg)] hover:text-[var(--background)] hover:bg-[var(--primary)] cursor-pointer rounded-full ring-1 ring-[var(--border)] py-1 px-3">
                                     Open<span className="sr-only">, {resource.name}</span>
