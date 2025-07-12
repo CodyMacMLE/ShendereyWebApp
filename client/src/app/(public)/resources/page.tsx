@@ -1,3 +1,5 @@
+import { getResources } from "@/lib/actions";
+import { Resource } from "@/lib/types";
 import { Metadata } from "next";
 import StackedList from "./StackedList";
 
@@ -5,34 +7,18 @@ export const metadata: Metadata = {
     title: 'Resources',
 };
 
-export default function Resources() {
+export default async function Resources() {
 
-    const resources = [
-        {
-            id: 1,
-            name: "AGM 2025",
-            posted: "2025-06-06",
-            size: "100KB",
-            downloads: 100,
-            link: "www.google.com"
-        },
-        {
-            id: 2,
-            name: "2025-2026 Parent Handbook",
-            posted: "2025-04-28",
-            size: "100KB",
-            downloads: 100,
-            link: "www.google.com"
-        },
-        {
-            id: 3,
-            name: "May 2025 Newsletter",
-            posted: "2025-05-01",
-            size: "100KB",
-            downloads: 100,
-            link: "www.google.com"
-        },
-    ]
+    const resourcesData = await getResources();
+    const resources: Resource[] = resourcesData.map((data: any) => ({
+        id: data.id,
+        name: data.name,
+        size: data.size,
+        views: data.views,
+        createdAt: data.createdAt,
+        resourceUrl: data.resourceUrl,
+    }));
+
     return (
         <div className="bg-white py-24 sm:py-32">
             {/* Header Section */}

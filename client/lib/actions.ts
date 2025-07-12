@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, scores, sponsors, userImages, users } from "@/lib/schema";
+import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, resources, scores, sponsors, userImages, users } from "@/lib/schema";
 import { asc, desc, eq } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
@@ -232,3 +232,8 @@ export const getGalleryMedia = async () => {
         id: item.id.toString()
     }));
 }
+
+export const getResources = async () => {
+    const resourcesData = await db.select().from(resources).orderBy(desc(resources.createdAt));
+    return resourcesData;
+}   

@@ -1,16 +1,8 @@
 'use client'
 
+import { Resource } from '@/lib/types'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
-
-interface Resource {
-    id: string | number
-    name: string
-    posted: string
-    size: string
-    downloads: number
-    link: string
-}
 
 export default function StackedList({ resources }: { resources: Resource[] }) {
 
@@ -49,7 +41,7 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
                             </div>
                             <div className="mt-1 flex items-center gap-x-2 text-xs/5 text-gray-500">
                                 <p className="whitespace-nowrap">
-                                    Posted on <time dateTime={resource.posted}>{resource.posted}</time>
+                                    Posted on <time dateTime={resource.createdAt.toISOString()}>{resource.createdAt.toISOString()}</time>
                                 </p>
                                 <svg viewBox="0 0 2 2" className="size-0.5 fill-current">
                                     <circle r={1} cx={1} cy={1} />
@@ -58,16 +50,18 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
                                 <svg viewBox="0 0 2 2" className="size-0.5 fill-current">
                                     <circle r={1} cx={1} cy={1} />
                                 </svg>
-                                <p className="truncate">Downloads: {resource.downloads}</p>
+                                <p className="truncate">Views: {resource.views}</p>
                             </div>
                         </div>
                         <div className="flex flex-none items-center gap-x-4">
-                            <a
-                                href={resource.link}
-                                className="hidden rounded-md bg-[var(--primary)] px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-[var(--primary-hover)] hover:text-white sm:block"
-                            >
-                            Download<span className="sr-only">, {resource.name}</span>
-                            </a>
+                            <button 
+                                onClick={() => {
+                                    // Open PDF directly in Google Docs Viewer
+                                    window.open(`https://docs.google.com/viewer?url=${resource.resourceUrl}`, '_blank');
+                                }}
+                                className="text-[var(--primary)] bg-[var(--card-bg)] hover:text-[var(--background)] hover:bg-[var(--primary)] cursor-pointer rounded-full ring-1 ring-[var(--border)] py-1 px-3">
+                                Open<span className="sr-only">, {resource.name}</span>
+                            </button>
                         </div>
                     </li>
                 ))}
