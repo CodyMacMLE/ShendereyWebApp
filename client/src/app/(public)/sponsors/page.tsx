@@ -12,6 +12,15 @@ export default async function Sponsors() {
 
     const {diamondSponsors, goldSponsors, silverSponsors, affiliates} = await getSponsors();
 
+    // Helper function to ensure URLs have proper protocol
+    const ensureHttps = (url: string) => {
+        if (!url) return url;
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        return `https://${url}`;
+    };
+
     const numSponsors = diamondSponsors.length + goldSponsors.length + silverSponsors.length;
 
     return (
@@ -131,7 +140,7 @@ export default async function Sponsors() {
                       >
                                           {diamondSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
@@ -156,7 +165,7 @@ export default async function Sponsors() {
                       >
                       {goldSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
@@ -181,7 +190,7 @@ export default async function Sponsors() {
                       >
                       {silverSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
@@ -206,7 +215,7 @@ export default async function Sponsors() {
                       >
                       {affiliates.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
