@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import { SponsorsQuote } from "@/public/files/quotes"
 import { getSponsors } from "@/lib/actions";
+import { SponsorsQuote } from "@/public/files/quotes";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -129,9 +129,9 @@ export default async function Sponsors() {
                       role="list"
                       className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6 m-t-10"
                       >
-                    {diamondSponsors.map((sponsor) => (
+                                          {diamondSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank">
+                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
@@ -156,7 +156,7 @@ export default async function Sponsors() {
                       >
                       {goldSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank">
+                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
@@ -181,7 +181,7 @@ export default async function Sponsors() {
                       >
                       {silverSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank">
+                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
@@ -206,7 +206,7 @@ export default async function Sponsors() {
                       >
                       {affiliates.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={sponsor.website!} target="_blank">
+                            <a href={sponsor.website!} target="_blank" rel="noopener noreferrer">
                                 <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
