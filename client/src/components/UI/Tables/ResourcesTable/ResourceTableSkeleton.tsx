@@ -14,7 +14,7 @@ export default function ResourceTableSkeleton() {
                         <div className="h-4 bg-[var(--muted)] rounded w-16" />
                     </td>
                     <td className="px-3 py-4">
-                        <div className="h-4 bg-[var(--muted)] rounded w-12" />
+                        <div className="h-4 bg-[var(--muted)] rounded w-16" />
                     </td>
                     <td className="px-3 py-4 text-center">
                         <div className="flex items-center justify-center">

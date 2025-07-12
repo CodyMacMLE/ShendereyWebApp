@@ -235,5 +235,8 @@ export const getGalleryMedia = async () => {
 
 export const getResources = async () => {
     const resourcesData = await db.select().from(resources).orderBy(desc(resources.createdAt));
-    return resourcesData;
+    return resourcesData.map(item => ({
+        ...item,
+        id: item.id.toString()
+    }));
 }   

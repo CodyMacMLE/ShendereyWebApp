@@ -10,14 +10,15 @@ export const metadata: Metadata = {
 export default async function Resources() {
 
     const resourcesData = await getResources();
-    const resources: Resource[] = resourcesData.map((data: any) => ({
-        id: data.id,
-        name: data.name,
-        size: data.size,
-        views: data.views,
-        createdAt: data.createdAt,
-        resourceUrl: data.resourceUrl,
+    const resources: Resource[] = resourcesData.map((data) => ({
+        id: parseInt(data.id),
+        name: data.name || '',
+        size: data.size || 0,
+        views: data.views || 0,
+        createdAt: data.createdAt || new Date(),
+        resourceUrl: data.resourceUrl || '',
     }));
+    
 
     return (
         <div className="bg-white py-24 sm:py-32">
