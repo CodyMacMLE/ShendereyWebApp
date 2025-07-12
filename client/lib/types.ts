@@ -98,7 +98,7 @@ export type Achievement = {
 
 // TESTIMONIAL
 export type Testimonial = {
-    id: string,
+    id: number,
     author: string,
     authorImgUrl: string,
     testimonial: string,
@@ -129,7 +129,7 @@ export type Employment = {
 
 // PROGRAM
 export type Program = {
-    id: string,
+    id: number,
     name: string,
     category: string,
     description: string,
@@ -140,8 +140,8 @@ export type Program = {
 
 // GROUP
 export type Group = {
-    id: string,
-    program: string,
+    id: number,
+    program: number,
     day: string,
     startTime: string,
     endTime: string,
@@ -152,14 +152,14 @@ export type Group = {
 
 // COACHGROUPLINE
 export type CoachGroupLine = {
-    id: string,
-    coachId: string,
-    groupId: string,
+    id: number,
+    coachId: number,
+    groupId: number,
 };
 
 // GALLERY
 export type Gallery = {
-    id: string,
+    id: number,
     name: string,
     description: string,
     date: Date,
@@ -170,7 +170,7 @@ export type Gallery = {
 
 // RESOURCES
 export type Resource = {
-    id: string,
+    id: number,
     name: string,
     size: number,
     downloads: number,
@@ -180,7 +180,7 @@ export type Resource = {
 
 // TRYOUTS
 export type Tryout = {
-    id: string,
+    id: number,
     athleteName: string,
     athleteDOB: Date,
     athleteAbout: string,

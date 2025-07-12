@@ -16,8 +16,16 @@ export default function EditResource({ resource, setResources, setModalEnable }:
         const resourceFile = formData.get('resourceFile') as File;
         formData.append('id', resource.id.toString());
         formData.append('name', formData.get('name') as string);
-        formData.append('size', resourceFile.size.toString());
-        formData.append('resourceFile', resourceFile);
+        
+        // Only add file-related data if a new file is selected
+        if (resourceFile && resourceFile.size > 0) {
+            formData.append('size', resourceFile.size.toString());
+            formData.append('resourceFile', resourceFile);
+        } else {
+            // Use existing resource size if no new file
+            formData.append('size', resource.size.toString());
+        }
+        
         formData.append('downloads', resource.downloads.toString());
 
         const res = await fetch('/api/resources', {

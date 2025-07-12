@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { resources } from "@/lib/schema";
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -16,9 +15,12 @@ const s3 = new S3Client({
 
 async function deleteFromS3(url: string) {
     try {
+        // Extract the key from the S3 URL
+        const key = url.replace(`https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`, '');
+        
         const command = new DeleteObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME!,
-            Key: url,
+            Key: key,
         });
         await s3.send(command);
     } catch (error) {
@@ -30,16 +32,21 @@ async function deleteFromS3(url: string) {
 async function uploadToS3(file: File, keyPrefix: string) {
     try {
         const key = `${keyPrefix}/${randomUUID()}-${file.name}`;
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
         const uploadParams = {
             Bucket: process.env.AWS_BUCKET_NAME!,
             Key: key,
-            Body: file,
+            Body: buffer,
             ContentType: file.type,
         };
 
         const command = new PutObjectCommand(uploadParams);
-        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        return signedUrl;
+        await s3.send(command);
+        
+        // Return the S3 URL
+        return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
     } catch (error) {
         console.error("Error in uploadToS3:", error);
         throw new Error(`Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -65,7 +72,7 @@ export async function POST(req: NextRequest) {
         const formData = await req.formData();
         const name = formData.get('name') as string;
         const size = formData.get('size') as unknown as number;
-        const downloads = formData.get('downloads') as unknown as number;
+        const downloads = formData.get('downloads') as unknown as number || 0;
         const resourceFile = formData.get('resourceFile') as unknown as File;
 
         const resourceUrl = await uploadToS3(resourceFile, 'resources');
@@ -118,7 +125,7 @@ export async function PUT(req: NextRequest) {
         let resourceUrl = resource[0].resourceUrl;
         let updatedResource = null;
 
-        if (resourceFile) {
+        if (resourceFile && resourceFile.size > 0) {
             if (resource[0].resourceUrl) {
                 await deleteFromS3(resource[0].resourceUrl);
             }
