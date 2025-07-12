@@ -6,6 +6,7 @@ import Modal from "@/components/UI/Modal/page";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
+import { formatShortDate } from "../../../../lib/utils";
 
 type Score =  {
     id: number,
@@ -222,7 +223,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                                     {score.competition}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
-                                    {new Date(score.date).toLocaleDateString()}
+                                    {formatShortDate(score.date)}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
                                     {score.category}

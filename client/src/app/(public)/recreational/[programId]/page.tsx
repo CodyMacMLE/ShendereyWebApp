@@ -2,6 +2,7 @@ import { getGroups, getProgram } from "@/lib/actions";
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import Image from "next/image";
 import Link from "next/link";
+import { formatShortDate } from '../../../../lib/utils';
 
 export default async function ProgramPage({ params }: { params: Promise<{ programId: string }> }) {
 
@@ -177,11 +178,11 @@ export default async function ProgramPage({ params }: { params: Promise<{ progra
                                         </td>
                                         {/* Start Date */}
                                         <td className="font-mono hidden py-4 pl-0 pr-4 text-left text-sm/6 sm:table-cell sm:pr-6 lg:pr-8">
-                                            {group.groups.startDate ? new Date(group.groups.startDate).toLocaleDateString() : 'N/A'}
+                                            {group.groups.startDate ? formatShortDate(group.groups.startDate) : 'N/A'}
                                         </td>
                                         {/* End Date */}
                                         <td className="font-mono hidden py-4 pl-0 pr-4 text-left text-sm/6 sm:table-cell sm:pr-6 lg:pr-8">
-                                            {group.groups.endDate ? new Date(group.groups.endDate).toLocaleDateString() : 'N/A'}
+                                            {group.groups.endDate ? formatShortDate(group.groups.endDate) : 'N/A'}
                                         </td>
                                         {/* Active Status */}
                                         <td className="py-4 pl-0 pr-4 sm:table-cell sm:pr-6 lg:pr-8 flex justify-center items-center">

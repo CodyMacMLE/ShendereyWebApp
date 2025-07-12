@@ -6,13 +6,13 @@ import { useState } from 'react';
 
 import Modal from "@/components/UI/Modal/page";
 
-import { RoleTag, Role } from "@/components/UI/RoleTag/page";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
-import { FaInstagram } from "react-icons/fa6";
-import { AiOutlineYoutube } from "react-icons/ai";
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import EditUser from "@/components/Form/EditUser/page";
+import { Role, RoleTag } from "@/components/UI/RoleTag/page";
+import { ExclamationTriangleIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { AiOutlineYoutube } from "react-icons/ai";
+import { FaInstagram } from "react-icons/fa6";
+import { formatFullDate } from '../../../../lib/utils';
 
 
 type UserData = {
@@ -295,7 +295,7 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                 Graduation Year
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
-                                {user.athlete?.prospect?.graduationYear ? new Date(user.athlete.prospect.graduationYear).getUTCFullYear() : 'None'}
+                                {user.athlete?.prospect?.graduationYear ? formatFullDate(user.athlete.prospect.graduationYear) : 'None'}
                             </p>
 
                             <h4 className="col-span-2 block text-md font-bold text-[var(--foreground)]">
@@ -388,7 +388,7 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                 Year
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
-                                {user.athlete?.alumni?.year ? new Date(user.athlete.alumni.year).getUTCFullYear() : 'None'}
+                                {user.athlete?.alumni?.year ? formatFullDate(user.athlete.alumni.year) : 'None'}
                             </p>
 
                             <h4 className="col-span-2 block text-md font-bold text-[var(--foreground)]">

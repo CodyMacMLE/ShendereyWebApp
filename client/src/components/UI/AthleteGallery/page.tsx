@@ -1,8 +1,11 @@
+"use client"
+
 import { EditUserMedia } from "@/components/Form/EditUserMedia/page";
 import { Dialog, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
 import { Fragment, useEffect, useState } from "react";
+import { formatShortDate } from '../../../lib/utils';
 
 type Athlete = {
     userId: number,
@@ -170,7 +173,7 @@ export default function AthleteGallery({ athlete, media }: { athlete: Athlete, m
                                                 </button>
                                                 </div>
                                                 <p className="text-sm text-[var(--muted)] mt-1">
-                                                    {new Date(selectedMedia.date).toLocaleDateString()}
+                                                    {formatShortDate(selectedMedia.date)}
                                                 </p>
                                                 <p className="mt-5">
                                                     {selectedMedia.description || "No description provided."}

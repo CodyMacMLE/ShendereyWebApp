@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 
-import { Employment } from "@/lib/types"
+import { Employment } from "@/lib/types";
 
 import Modal from "@/components/UI/Modal/page";
+import { formatFullDate } from '../../../../lib/utils';
 
 
 interface Props {
@@ -102,7 +103,7 @@ export default function EmploymentTable({ jobs }: Props) {
                                                 {job.hours} hours/week
                                             </td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
-                                                {new Date(job.dateCreated).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                                {formatFullDate(job.dateCreated)}
                                             </td>
                                             <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                             <button

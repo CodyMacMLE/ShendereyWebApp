@@ -11,6 +11,7 @@ import imageCompression from 'browser-image-compression';
 
 import ErrorModal from "@/components/UI/ErrorModal/page";
 import Image from "next/image";
+import { formatShortDate } from '../../../../lib/utils';
 
 type Media = {
     id: number,
@@ -539,7 +540,7 @@ export default function OldGallery() {
                                                         </button>
                                                         </div>
                                                         <p className="text-sm text-[var(--muted)] mt-1">
-                                                            {new Date(selectedMedia.date).toLocaleDateString()}
+                                                            {formatShortDate(selectedMedia.date)}
                                                         </p>
                                                         <p className="mt-5">
                                                             {selectedMedia.description || "No description provided."}

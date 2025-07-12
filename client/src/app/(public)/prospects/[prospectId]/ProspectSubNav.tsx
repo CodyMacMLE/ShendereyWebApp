@@ -5,6 +5,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
+import { formatShortDate } from '../../../../lib/utils';
 
 enum NavPages {
     Scores = 'Scores',
@@ -127,7 +128,7 @@ export default function ProspectSubNav({ athleteScores, athleteMedia, athleteAch
                                         {score.competition}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
-                                        {new Date(score.date).toLocaleDateString()}
+                                        {formatShortDate(score.date)}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
                                         {score.category}
@@ -256,7 +257,7 @@ export default function ProspectSubNav({ athleteScores, athleteMedia, athleteAch
                                                                 {selectedMedia.name}
                                                             </h3>
                                                             <p className="text-sm text-[var(--muted)]">
-                                                                {new Date(selectedMedia.date).toLocaleDateString()}
+                                                                {formatShortDate(selectedMedia.date)}
                                                             </p>
                                                         </div>
                                                         
@@ -306,7 +307,7 @@ export default function ProspectSubNav({ athleteScores, athleteMedia, athleteAch
                                                         {achievement.title}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
-                                                        {new Date(achievement.date).toLocaleDateString()}
+                                                        {formatShortDate(achievement.date)}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
                                                         {achievement.description}

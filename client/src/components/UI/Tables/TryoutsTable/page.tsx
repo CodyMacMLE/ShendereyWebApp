@@ -1,12 +1,13 @@
 "use client"
 
-import { SetStateAction, Dispatch, useState, useEffect } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import Modal from "@/components/UI/Modal/page";
 import TryoutsTableSkeleton from "@/components/UI/Tables/TryoutsTable/TryoutsTableSkeleton";
 
-import { EnvelopeOpenIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import TryoutDisplay from '@/components/Layout/Admin/TryoutDisplay/page';
+import { EnvelopeIcon, EnvelopeOpenIcon } from '@heroicons/react/24/outline';
+import { formatFullDate } from '../../../../lib/utils';
 
 type Tryout = {
   id: number;
@@ -260,17 +261,13 @@ export default function TryoutsTable({ tryouts, setTryouts, isLoading }: Props) 
 
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] w-full sm:w-1 md:w-1/6">
                               <div className="flex items-center gap-3">
-                                {(() => {
-                                  const date = new Date(tryout.athleteDOB);
-                                  const utcDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-                                  return utcDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                                })()}
+                                {formatFullDate(tryout.athleteDOB)}
                               </div>
                             </td>
 
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] w-full sm:w-1 md:w-1/6">
                               <div className="flex items-center gap-3">
-                                {new Date(tryout.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                {formatFullDate(tryout.createdAt)}
                               </div>
                             </td>
 

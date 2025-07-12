@@ -1,3 +1,5 @@
+import { formatFullDate } from '../../../../lib/utils';
+
 type Tryout = {
   id: number;
   athleteName: string;
@@ -36,7 +38,6 @@ export default function TryoutDisplay({ tryout }: { tryout: Tryout }) {
                             <dd className="mt-1 text-sm/6 text-[var(--foreground)] sm:col-span-2 sm:mt-0">
                             {(() => {
                                 const date = new Date(tryout.athleteDOB);
-                                const utcDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
                                 const today = new Date();
                                 const age = today.getFullYear() - date.getFullYear();
                                 const monthDiff = today.getMonth() - date.getMonth();
@@ -44,7 +45,7 @@ export default function TryoutDisplay({ tryout }: { tryout: Tryout }) {
                                 
                                 // Adjust age if birthday hasn't occurred yet this year
                                 const adjustedAge = (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) ? age - 1 : age;
-                                return `${utcDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (${adjustedAge}y)`;
+                                return `${formatFullDate(tryout.athleteDOB)} (${adjustedAge}y)`;
                             })()}
                             </dd>
                             <dt className="text-sm/6 font-medium text-[var(--foreground)]">About</dt>
