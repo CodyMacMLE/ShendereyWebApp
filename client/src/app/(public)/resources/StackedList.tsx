@@ -9,6 +9,17 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
     const [search, setSearch] = useState('')
     const [localResources, setLocalResources] = useState<Resource[]>(resources)
 
+    // Helper function to convert bytes to human-readable format
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
     const handleOpenResource = async (resource: Resource) => {
         try {
             // Optimistically update the local state first
@@ -94,7 +105,7 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
                                 <svg viewBox="0 0 2 2" className="size-0.5 fill-current">
                                     <circle r={1} cx={1} cy={1} />
                                 </svg>
-                                <p className="truncate">Size: {resource.size}</p>
+                                <p className="truncate">Size: {formatFileSize(resource.size)}</p>
                                 <svg viewBox="0 0 2 2" className="size-0.5 fill-current">
                                     <circle r={1} cx={1} cy={1} />
                                 </svg>
