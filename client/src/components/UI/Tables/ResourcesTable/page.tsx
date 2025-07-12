@@ -8,6 +8,17 @@ import Modal from "@/components/UI/Modal/page";
 import { Resource } from '@/lib/types';
 import ResourceTableSkeleton from './ResourceTableSkeleton';
 
+// Helper function to convert bytes to human-readable format
+const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
 interface Props {
     resources: Resource[];
     setResources: Dispatch<SetStateAction<Resource[]>>;
@@ -131,6 +142,9 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
                           Downloads
                         </th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
+                          Open
+                        </th>
                         <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                           <span className="sr-only">Edit</span>
                         </th>
@@ -166,11 +180,20 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] w-full sm:w-1/3 md:w-1/4 min-w-[160px]">
                               <div className="flex items-center gap-3">
-                                {resource.size}
+                                {formatFileSize(resource.size)}
                               </div>
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] max-w-xs truncate">
                                 {resource.downloads}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] w-full sm:w-1/3 md:w-1/4 min-w-[160px]">
+                              <div className="flex items-center gap-3">
+                                <button onClick={() => {
+                                    window.open(resource.resourceUrl, '_blank');
+                                }}>
+                                  Open
+                                </button>
+                              </div>
                             </td>
                             <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6">
                                 <button
