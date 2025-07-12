@@ -7,6 +7,54 @@ import { useState } from 'react'
 export default function StackedList({ resources }: { resources: Resource[] }) {
 
     const [search, setSearch] = useState('')
+    const [localResources, setLocalResources] = useState<Resource[]>(resources)
+
+    const handleOpenResource = async (resource: Resource) => {
+        try {
+            // Optimistically update the local state first
+            setLocalResources(prev => 
+                prev.map(r => 
+                    r.id === resource.id 
+                        ? { ...r, views: r.views + 1 }
+                        : r
+                )
+            )
+
+            // Call the API to update the database
+            const response = await fetch(`/api/resources/${resource.id}/increment-view`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            if (!response.ok) {
+                // If the API call fails, revert the optimistic update
+                setLocalResources(prev => 
+                    prev.map(r => 
+                        r.id === resource.id 
+                            ? { ...r, views: r.views - 1 }
+                            : r
+                    )
+                )
+                console.error('Failed to increment view count')
+            }
+
+            // Open PDF directly in Google Docs Viewer
+            window.open(`https://docs.google.com/viewer?url=${resource.resourceUrl}`, '_blank');
+        } catch (error) {
+            console.error('Error opening resource:', error)
+            // Revert the optimistic update on error
+            setLocalResources(prev => 
+                prev.map(r => 
+                    r.id === resource.id 
+                        ? { ...r, views: r.views - 1 }
+                        : r
+                )
+            )
+        }
+    }
+
     return (
         <>
             <div className="mt-20 mx-auto max-w-7xl border border-gray-200 rounded-lg shadow-md grid grid-cols-2 p-5">
@@ -33,7 +81,7 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
 
             <div className="mt-20 mx-auto max-w-7xl px-6 sm:px-8">
                 <ul role="list" className="divide-y divide-gray-100">
-                {resources.filter((resource) => resource.name.toLowerCase().includes(search.toLowerCase())).map((resource) => (
+                {localResources.filter((resource) => resource.name.toLowerCase().includes(search.toLowerCase())).map((resource) => (
                     <li key={resource.id} className="flex items-center justify-between gap-x-6 py-5">
                         <div className="min-w-0">
                             <div className="flex items-start gap-x-3">
@@ -55,11 +103,9 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
                         </div>
                         <div className="flex flex-none items-center gap-x-4">
                             <button 
-                                onClick={() => {
-                                    // Open PDF directly in Google Docs Viewer
-                                    window.open(`https://docs.google.com/viewer?url=${resource.resourceUrl}`, '_blank');
-                                }}
-                                className="text-[var(--primary)] bg-[var(--card-bg)] hover:text-[var(--background)] hover:bg-[var(--primary)] cursor-pointer rounded-full ring-1 ring-[var(--border)] py-1 px-3">
+                                onClick={() => handleOpenResource(resource)}
+                                className="text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] cursor-pointer rounded-md ring-1 ring-[var(--border)] py-1 px-3"
+                            >
                                 Open<span className="sr-only">, {resource.name}</span>
                             </button>
                         </div>

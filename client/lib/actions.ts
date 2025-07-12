@@ -239,4 +239,27 @@ export const getResources = async () => {
         ...item,
         id: item.id.toString()
     }));
+}
+
+export const incrementResourceView = async (resourceId: number) => {
+    try {
+        const currentResource = await db.select().from(resources).where(eq(resources.id, resourceId));
+        
+        if (!currentResource.length) {
+            throw new Error('Resource not found');
+        }
+
+        const [updatedResource] = await db
+            .update(resources)
+            .set({
+                views: (currentResource[0].views || 0) + 1
+            })
+            .where(eq(resources.id, resourceId))
+            .returning();
+
+        return updatedResource;
+    } catch (error) {
+        console.error("Error incrementing resource view:", error);
+        throw error;
+    }
 }   
