@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { sendTryoutEmail } from '@/lib/email';
 import { tryouts } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -53,6 +54,30 @@ export async function POST(req: NextRequest) {
             contactEmail: contactEmail.trim(), 
             contactPhone: contactPhone.trim(), 
         });
+
+        // Send email notification
+        try {
+            await sendTryoutEmail({
+                athleteName: athleteName.trim(),
+                DoB,
+                about,
+                experienceProgram: experienceProgram.trim(),
+                experienceLevel: experienceLevel.trim(),
+                experienceYears: parseInt(experienceYears),
+                hoursPerWeek: parseInt(hoursPerWeek),
+                currentClub: currentClub.trim(),
+                currentCoach: currentCoach.trim(),
+                tryoutPreference: tryoutPreference.trim(),
+                tryoutLevel: tryoutLevel.trim(),
+                contactName: contactName.trim(),
+                contactRelationship: contactRelationship.trim(),
+                contactEmail: contactEmail.trim(),
+                contactPhone: contactPhone.trim(),
+            });
+        } catch (emailError) {
+            console.error('Error sending email notification:', emailError);
+            // Don't fail the request if email fails, just log it
+        }
         
         return NextResponse.json({ success: 'Tryout form submitted successfully' }, { status: 200 });
 

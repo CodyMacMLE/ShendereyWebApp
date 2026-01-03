@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
-import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
-import { ChevronUpDownIcon } from '@heroicons/react/16/solid'
-import { CheckIcon } from '@heroicons/react/20/solid'
-import { useRouter } from "next/navigation";
 import ErrorModal from "@/components/UI/ErrorModal/page";
+import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
+import { ChevronUpDownIcon } from '@heroicons/react/16/solid';
+import { CheckIcon } from '@heroicons/react/20/solid';
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 const experienceLevel = [
   { id: 1, name: 'Recreational' },
@@ -76,6 +76,7 @@ export default function TryoutForm() {
         formData.contactEmail = formData.contactEmail.trim();
         formData.contactPhone = formData.contactPhone.trim();
 
+        setIsSubmitting(true);
         try {
             const res = await fetch("/api/tryouts", {
                 method: "POST",
@@ -102,6 +103,8 @@ export default function TryoutForm() {
             console.error("Error submitting form:", error);
             setErrorModalOpen(true);
             setErrorMessage("An error occurred while submitting the form. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -119,6 +122,7 @@ export default function TryoutForm() {
 
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <div className="bg-white py-10 sm:py-10">
@@ -519,9 +523,10 @@ export default function TryoutForm() {
                     <div className="mt-6 flex items-center justify-end gap-x-6">
                         <button
                             type="submit"
-                            className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                            disabled={isSubmitting}
+                            className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Submit
+                            {isSubmitting ? "Submitting..." : "Submit"}
                     </button>
                     </div>
                 </div>

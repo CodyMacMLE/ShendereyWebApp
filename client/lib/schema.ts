@@ -221,3 +221,19 @@ export const tryouts = pgTable('tryouts', {
     createdAt: timestamp('createdAt').defaultNow(),
     updatedAt: timestamp('updatedAt').defaultNow(),
 })
+
+export const registrationImage = pgTable('registration_images', {
+    id: serial('id').primaryKey(),
+    imageUrl: text('imageUrl'),
+    title: text('title'),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow(),
+})
+
+export const registrationPolicies = pgTable('registration_policies', {
+    id: serial('id').primaryKey(),
+    policy: text('policy').notNull(),
+    order: integer('order').notNull(),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow(),
+})

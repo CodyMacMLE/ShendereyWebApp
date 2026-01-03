@@ -10,15 +10,15 @@ import {
 import {
   ArrowLeftStartOnRectangleIcon,
   Bars3Icon,
+  BookOpenIcon,
   ClipboardDocumentIcon,
   CurrencyDollarIcon,
   CursorArrowRaysIcon,
   DocumentDuplicateIcon,
   HomeIcon,
-  MagnifyingGlassIcon,
   PlayCircleIcon,
   UsersIcon,
-  XMarkIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
@@ -33,11 +33,12 @@ import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components"
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-  { name: 'Programs', href: '/admin/programs', icon: CursorArrowRaysIcon },
   { name: 'Users', href: '/admin/users', icon: UsersIcon},
+  { name: 'Programs', href: '/admin/programs', icon: CursorArrowRaysIcon },
+  { name: 'Registration', href: '/admin/registration', icon: BookOpenIcon },
   { name: 'Gallery', href: '/admin/gallery', icon: PlayCircleIcon },
-  { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
   { name: 'Tryouts', href: '/admin/tryouts', icon: ClipboardDocumentIcon },
+  { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
   { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
   { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
 ]
@@ -192,6 +193,8 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
 
         <div className="lg:pl-72">
           <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-[var(--border)] bg-[var(--card-bg)] px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+
+            {/* Sidebar Open Button */}
             <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-700 lg:hidden">
               <span className="sr-only">Open sidebar</span>
               <Bars3Icon aria-hidden="true" className="size-6" />
@@ -200,25 +203,12 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
             {/* Separator */}
             <div aria-hidden="true" className="h-6 w-px bg-[var(--border)] lg:hidden" />
 
-            {/* Search Bar */}
-            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-              
-              <form action="#" method="GET" className="grid flex-1 grid-cols-1">
-                <input
-                  name="search"
-                  type="search"
-                  placeholder="Search"
-                  aria-label="Search"
-                  className="col-start-1 row-start-1 block size-full bg-[var(--card-bg)] pl-8 text-base text-[var(--foreground)] outline-none placeholder:[var(--foreground)] sm:text-sm/6"
-                />
-                <MagnifyingGlassIcon
-                  aria-hidden="true"
-                  className="pointer-events-none col-start-1 row-start-1 size-5 self-center text-[var(--foreground)]"
-                />
-              </form>
+            {/* Top Bar */}
+            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 justify-end">
 
               {/* Theme and Logout */}
               <div className="flex gap-4 items-center">
+
                 {/* Theme Toggle */}
                 <Switch
                   checked={theme === 'dark'}
@@ -244,15 +234,17 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                     <SunIcon className="w-5 h-5 text-white"/>
                   </span>
                 </Switch>
+
                 {/* Logout Button */}
                 <div className="flex items-center gap-x-4 lg:gap-x-6">
                   <LogoutLink className='flex items-center gap-x-2'>
                     <ArrowLeftStartOnRectangleIcon className='size-6 text-gray-400 hover:text-[var(--primary)] cursor-pointer'/>
                   </LogoutLink>
                 </div>
-              </div>
 
+              </div>
             </div>
+            
           </div>
 
           <main className="py-10">
