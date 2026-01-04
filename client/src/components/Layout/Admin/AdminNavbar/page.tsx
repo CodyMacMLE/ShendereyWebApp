@@ -25,7 +25,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { Suspense, useState } from 'react'
-import { IoShirtOutline } from 'react-icons/io5'
+/* import { IoShirtOutline } from 'react-icons/io5' */
 
 import { useTheme } from '@/components/Theme/page'
 
@@ -39,7 +39,7 @@ const navigation = [
   { name: 'Gallery', href: '/admin/gallery', icon: PlayCircleIcon },
   { name: 'Tryouts', href: '/admin/tryouts', icon: ClipboardDocumentIcon },
   { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
-  { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
+  /*{ name: 'Store', href: '/admin/store', icon: IoShirtOutline },*/
   { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
 ]
 

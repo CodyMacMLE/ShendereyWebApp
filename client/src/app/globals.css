@@ -7,6 +7,8 @@
   --foreground: #111827;
 
   --card-bg: #eeeeee;
+  --progress-bg: #d8d8d8;
+  --progress-line: #b8b8b8;
   --muted: #6B7280;
   --border: #dadada;
 
@@ -25,6 +27,8 @@
   --foreground: #EDEDED;
 
   --card-bg: #1A1A1A;
+  --progress-bg: #252525;
+  --progress-line: #323232;
   --muted: #9CA3AF;
   --border: #2D2D2D;
 

@@ -12,14 +12,21 @@ if (!process.env.AWS_BUCKET_NAME) {
   throw new Error('AWS_BUCKET_NAME environment variable is required');
 }
 
-const s3 = new S3Client({ 
+// S3 Client configuration
+const s3Config: { region: string; credentials?: { accessKeyId: string; secretAccessKey: string } } = {
   region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  }
-});
-const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
+};
+
+// Only add explicit credentials if both are provided
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  s3Config.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  };
+}
+
+const s3 = new S3Client(s3Config);
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 async function uploadToS3(file: File, keyPrefix: string) {
   try {

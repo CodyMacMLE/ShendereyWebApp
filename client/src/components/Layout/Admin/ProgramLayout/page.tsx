@@ -56,6 +56,9 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
       return;
     }
 
+    // Clear previous errors
+    setFormErrors([]);
+
     try {
       const formData = new FormData();
       formData.append('name', name);
@@ -77,10 +80,21 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
           setModalEnabled(false);
           if (data.body && setPrograms) setPrograms(prevPrograms => [...prevPrograms, data.body]);
       } else {
-          console.error('Upload failed.', await res.json());
+          let errorMessage = 'Failed to upload program. Please try again.';
+          try {
+              const errorData = await res.json();
+              errorMessage = errorData.error || errorMessage;
+          } catch (parseError) {
+              // If JSON parsing fails, use the status text
+              errorMessage = res.statusText || errorMessage;
+          }
+          setFormErrors([{ msg: errorMessage }]);
+          console.error('Upload failed:', errorMessage);
       }
     } catch (err) {
-    console.error('Error submitting form', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setFormErrors([{ msg: errorMessage }]);
+      console.error('Error submitting form', err);
     }
   }
 

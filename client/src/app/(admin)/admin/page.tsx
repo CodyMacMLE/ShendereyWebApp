@@ -1,3 +1,4 @@
+import AdminDashboard from "@/components/Layout/Admin/AdminDashboard/page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,6 +10,6 @@ export const metadata: Metadata = {
 
 export default function Admin() {
     return (
-        <>Home</>
+        <AdminDashboard />
     )
 }
