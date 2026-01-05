@@ -1,7 +1,7 @@
 import {
-    CloudWatchClient,
-    GetMetricDataCommand,
-    type GetMetricDataCommandInput,
+  CloudWatchClient,
+  GetMetricDataCommand,
+  type GetMetricDataCommandInput,
 } from "@aws-sdk/client-cloudwatch";
 import { NextResponse } from "next/server";
 
@@ -143,12 +143,13 @@ export async function GET() {
         },
       }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return NextResponse.json(
       {
-        error: err?.name || "CloudWatchError",
-        message: err?.message || "Failed to query CloudWatch",
-        details: err?.stack || undefined,
+        error: error.name || "CloudWatchError",
+        message: error.message || "Failed to query CloudWatch",
+        details: error.stack || undefined,
       },
       { status: 500 }
     );

@@ -78,7 +78,7 @@ export default function AdminDashboard() {
                     errorMessage = errorData.error || errorData.message || errorMessage
                     // Log the full error for debugging
                     console.error('S3 API error response:', errorData)
-                } catch (parseError) {
+                } catch (_parseError) {
                     errorMessage = res.statusText || errorMessage
                 }
                 setS3Error(errorMessage)
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
                             name: program.name,
                             classCount: 0
                         }
-                    } catch (error) {
+                    } catch (_error) {
                         return {
                             id: program.id,
                             name: program.name,

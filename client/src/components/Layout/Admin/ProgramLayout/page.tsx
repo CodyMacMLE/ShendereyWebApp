@@ -87,7 +87,7 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
           try {
               const errorData = await res.json();
               errorMessage = errorData.error || errorMessage;
-          } catch (parseError) {
+          } catch (_parseError) {
               // If JSON parsing fails, use the status text
               errorMessage = res.statusText || errorMessage;
           }

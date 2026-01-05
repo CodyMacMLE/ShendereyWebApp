@@ -94,7 +94,7 @@ export default function Registration() {
             }
         };
         fetchData();
-    }, []);
+    }, [placeholderSession]);
 
     // Handle policy text change
     const handlePolicyChange = (index: number, value: string) => {
@@ -309,7 +309,7 @@ export default function Registration() {
                         </div>
                     ) : (
                         <div className="mt-6 p-6 text-sm text-[var(--muted)] text-center border border-[var(--border)] rounded-lg">
-                            No recreational class schedule image uploaded. Click "Change Schedule" to upload one.
+                            No recreational class schedule image uploaded. Click &quot;Change Schedule&quot; to upload one.
                         </div>
                     )}
                 </>
