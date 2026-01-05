@@ -45,7 +45,10 @@ export default function EditScore({ athleteId, score, setModalEnable, refreshSco
         setOverallScore(total.toFixed(3)); // Keep three decimal places
     }, [vaultScore, barsScore, beamScore, floorScore]);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleSubmit = async () => {
+        if (isSubmitting) return;
         const scoreData = {
             competitionName,
             competitionDate,
@@ -57,6 +60,8 @@ export default function EditScore({ athleteId, score, setModalEnable, refreshSco
             overallScore: overallScore ? overallScore : 0,
           };
       
+        setIsSubmitting(true);
+        try {
         const res = await fetch(`/api/users/${athleteId}/score/${score.id}`, {
           method: 'PUT',
           headers: {
@@ -70,6 +75,11 @@ export default function EditScore({ athleteId, score, setModalEnable, refreshSco
             if (setModalEnable) setModalEnable(false);
             if (refreshScores && data.body) refreshScores(data.body);
           }
+        } catch (err) {
+            console.error('Error submitting form', err);
+        } finally {
+            setIsSubmitting(false);
+        }
       };
 
     return (
@@ -249,9 +259,10 @@ export default function EditScore({ athleteId, score, setModalEnable, refreshSco
                 </button>
                 <button
                     type="submit"
-                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                    disabled={isSubmitting}
+                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                 >
-                    Save
+                    {isSubmitting ? 'Saving...' : 'Save'}
                 </button>
             </div>
         </form>

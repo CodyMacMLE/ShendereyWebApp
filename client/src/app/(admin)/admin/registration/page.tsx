@@ -36,6 +36,14 @@ export default function Registration() {
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
     const placeholderSession = `Fall ${new Date().getFullYear()}`;
 
+    // Helper function to add cache-busting parameter to image URL
+    const getImageUrlWithCacheBust = (url: string | null | undefined): string | null => {
+        if (!url) return null;
+        // Check if URL already has query parameters
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}t=${Date.now()}`;
+    };
+
     // Click outside handler to reset delete confirmations
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -225,7 +233,12 @@ export default function Registration() {
 
             const data = await response.json();
             if (data.success) {
-                setRegistrationImage(data.body);
+                // Add cache-busting query parameter to force image reload
+                const updatedImage = {
+                    ...data.body,
+                    imageUrl: data.body.imageUrl ? `${data.body.imageUrl}?t=${Date.now()}` : data.body.imageUrl
+                };
+                setRegistrationImage(updatedImage);
                 setImageModalOpen(false);
                 setImageFile(null);
                 setImagePreview(null);
@@ -286,6 +299,7 @@ export default function Registration() {
                     {registrationImage?.imageUrl ? (
                         <div className="mt-6 flex justify-center">
                             <Image
+                                key={registrationImage.imageUrl}
                                 src={registrationImage.imageUrl}
                                 alt={registrationImage.title || "Registration Schedule"}
                                 width={1200}
@@ -338,6 +352,7 @@ export default function Registration() {
                                     <div className="mt-2 flex items-center gap-x-3">
                                         {imagePreview ? (
                                             <Image
+                                                key={imagePreview}
                                                 src={imagePreview}
                                                 alt="Preview"
                                                 width={300}
@@ -346,7 +361,8 @@ export default function Registration() {
                                             />
                                         ) : registrationImage?.imageUrl ? (
                                             <Image
-                                                src={registrationImage.imageUrl}
+                                                key={registrationImage.imageUrl}
+                                                src={getImageUrlWithCacheBust(registrationImage.imageUrl) || registrationImage.imageUrl}
                                                 alt="Current"
                                                 width={300}
                                                 height={200}

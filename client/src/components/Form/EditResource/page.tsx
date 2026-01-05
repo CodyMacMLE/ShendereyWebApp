@@ -1,5 +1,5 @@
 import { Resource } from "@/lib/types";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 interface Props {
     resource: Resource;
@@ -8,9 +8,11 @@ interface Props {
 }
 
 export default function EditResource({ resource, setResources, setModalEnable }: Props ) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (isSubmitting) return;
 
         const formData = new FormData(e.target as HTMLFormElement);
         const resourceFile = formData.get('resourceFile') as File;
@@ -26,14 +28,21 @@ export default function EditResource({ resource, setResources, setModalEnable }:
             formData.append('size', resource.size.toString());
         }
 
-        const res = await fetch('/api/resources', {
-            method: 'PUT',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            setResources(prev => prev.map(r => r.id === resource.id ? data.body : r));
-            setModalEnable(false);
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/resources', {
+                method: 'PUT',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                setResources(prev => prev.map(r => r.id === resource.id ? data.body : r));
+                setModalEnable(false);
+            }
+        } catch (err) {
+            console.error('Error submitting form', err);
+        } finally {
+            setIsSubmitting(false);
         }
     }
     return (
@@ -41,7 +50,9 @@ export default function EditResource({ resource, setResources, setModalEnable }:
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <input type="text" name="name" placeholder="Name" className="border border-gray-300 rounded-md p-2" />
                 <input type="file" name="resourceFile" className="border border-gray-300 rounded-md p-2" />
-                <button type="submit" className="bg-blue-500 text-white p-2 rounded-md">Edit Resource</button>
+                <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                    {isSubmitting ? 'Saving...' : 'Edit Resource'}
+                </button>
                 <button onClick={() => setModalEnable(false)}>Cancel</button>
             </form>
         </div>

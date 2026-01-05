@@ -12,7 +12,6 @@ export const HomeStats = [
 
 export const StaffStats: Stat[] = [
     { label: 'Founded', value: '1984' },
-    { label: 'Employees', value: '25' },
 ]
 
 export const AchievementsStats = [

@@ -37,8 +37,10 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
     });
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
+        if (isSubmitting) return;
         const errors: { msg: string }[] = [];
 
         if (!organization.trim()) errors.push({ msg: 'Organization is required.' });
@@ -51,6 +53,7 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
         return;
         }
 
+        setIsSubmitting(true);
         try {
         const formData = new FormData();
         formData.append('organization', organization);
@@ -76,6 +79,8 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
         }
         } catch (err) {
         console.error('Error submitting form', err);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -209,9 +214,10 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
                 </button>
                 <button
                     type="submit"
-                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                    disabled={isSubmitting}
+                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                 >
-                    Save
+                    {isSubmitting ? 'Saving...' : 'Save'}
                 </button>
             </div>
 

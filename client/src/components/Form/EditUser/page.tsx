@@ -10,6 +10,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
 
     const [loading, setLoading] = useState(true);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Roles
     const [isStaff, setIsStaff] = useState(true);
@@ -114,6 +115,8 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
       }, [userId]);
 
     const handleSubmit = async () => {
+      if (isSubmitting) return;
+
       const errors: { msg: string }[] = [];
 
       if (!name.trim()) errors.push({ msg: 'Name is required.' });
@@ -138,6 +141,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
         return;
       }
 
+      setIsSubmitting(true);
       try {
         setFormErrors([]);
         const form = new FormData();
@@ -198,6 +202,8 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
         }
       } catch (err) {
         console.error('Submission failed', err);
+      } finally {
+        setIsSubmitting(false);
       }
     };
 
@@ -1023,9 +1029,10 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                         </button>
                         <button
                         type="submit"
-                        className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                        disabled={isSubmitting}
+                        className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                         >
-                            Save
+                            {isSubmitting ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </div>

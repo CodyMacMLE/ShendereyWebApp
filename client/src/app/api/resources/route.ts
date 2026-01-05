@@ -5,13 +5,20 @@ import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-const s3 = new S3Client({
-    region: process.env.AWS_REGION!,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    },
-});
+// S3 Client configuration
+const s3Config: { region: string; credentials?: { accessKeyId: string; secretAccessKey: string } } = {
+  region: process.env.AWS_REGION!,
+};
+
+// Only add explicit credentials if both are provided
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  s3Config.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  };
+}
+
+const s3 = new S3Client(s3Config);
 
 async function deleteFromS3(url: string) {
     try {

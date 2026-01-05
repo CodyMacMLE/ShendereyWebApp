@@ -43,6 +43,8 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
 
   // Handle Submit
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+
     const errors: { msg: string }[] = [];
 
     if (!name.trim()) errors.push({ msg: 'Name is required.' });
@@ -58,6 +60,7 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
 
     // Clear previous errors
     setFormErrors([]);
+    setIsSubmitting(true);
 
     try {
       const formData = new FormData();
@@ -95,6 +98,8 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
       setFormErrors([{ msg: errorMessage }]);
       console.error('Error submitting form', err);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -106,6 +111,7 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
   const [programImgFile, setProgramImgFile] = useState<File | null>(null);
 
   const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
       <>
@@ -257,15 +263,17 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                         <button
                             type="button"
                             onClick={() => {setModalEnabled(false);}}
-                            className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
+                            disabled={isSubmitting}
+                            className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                            disabled={isSubmitting}
+                            className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Save
+                            {isSubmitting ? 'Saving...' : 'Save'}
                         </button>
                     </div>
 

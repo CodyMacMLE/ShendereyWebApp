@@ -21,14 +21,18 @@ export default function EditAchievement({
 }) {
   const [title, setTitle] = useState(achievement.title);
   const [description, setDescription] = useState(achievement.description);
-  const [date, setDate] = useState(() => {
+    const [date, setDate] = useState(() => {
     const parsed = new Date(achievement.date);
     return parsed.toISOString().split('T')[0];
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
     const updatedData = { title, description, date };
 
+    setIsSubmitting(true);
+    try {
     const res = await fetch(`/api/users/${athleteId}/achievements/${achievement.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -43,6 +47,11 @@ export default function EditAchievement({
           prev.map((item) => (item.id === data.body.id ? data.body : item))
         );
       }
+    }
+    } catch (err) {
+        console.error('Error submitting form', err);
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -119,9 +128,10 @@ export default function EditAchievement({
         </button>
         <button
           type="submit"
-          className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+          disabled={isSubmitting}
+          className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
         >
-          Save
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>

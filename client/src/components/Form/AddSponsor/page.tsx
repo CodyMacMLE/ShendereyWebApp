@@ -33,8 +33,10 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
     const [sponsorLevel, setSponsorLevel] = useState(sponsorLevels[0]);
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
+        if (isSubmitting) return;
         const errors: { msg: string }[] = [];
 
         if (!organization.trim()) errors.push({ msg: 'Organization is required.' });
@@ -48,6 +50,7 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
             return;
         }
 
+        setIsSubmitting(true);
         try {
         const formData = new FormData();
         formData.append('organization', organization);
@@ -69,10 +72,32 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
             setSponsors((prevSponsors) => [...prevSponsors, data.body]);
             if (setModalEnable) setModalEnable(false);
         } else {
-            console.error('Upload failed.', await res.json());
+            const contentType = res.headers.get('content-type');
+            let errorMessage = `Server error (${res.status}): ${res.statusText || 'Unknown error'}`;
+            
+            if (contentType && contentType.includes('application/json')) {
+                try {
+                    const errorData = await res.json();
+                    if (errorData && errorData.error && typeof errorData.error === 'string') {
+                        errorMessage = errorData.error;
+                    } else if (!errorData || (typeof errorData === 'object' && Object.keys(errorData).length === 0)) {
+                        errorMessage = `Server returned an empty response (${res.status})`;
+                    } else if (errorData && typeof errorData === 'object') {
+                        errorMessage = `Server error (${res.status}): ${JSON.stringify(errorData)}`;
+                    }
+                } catch (parseError) {
+                    console.error('Failed to parse error response:', parseError);
+                }
+            }
+            
+            console.error('Upload failed - Status:', res.status, 'StatusText:', res.statusText, 'Message:', errorMessage);
+            setFormErrors([{ msg: errorMessage }]);
         }
         } catch (err) {
-        console.error('Error submitting form', err);
+            console.error('Error submitting form', err);
+            setFormErrors([{ msg: err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.' }]);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -206,9 +231,10 @@ export default function AddSponsor({ setSponsors, setModalEnable }: {
                 </button>
                 <button
                     type="submit"
-                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                    disabled={isSubmitting}
+                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                 >
-                    Save
+                    {isSubmitting ? 'Saving...' : 'Save'}
                 </button>
             </div>
 

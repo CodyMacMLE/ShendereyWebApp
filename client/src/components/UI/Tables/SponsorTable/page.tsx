@@ -52,13 +52,24 @@ export default function SponsorTable({ sponsors, setSponsors, isLoading }: Props
 
             if (res.ok) {
                 const data = await res.json();
-                if (data.body) {
+                if (data.success && data.body) {
                     const newArray = sponsors.filter(sponsor => sponsor.id !== data.body);
                     setSponsors(newArray);
+                    // Reset enabled state after successful deletion
+                    setEnabledStates(prev => {
+                        const newState = { ...prev };
+                        delete newState[sponsorId];
+                        return newState;
+                    });
+                } else {
+                    console.error('Delete failed:', data);
                 }
+            } else {
+                const errorData = await res.json();
+                console.error('Delete failed:', errorData);
             }
         } catch (error) {
-            console.error(error);
+            console.error('Error deleting sponsor:', error);
         }
     }
 

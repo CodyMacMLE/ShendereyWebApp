@@ -76,6 +76,9 @@ export default function Program() {
     const [addModal, setAddModal] = useState(false);
     const [deleteModal, setDeleteModal] = useState(false);
     const [formErrors, setFormErrors] = useState<{msg: string}[]>([]);
+    const [isAddingGroup, setIsAddingGroup] = useState(false);
+    const [isEditingProgram, setIsEditingProgram] = useState(false);
+    const [isUpdatingGroup, setIsUpdatingGroup] = useState(false);
 
     // Program Form
     const [programName, setProgramName] = useState(program ? program.name : ''); 
@@ -151,7 +154,7 @@ export default function Program() {
                     id: coach.id,
                     name: coach.name
                 }));
-                setCoaches(prevCoaches => [...prevCoaches, ...fetchedCoaches]);
+                setCoaches(fetchedCoaches);
             }
         } catch (err) {
             console.error('Fetch error:', err);
@@ -197,6 +200,8 @@ export default function Program() {
 
     // Handle Submit
     const handleEditProgram = async () => {
+        if (isEditingProgram) return;
+
         const errors = [];
 
         if (!programName.trim()) errors.push({msg: "Program name is required"});
@@ -210,6 +215,7 @@ export default function Program() {
             return;
         }
 
+        setIsEditingProgram(true);
         try {
             const formData = new FormData();
             formData.append('name', programName);
@@ -235,6 +241,7 @@ export default function Program() {
         } catch (err) {
             console.error('Fetch error:', err);
         } finally {
+            setIsEditingProgram(false);
             setProgramEditModal(false);
         }
 
@@ -285,6 +292,8 @@ export default function Program() {
 
     // HANDLE GROUPS
     const handleAddGroup = async () => {
+        if (isAddingGroup) return;
+
         const errors = [];
 
         if (!groupDay.name.trim()) errors.push({msg: "Group day is required"});
@@ -298,6 +307,7 @@ export default function Program() {
             return;
         }
 
+        setIsAddingGroup(true);
         try {
             const formData = new FormData();
             formData.append('day', groupDay.name);
@@ -332,6 +342,7 @@ export default function Program() {
         } catch (err) {
             console.error('Fetch error:', err);
         } finally {
+            setIsAddingGroup(false);
             setAddModal(false);
         }
     }
@@ -357,7 +368,9 @@ export default function Program() {
     };
 
     const handleUpdateGroup = async () => {
+        if (isUpdatingGroup) return;
         
+        setIsUpdatingGroup(true);
         try {
             const formData = new FormData();
             formData.append('day', groupDay.name);
@@ -385,6 +398,7 @@ export default function Program() {
         } catch (error) {
             console.error(error);
         } finally {
+            setIsUpdatingGroup(false);
             setEditGroupModal(false);
         }
     }
@@ -515,15 +529,17 @@ export default function Program() {
                             <button
                                 type="button"
                                 onClick={() => {setAddModal(false);}}
-                                className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500"
+                                disabled={isAddingGroup}
+                                className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                                disabled={isAddingGroup}
+                                className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                             >
-                                Save
+                                {isAddingGroup ? 'Saving...' : 'Save'}
                             </button>
                         </div>
 
@@ -690,9 +706,10 @@ export default function Program() {
                             </button>
                             <button
                                 type="submit"
-                                className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                                disabled={isEditingProgram}
+                                className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                             >
-                                Save
+                                {isEditingProgram ? 'Saving...' : 'Save'}
                             </button>
                         </div>
 
@@ -820,9 +837,10 @@ export default function Program() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                                    disabled={isUpdatingGroup}
+                                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                                 >
-                                    Save
+                                    {isUpdatingGroup ? 'Saving...' : 'Save'}
                                 </button>
                             </div>
 

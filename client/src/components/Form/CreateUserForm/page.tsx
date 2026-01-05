@@ -49,8 +49,15 @@ export default function CreateUserForm() {
 
     // Form Errors
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
+    
+    // Submission state
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
+      // Prevent multiple submissions
+      if (isSubmitting) return;
+      
+      setIsSubmitting(true);
       const errors: { msg: string }[] = [];
 
       if (!name.trim()) errors.push({ msg: 'Name is required.' });
@@ -72,6 +79,7 @@ export default function CreateUserForm() {
 
       if (errors.length > 0) {
         setFormErrors(errors);
+        setIsSubmitting(false);
         return;
       }
 
@@ -104,7 +112,7 @@ export default function CreateUserForm() {
 
         // Prospect fields
         if (isProspect) {
-            form.append('prospectGPA', prospectGPA)
+            form.append('prospectGPA', prospectGPA);
             form.append('prospectMajor', prospectMajor);
             form.append('prospectInstitution', prospectInstitution);
             form.append('prospectGraduationYear', prospectGraduationYear);
@@ -128,15 +136,46 @@ export default function CreateUserForm() {
         });
 
         if (res.ok) {
-          const data = await res.json();
-          if (data.redirect) window.location.href = data.redirect;
+          try {
+            const data = await res.json();
+            if (data.redirect) {
+              window.location.href = data.redirect;
+            } else {
+              setIsSubmitting(false);
+            }
+          } catch (parseError) {
+            console.error('Failed to parse success response:', parseError);
+            setFormErrors([{ msg: 'User created but received an invalid response from server.' }]);
+            setIsSubmitting(false);
+          }
         } else {
-          const errorData = await res.json().catch(() => ({ error: 'Unknown error occurred' }));
-          console.error('Error submitting form:', errorData);
-          setFormErrors([{ msg: errorData.error || 'Failed to create user. Please try again.' }]);
+          const contentType = res.headers.get('content-type');
+          let errorMessage = `Server error (${res.status}): ${res.statusText || 'Unknown error'}`;
+          
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              const errorData = await res.json();
+              if (errorData && errorData.error && typeof errorData.error === 'string') {
+                errorMessage = errorData.error;
+              } else if (!errorData || (typeof errorData === 'object' && Object.keys(errorData).length === 0)) {
+                errorMessage = `Server returned an empty response (${res.status})`;
+              } else if (errorData && typeof errorData === 'object') {
+                // If we have an object but no error field, stringify it for debugging
+                errorMessage = `Server error (${res.status}): ${JSON.stringify(errorData)}`;
+              }
+            } catch (parseError) {
+              console.error('Failed to parse error response:', parseError);
+              // errorMessage already set above
+            }
+          }
+          
+          console.error('Error submitting form - Status:', res.status, 'StatusText:', res.statusText, 'Message:', errorMessage);
+          setFormErrors([{ msg: errorMessage }]);
+          setIsSubmitting(false);
         }
       } catch (err) {
         console.error('Submission failed', err);
+        setIsSubmitting(false);
         if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
           setFormErrors([{ msg: 'Authentication required. Please log in again.' }]);
         } else {
@@ -979,9 +1018,10 @@ export default function CreateUserForm() {
                         </button>
                         <button
                         type="submit"
-                        className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                        disabled={isSubmitting}
+                        className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                         >
-                            Save
+                            {isSubmitting ? 'Submitting...' : 'Save'}
                         </button>
                     </div>
                 </div>

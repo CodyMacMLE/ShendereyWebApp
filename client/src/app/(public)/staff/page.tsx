@@ -130,6 +130,10 @@ export default async function Staff() {
                                         <dd className="mt-2 text-3xl/10 font-bold tracking-tight text-gray-900">{stat.value}</dd>
                                     </div>
                                 ))}
+                                <div key='employees'>
+                                    <dt className="text-sm/6 font-semibold text-gray-600">Employees</dt>
+                                    <dd className="mt-2 text-3xl/10 font-bold tracking-tight text-gray-900">{seniorStaff.length + juniorStaff.length}</dd>
+                                </div>
                                 <div key='coach_ca'>
                                     <a href="https://www.coach.ca" target="_blank">
                                         <Image alt= "Coach.ca Logo" src="/logos/coachCa_Affiliate.jpg" className="h-[70px] w-auto" width={90} height={70}/>

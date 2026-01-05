@@ -5,8 +5,29 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm/sql';
 import { NextRequest, NextResponse } from 'next/server';
 
-const s3 = new S3Client({ region: process.env.AWS_REGION });
-const BUCKET_NAME = process.env.AWS_BUCKET_NAME
+// Validate required environment variables
+if (!process.env.AWS_REGION) {
+  throw new Error('AWS_REGION environment variable is required');
+}
+if (!process.env.AWS_BUCKET_NAME) {
+  throw new Error('AWS_BUCKET_NAME environment variable is required');
+}
+
+// S3 Client configuration
+const s3Config: { region: string; credentials?: { accessKeyId: string; secretAccessKey: string } } = {
+  region: process.env.AWS_REGION,
+};
+
+// Only add explicit credentials if both are provided
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  s3Config.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  };
+}
+
+const s3 = new S3Client(s3Config);
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
 
 export async function GET(
   req: NextRequest,
@@ -364,23 +385,27 @@ export async function DELETE(
 
   const athleteId = athleteIdResult.length > 0 ? athleteIdResult[0].athleteId : null;
 
-  if (athleteId) {
-    const mediaUrls = await db.select({ url: media.mediaUrl }).from(media).where(eq(media.athlete, athleteId));
+  // Helper function to extract S3 key from URL
+  function extractS3Key(url: string): string {
+    try {
+      // Remove the S3 URL prefix to get the key
+      const prefix = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
+      if (url.startsWith(prefix)) {
+        return url.replace(prefix, '');
+      }
+      // Fallback: split by '/' and take everything after index 3
+      const parts = url.split('/');
+      return parts.slice(3).join('/');
+    } catch (error) {
+      console.error('Error extracting S3 key from URL:', url, error);
+      // Fallback: split by '/' and take everything after index 3
+      const parts = url.split('/');
+      return parts.slice(3).join('/');
+    }
+  }
 
-    const mediaKeys = mediaUrls
-      .filter((obj): obj is { url: string } => obj.url !== null)
-      .map(obj => {
-        const parts = obj.url.split('/');
-        return parts.slice(3).join('/');
-      });
-
-    const s3MediaDeletePromises = mediaKeys.map(key =>
-      s3.send(new DeleteObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: key,
-      }))
-    );
-
+  try {
+    // Delete user images from S3 (should happen for ALL users, not just athletes)
     const userImageUrls = await db.select({
       staffUrl: userImages.staffUrl,
       athleteUrl: userImages.athleteUrl,
@@ -389,31 +414,57 @@ export async function DELETE(
     }).from(userImages).where(eq(userImages.user, parseInt(userId)));
     
     const imageUrls = userImageUrls[0];
-    const keys = ['staffUrl', 'athleteUrl', 'prospectUrl', 'alumniUrl'] as const;
-    const s3Keys = keys
-      .map((key) => {
-        switch (key) {
-          case 'staffUrl': return imageUrls?.staffUrl;
-          case 'athleteUrl': return imageUrls?.athleteUrl;
-          case 'prospectUrl': return imageUrls?.prospectUrl;
-          case 'alumniUrl': return imageUrls?.alumniUrl;
+    const s3DeletePromises: Promise<void>[] = [];
+    
+    if (imageUrls) {
+      const keys = ['staffUrl', 'athleteUrl', 'prospectUrl', 'alumniUrl'] as const;
+      keys.forEach((key) => {
+        const url = imageUrls[key];
+        if (url) {
+          const s3Key = extractS3Key(url);
+          s3DeletePromises.push(
+            s3.send(new DeleteObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: s3Key,
+            })).then(() => {
+              console.log(`Successfully deleted user image from S3: ${s3Key}`);
+            }).catch((error) => {
+              console.error(`Failed to delete user image from S3 (${s3Key}):`, error);
+              // Continue with other deletions even if one fails
+            })
+          );
         }
-      })
-      .filter((url): url is string => Boolean(url))
-      .map((url) => {
-        const parts = url.split('/');
-        return parts.slice(3).join('/');
       });
+    }
+
+    // Delete athlete media from S3 (only if user is an athlete)
+    if (athleteId) {
+      const mediaUrls = await db.select({ url: media.mediaUrl }).from(media).where(eq(media.athlete, athleteId));
+
+      const mediaKeys = mediaUrls
+        .filter((obj): obj is { url: string } => obj.url !== null)
+        .map(obj => extractS3Key(obj.url));
+
+      const s3MediaDeletePromises = mediaKeys.map(key =>
+        s3.send(new DeleteObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: key,
+        })).then(() => {
+          console.log(`Successfully deleted media from S3: ${key}`);
+        }).catch((error) => {
+          console.error(`Failed to delete media from S3 (${key}):`, error);
+          // Continue with other deletions even if one fails
+        })
+      );
+      
+      await Promise.all(s3MediaDeletePromises);
+    }
     
-    const s3DeletePromises = s3Keys.map(key =>
-      s3.send(new DeleteObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: key,
-      }))
-    );
-    
+    // Delete all user images from S3
     await Promise.all(s3DeletePromises);
-    await Promise.all(s3MediaDeletePromises);
+  } catch (error) {
+    console.error('Error deleting files from S3:', error);
+    // Continue with database deletion even if S3 deletion fails
   }
 
   try {

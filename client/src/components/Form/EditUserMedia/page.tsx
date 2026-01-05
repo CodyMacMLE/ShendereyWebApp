@@ -41,6 +41,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
     const [date, setDate] = useState('');
 
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         console.log(media)
@@ -54,6 +55,8 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
     }, [media]);
 
     const handleSubmit = async () => {
+        if (isSubmitting) return;
+
         const errors: { msg: string }[] = [];
 
         if (!name.trim()) errors.push({ msg: 'Name is required.' });
@@ -65,6 +68,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
             return;
         }
 
+        setIsSubmitting(true);
         try {
             const formData = new FormData();
             formData.append('name', name);
@@ -92,6 +96,8 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
             }
         } catch (err) {
             console.error('Error submitting form', err);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -183,9 +189,10 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
                 </button>
                 <button
                     type="submit"
-                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                    disabled={isSubmitting}
+                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--primary)]"
                 >
-                    Save
+                    {isSubmitting ? 'Saving...' : 'Save'}
                 </button>
             </div>
 
