@@ -33,34 +33,31 @@ if (!isVercel) {
   }
 }
 
-// Validate required environment variables
-if (!process.env.AWS_REGION) {
-  throw new Error('AWS_REGION environment variable is required');
-}
-if (!process.env.AWS_BUCKET_NAME) {
-  throw new Error('AWS_BUCKET_NAME environment variable is required');
-}
-if (!process.env.AWS_ACCESS_KEY_ID) {
-  throw new Error('AWS_ACCESS_KEY_ID environment variable is required');
-}
-if (!process.env.AWS_SECRET_ACCESS_KEY) {
-  throw new Error('AWS_SECRET_ACCESS_KEY environment variable is required');
+// S3 Client configuration - initialize lazily when needed
+function getS3Client(): S3Client {
+  const s3Config: { region: string; credentials?: { accessKeyId: string; secretAccessKey: string } } = {
+    region: process.env.AWS_REGION || '',
+  };
+
+  // Only add explicit credentials if both are provided
+  if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+    s3Config.credentials = {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    };
+  }
+
+  return new S3Client(s3Config);
 }
 
-const s3 = new S3Client({ 
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  }
-});
-const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME || '';
 
 // Helper function to test S3 connectivity and permissions
 async function testS3Access() {
   try {
     // Try to list objects in the bucket to test access
     const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+    const s3 = getS3Client();
     await s3.send(new ListObjectsV2Command({ Bucket: BUCKET_NAME, MaxKeys: 1 }));
     console.log('S3 access test successful');
     return true;
@@ -72,6 +69,7 @@ async function testS3Access() {
 
 async function uploadToS3(file: File, keyPrefix: string) {
   try {
+    const s3 = getS3Client();
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const key = `${keyPrefix}/${randomUUID()}-${file.name}`;
@@ -249,6 +247,7 @@ export async function DELETE(
       mediaType: target.mediaType
     });
 
+    const s3 = getS3Client();
     const commands = [];
     const deletionResults = [];
 

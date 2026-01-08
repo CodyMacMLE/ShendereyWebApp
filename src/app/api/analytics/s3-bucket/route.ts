@@ -60,6 +60,10 @@ export async function GET() {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     };
+  } else {
+    // Warn if credentials are not explicitly set (relying on default credential chain)
+    // In Vercel, you should set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as environment variables
+    console.warn('AWS credentials not explicitly set, relying on default credential chain');
   }
 
   const client = new CloudWatchClient(cloudWatchConfig);
@@ -145,11 +149,29 @@ export async function GET() {
     );
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
+    
+    // Check for AccessDenied error specifically
+    if (error.name === 'AccessDenied' || error.message.includes('AccessDenied')) {
+      return NextResponse.json(
+        {
+          error: "AccessDenied",
+          message: "AWS credentials do not have CloudWatch permissions. The IAM user/role needs 'cloudwatch:GetMetricData' permission to query S3 bucket metrics.",
+          hint: "Add the following permission to your IAM policy:\n" +
+                "{\n" +
+                "  \"Effect\": \"Allow\",\n" +
+                "  \"Action\": [\"cloudwatch:GetMetricData\"],\n" +
+                "  \"Resource\": \"*\"\n" +
+                "}",
+        },
+        { status: 403 }
+      );
+    }
+    
     return NextResponse.json(
       {
         error: error.name || "CloudWatchError",
         message: error.message || "Failed to query CloudWatch",
-        details: error.stack || undefined,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       },
       { status: 500 }
     );
