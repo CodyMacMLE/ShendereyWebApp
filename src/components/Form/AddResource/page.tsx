@@ -41,7 +41,7 @@ export default function AddResource({ setResources, setModalEnable }: Props) {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <input type="text" name="name" placeholder="Name" className="border border-gray-300 rounded-md p-2" />
                 <input type="file" name="resourceFile" className="border border-gray-300 rounded-md p-2" />
-                <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="submit" disabled={isSubmitting} className="bg-[var(--primary)] text-[var(--button-text)] p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                     {isSubmitting ? 'Saving...' : 'Add Resource'}
                 </button>
                 <button onClick={() => setModalEnable(false)}>Cancel</button>

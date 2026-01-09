@@ -69,6 +69,7 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
         }
 
         setIsSubmitting(true);
+        setFormErrors([]);
         try {
             const formData = new FormData();
             formData.append('name', name);
@@ -92,10 +93,12 @@ export function EditUserMedia({ athlete, media, closeModal, onSuccess }: {
                 onSuccess(updatedMedia);
                 if (closeModal) closeModal();
             } else {
-                console.error('Upload failed.', await res.json());
+                const errorData = await res.json();
+                setFormErrors([{ msg: errorData.error || 'Failed to update media. Please try again.' }]);
             }
         } catch (err) {
             console.error('Error submitting form', err);
+            setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
         } finally {
             setIsSubmitting(false);
         }

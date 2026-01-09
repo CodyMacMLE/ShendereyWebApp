@@ -79,6 +79,7 @@ export default function Program() {
     const [isAddingGroup, setIsAddingGroup] = useState(false);
     const [isEditingProgram, setIsEditingProgram] = useState(false);
     const [isUpdatingGroup, setIsUpdatingGroup] = useState(false);
+    const [isDeletingProgram, setIsDeletingProgram] = useState(false);
 
     // Program Form
     const [programName, setProgramName] = useState(program ? program.name : ''); 
@@ -248,6 +249,7 @@ export default function Program() {
     }
 
     const handleDeleteProgram = async () => {
+        setIsDeletingProgram(true);
         try {
             const res = await fetch(`/api/programs/${programId}`, {
                 method: 'DELETE'
@@ -255,16 +257,20 @@ export default function Program() {
             
             if (res.ok) {
                 router.push("/admin/programs");
+            } else {
+                setIsDeletingProgram(false);
+                setDeleteModal(false);
             }
             
         } catch (err) {
             console.error('Fetch error:', err);
-        } finally {
+            setIsDeletingProgram(false);
             setDeleteModal(false);
         }
     }
 
     const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
+    const [deletingStates, setDeletingStates] = useState<{ [key: number]: boolean }>({});
     const [groupDeleted, setGroupDeleted] = useState(false);
 
     useEffect(() => {
@@ -348,6 +354,7 @@ export default function Program() {
     }
 
     const deleteGroup = async (groupId: number) => {
+        setDeletingStates(prev => ({ ...prev, [groupId]: true }));
         try {
             const res = await fetch(`/api/groups/${programId}/${groupId}`, {
                 method: 'DELETE',
@@ -357,6 +364,17 @@ export default function Program() {
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setDeletingStates(prev => {
+                const newState = { ...prev };
+                delete newState[groupId];
+                return newState;
+            });
+            setEnabledStates(prev => {
+                const newState = { ...prev };
+                delete newState[groupId];
+                return newState;
+            });
         }
     }
 
@@ -860,10 +878,11 @@ export default function Program() {
                     <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                         <button
                             type="button"
-                            onClick={() => {setDeleteModal(false); handleDeleteProgram();}}
-                            className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+                            onClick={() => {handleDeleteProgram();}}
+                            disabled={isDeletingProgram}
+                            className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto ${isDeletingProgram ? 'bg-gray-400 cursor-not-allowed opacity-60' : 'bg-red-600 hover:bg-red-500'}`}
                         >
-                            Delete
+                            {isDeletingProgram ? 'Deleting...' : 'Delete'}
                         </button>
                         <button
                             type="button"
@@ -1037,8 +1056,10 @@ export default function Program() {
                                     {groups &&
                                         groups.map((group) => {
                                             const enabled = enabledStates[group.id] || false;
+                                            const isDeleting = deletingStates[group.id] || false;
 
                                             const handleDeleteClick = async () => {
+                                                if (isDeleting) return;
                                                 if (!enabled) {
                                                     toggleEnabled(group.id);
                                                 } else {
@@ -1111,15 +1132,22 @@ export default function Program() {
                                             <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6 ml-5">
                                                     <button
                                                         onClick={handleDeleteClick}
-                                                        className={`confirm-delete-button cursor-pointer group relative inline-flex p-1 items-center justify-center rounded-full ${enabled ? 'bg-red-600 hover:bg-red-500' : 'hover:bg-red-600'}`}
+                                                        disabled={isDeleting}
+                                                        className={`confirm-delete-button relative inline-flex p-1 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'hover:bg-red-600 cursor-pointer'}`}
                                                     >
                                                         <span className="relative w-[60px] h-[20px] flex items-center justify-center">
-                                                          <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
-                                                            Confirm
-                                                          </span>
-                                                          <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
-                                                            <TrashIcon className="w-4 h-4" />
-                                                          </span>
+                                                          {isDeleting ? (
+                                                            <span className="text-xs text-white font-semibold">...</span>
+                                                          ) : (
+                                                            <>
+                                                              <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
+                                                                Confirm
+                                                              </span>
+                                                              <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
+                                                                <TrashIcon className="w-4 h-4" />
+                                                              </span>
+                                                            </>
+                                                          )}
                                                         </span>
                                                     </button>
                                                     <button

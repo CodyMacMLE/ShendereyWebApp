@@ -1,4 +1,5 @@
-import { useState, Dispatch, SetStateAction } from 'react';
+import ErrorModal from '@/components/UI/ErrorModal/page';
+import { Dispatch, SetStateAction, useState } from 'react';
 
 type Achievement =  {
     id: number,
@@ -26,12 +27,25 @@ export default function EditAchievement({
     return parsed.toISOString().split('T')[0];
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
+    const errors: { msg: string }[] = [];
+
+    if (!title.trim()) errors.push({ msg: 'Title is required.' });
+    if (!description.trim()) errors.push({ msg: 'Description is required.' });
+    if (!date) errors.push({ msg: 'Date is required.' });
+
+    if (errors.length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     const updatedData = { title, description, date };
 
     setIsSubmitting(true);
+    setFormErrors([]);
     try {
     const res = await fetch(`/api/users/${athleteId}/achievements/${achievement.id}`, {
       method: 'PUT',
@@ -47,15 +61,25 @@ export default function EditAchievement({
           prev.map((item) => (item.id === data.body.id ? data.body : item))
         );
       }
+    } else {
+      const errorData = await res.json();
+      setFormErrors([{ msg: errorData.error || 'Failed to update achievement. Please try again.' }]);
     }
     } catch (err) {
         console.error('Error submitting form', err);
+        setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
     } finally {
         setIsSubmitting(false);
     }
   };
 
   return (
+    <div>
+      {formErrors.length > 0 && (
+        <div className="px-4 pt-6 sm:px-8">
+          <ErrorModal errors={formErrors} />
+        </div>
+      )}
     <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
       <div className="space-y-12">
         <div className="border-b border-[var(--border)] pb-12">
@@ -135,5 +159,6 @@ export default function EditAchievement({
         </button>
       </div>
     </form>
+    </div>
   );
 }

@@ -73,6 +73,7 @@ export default function OldGallery() {
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const resetForm = () => {
         setName('');
@@ -271,18 +272,26 @@ export default function OldGallery() {
     };
 
     const handleDelete = async () => {
-        if (!selectedMedia) return;
+        if (!selectedMedia || isDeleting) return;
+        setIsDeleting(true);
         console.log('Entered Delete')
 
-        const res = await fetch(`/api/gallery/${selectedMedia.id}`, {
-            method: "DELETE",
-        });
+        try {
+            const res = await fetch(`/api/gallery/${selectedMedia.id}`, {
+                method: "DELETE",
+            });
 
-        if (res.ok) {
-            setActionModalOpen(false);
-            setMediaModalOpen(false);
-            // Optionally trigger a refetch or update local state
-            setMedia((prev) => prev.filter(item => item.id !== selectedMedia.id));
+            if (res.ok) {
+                setActionModalOpen(false);
+                setMediaModalOpen(false);
+                // Optionally trigger a refetch or update local state
+                setMedia((prev) => prev.filter(item => item.id !== selectedMedia.id));
+            } else {
+                setIsDeleting(false);
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            setIsDeleting(false);
         }
     };
 
@@ -578,9 +587,10 @@ export default function OldGallery() {
                             </button>
                             <button 
                                 onClick={handleDelete}
-                                className="text-sm w-full text-left text-red-500 hover:underline"
+                                disabled={isDeleting}
+                                className={`text-sm w-full text-left ${isDeleting ? 'text-gray-400 cursor-not-allowed' : 'text-red-500 hover:underline'}`}
                             >
-                                Delete
+                                {isDeleting ? 'Deleting...' : 'Delete'}
                             </button>
                         </Dialog.Panel>
                         </div>

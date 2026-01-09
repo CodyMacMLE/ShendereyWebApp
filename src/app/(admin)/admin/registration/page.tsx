@@ -27,6 +27,7 @@ export default function Registration() {
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
+    const [deletingStates, setDeletingStates] = useState<{ [key: number]: boolean }>({});
     const [registrationImage, setRegistrationImage] = useState<RegistrationImage | null>(null);
     const [imageModalOpen, setImageModalOpen] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -121,20 +122,29 @@ export default function Registration() {
     };
 
     // Delete policy
-    const handleDeletePolicy = (index: number) => {
-        const updatedPolicies = policies.filter((_, i) => i !== index);
-        // Reorder remaining policies
-        const reorderedPolicies = updatedPolicies.map((policy, i) => ({
-            ...policy,
-            order: i,
-        }));
-        setPolicies(reorderedPolicies);
-        // Reset the enabled state for this index
-        setEnabledStates(prev => {
-            const updated = { ...prev };
-            delete updated[index];
-            return updated;
-        });
+    const handleDeletePolicy = async (index: number) => {
+        setDeletingStates(prev => ({ ...prev, [index]: true }));
+        // Small delay to ensure UI updates, then delete
+        setTimeout(() => {
+            const updatedPolicies = policies.filter((_, i) => i !== index);
+            // Reorder remaining policies
+            const reorderedPolicies = updatedPolicies.map((policy, i) => ({
+                ...policy,
+                order: i,
+            }));
+            setPolicies(reorderedPolicies);
+            // Reset states
+            setDeletingStates(prev => {
+                const newState = { ...prev };
+                delete newState[index];
+                return newState;
+            });
+            setEnabledStates(prev => {
+                const updated = { ...prev };
+                delete updated[index];
+                return updated;
+            });
+        }, 100);
     };
 
     // Save all policies
@@ -488,7 +498,9 @@ export default function Registration() {
                                 <td className="w-16 whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
                                   {(() => {
                                     const enabled = enabledStates[index] || false;
+                                    const isDeleting = deletingStates[index] || false;
                                     const handleDeleteClick = () => {
+                                      if (isDeleting) return;
                                       if (!enabled) {
                                         toggleEnabled(index);
                                       } else {
@@ -498,15 +510,22 @@ export default function Registration() {
                                     return (
                                       <button
                                         onClick={handleDeleteClick}
-                                        className={`confirm-delete-button cursor-pointer group relative inline-flex p-1 items-center justify-center rounded-full ${enabled ? 'bg-red-600 hover:bg-red-500' : 'hover:bg-red-600'}`}
+                                        disabled={isDeleting}
+                                        className={`confirm-delete-button relative inline-flex p-1 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'hover:bg-red-600 cursor-pointer'}`}
                                       >
                                         <span className="relative w-[60px] h-[20px] flex items-center justify-center">
-                                          <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
-                                            Confirm
-                                          </span>
-                                          <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
-                                            <TrashIcon className="w-4 h-4" />
-                                          </span>
+                                          {isDeleting ? (
+                                            <span className="text-xs text-white font-semibold">...</span>
+                                          ) : (
+                                            <>
+                                              <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
+                                                Confirm
+                                              </span>
+                                              <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
+                                                <TrashIcon className="w-4 h-4" />
+                                              </span>
+                                            </>
+                                          )}
                                         </span>
                                       </button>
                                     );

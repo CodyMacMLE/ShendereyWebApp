@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 type Score =  {
     id: number,
@@ -74,7 +74,11 @@ export default function EditScore({ athleteId, score, setModalEnable, refreshSco
             const data = await res.json();
             if (setModalEnable) setModalEnable(false);
             if (refreshScores && data.body) refreshScores(data.body);
-          }
+        } else {
+            const errorData = await res.json();
+            console.error('Failed to update score:', errorData);
+            // Could add error display here if needed
+        }
         } catch (err) {
             console.error('Error submitting form', err);
         } finally {

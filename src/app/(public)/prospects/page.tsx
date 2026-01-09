@@ -16,7 +16,7 @@ export default async function Prospects() {
         id: prospect.prospects.id,
         name: prospect.users.name || '',
         level: prospect.athletes.level || null,
-        graduationYear: prospect.prospects.graduationYear ? new Date(prospect.prospects.graduationYear).getFullYear() : null,
+        graduationYear: prospect.prospects.graduationYear ? new Date(prospect.prospects.graduationYear).getUTCFullYear() : null,
         imageSrc: prospect.user_images.prospectUrl || null,
     }));
 

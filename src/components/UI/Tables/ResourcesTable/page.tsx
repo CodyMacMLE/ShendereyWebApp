@@ -31,6 +31,7 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
     const [addModal, setAddModal] = useState(false);
     const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
     const [enabledStates, setEnabledStates] = useState<{ [key: string]: boolean }>({});
+    const [deletingStates, setDeletingStates] = useState<{ [key: string]: boolean }>({});
 
     // Toggle enabled state for delete confirmation
     const toggleEnabled = (resourceId: number) => {
@@ -56,6 +57,8 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
 
     // Delete Resource
     const deleteResource = async (resourceId : number) => {
+        const resourceIdStr = resourceId.toString();
+        setDeletingStates(prev => ({ ...prev, [resourceIdStr]: true }));
         try {
             const res = await fetch(`/api/resources/${resourceId}`, {
                 method: 'DELETE',
@@ -70,6 +73,17 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setDeletingStates(prev => {
+                const newState = { ...prev };
+                delete newState[resourceIdStr];
+                return newState;
+            });
+            setEnabledStates(prev => {
+                const newState = { ...prev };
+                delete newState[resourceIdStr];
+                return newState;
+            });
         }
     }
 
@@ -160,8 +174,10 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                         }
                         
                         const enabled = enabledStates[resource.id.toString()] || false;
+                        const isDeleting = deletingStates[resource.id.toString()] || false;
 
                         const handleDeleteClick = async () => {
+                          if (isDeleting) return;
                           if (!enabled) {
                             toggleEnabled(resource.id);
                           } else {
@@ -204,14 +220,21 @@ export default function ResourceTable({ resources, setResources, isLoading }: Pr
                                     onClick={() => {
                                         handleDeleteClick();
                                     }}
-                                    className={`confirm-delete-button cursor-pointer group relative inline-flex h-6 w-16 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
+                                    disabled={isDeleting}
+                                    className={`confirm-delete-button relative inline-flex h-6 w-16 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'bg-[var(--background) hover:bg-[var(--muted)]/5 cursor-pointer'} ring-1 ring-[var(--border)]`}
                                 >
-                                    <span className="text-xs text-white font-semibold">
-                                        {enabled ? 'Confirm' : ''}
-                                    </span>
-                                    <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
-                                        {!enabled ? 'Delete' : ''}
-                                    </span>
+                                    {isDeleting ? (
+                                        <span className="text-xs text-white font-semibold">...</span>
+                                    ) : (
+                                        <>
+                                            <span className="text-xs text-white font-semibold">
+                                                {enabled ? 'Confirm' : ''}
+                                            </span>
+                                            <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
+                                                {!enabled ? 'Delete' : ''}
+                                            </span>
+                                        </>
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => {

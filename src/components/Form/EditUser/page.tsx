@@ -1,7 +1,6 @@
 'use client';
  
 import ErrorModal from '@/components/UI/ErrorModal/page';
-import { UserCircleIcon } from '@heroicons/react/24/solid';
 import imageCompression from 'browser-image-compression';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
@@ -98,11 +97,11 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                         setAlumniDescription(body.athlete.alumni.description ?? '');
                     }
                 }
-                // Photos
-                setStaffPhotoPreview(body.images.staffUrl ?? null);
-                setAthletePhotoPreview(body.images.athleteUrl ?? null);
-                setProspectPhotoPreview(body.images.prospectUrl ?? null);
-                setAlumniPhotoPreview(body.images.alumniUrl ?? null);
+                // Photos - use default images if URLs are null/undefined
+                setStaffPhotoPreview(body.images.staffUrl || '/default-user-icon.png');
+                setAthletePhotoPreview(body.images.athleteUrl || '/default-user-icon.png');
+                setProspectPhotoPreview(body.images.prospectUrl || '/default-profile.png');
+                setAlumniPhotoPreview(body.images.alumniUrl || '/default-profile.png');
             
                 setLoading(false);
             } catch (error) {
@@ -196,12 +195,18 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
 
         if (res.ok) {
           const data = await res.json();
-          if (data.redirect) window.location.href = data.redirect;
+          if (data.redirect) {
+            window.location.href = data.redirect;
+          } else if (setModalEnable) {
+            setModalEnable(false);
+          }
         } else {
-          console.error('Error submitting form');
+          const errorData = await res.json();
+          setFormErrors([{ msg: errorData.error || 'Failed to update user. Please try again.' }]);
         }
       } catch (err) {
         console.error('Submission failed', err);
+        setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
       } finally {
         setIsSubmitting(false);
       }
@@ -563,20 +568,32 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                                     Staff Photo
                                 </label>
                                 <div className="mt-2 flex items-center gap-x-3">
-                                    {!isSeniorStaff && (staffPhotoPreview ? (
-                                    <Image src={staffPhotoPreview} alt="Staff" className="h-12 w-12 rounded-full object-cover" width={1000} height={1000} />
-                                    ) : (
-                                    <div className='flex items-center justify-center h-12 w-12 rounded-full'>
-                                        <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
-                                    </div>
-                                    ))}
-                                    {isSeniorStaff && (staffPhotoPreview ? (
-                                    <Image src={staffPhotoPreview} alt="Staff" className="h-[225px] w-[150px] rounded-md object-cover" width={1000} height={1000} />
-                                    ) : (
-                                    <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
-                                        <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
-                                    </div>
-                                    ))}
+                                    {!isSeniorStaff && (
+                                    <Image 
+                                        src={staffPhotoPreview || '/default-user-icon.png'} 
+                                        alt="Staff" 
+                                        className="h-12 w-12 rounded-full object-cover" 
+                                        width={1000} 
+                                        height={1000}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/default-user-icon.png';
+                                        }}
+                                    />
+                                    )}
+                                    {isSeniorStaff && (
+                                    <Image 
+                                        src={staffPhotoPreview || '/default-profile.png'} 
+                                        alt="Staff" 
+                                        className="h-[225px] w-[150px] rounded-md object-cover" 
+                                        width={1000} 
+                                        height={1000}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/default-profile.png';
+                                        }}
+                                    />
+                                    )}
                                     <div>
                                         <input
                                         type="file"
@@ -653,13 +670,17 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                             <div className="col-span-full">
                                 <label htmlFor="athlete-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Athlete Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
-                                    {athletePhotoPreview ? (
-                                    <Image src={athletePhotoPreview} alt="Athlete" className="h-12 w-12 rounded-full object-cover" width={1000} height={1000} />
-                                    ) : (
-                                    <div className='flex items-center justify-center h-12 w-12 rounded-full'>
-                                        <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
-                                    </div>
-                                    )}
+                                    <Image 
+                                        src={athletePhotoPreview || '/default-user-icon.png'} 
+                                        alt="Athlete" 
+                                        className="h-12 w-12 rounded-full object-cover" 
+                                        width={1000} 
+                                        height={1000}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/default-user-icon.png';
+                                        }}
+                                    />
                                     <input
                                     type="file"
                                     accept="image/*"
@@ -727,13 +748,17 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                             <div className="col-span-full">
                               <label htmlFor="prospect-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Prospect Photo</label>
                               <div className="mt-2 flex items-center gap-x-3">
-                              {prospectPhotoPreview ? (
-                                <Image src={prospectPhotoPreview} alt="Prospect" className="h-[225px] w-[150px] rounded-md object-cover" width={1000} height={1000} />
-                                ) : (
-                                <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
-                                    <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
-                                </div>
-                                )}
+                                <Image 
+                                    src={prospectPhotoPreview || '/default-profile.png'} 
+                                    alt="Prospect" 
+                                    className="h-[225px] w-[150px] rounded-md object-cover" 
+                                    width={1000} 
+                                    height={1000}
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.src = '/default-profile.png';
+                                    }}
+                                />
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -917,13 +942,17 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                             <div className="col-span-full">
                                 <label htmlFor="alumni-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Alumni Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
-                                {alumniPhotoPreview ? (
-                                    <Image src={alumniPhotoPreview} alt="Alumni" className="h-[225px] w-[150px] rounded-md object-cover" width={1000} height={1000} />
-                                    ) : (
-                                    <div className='flex items-center justify-center bg-[var(--border)] h-[225px] w-[150px] rounded-md'>
-                                        <UserCircleIcon aria-hidden="true" className="size-12 text-[var(--muted)]" />
-                                    </div>
-                                    )}
+                                    <Image 
+                                        src={alumniPhotoPreview || '/default-profile.png'} 
+                                        alt="Alumni" 
+                                        className="h-[225px] w-[150px] rounded-md object-cover" 
+                                        width={1000} 
+                                        height={1000}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/default-profile.png';
+                                        }}
+                                    />
                                     <input
                                     type="file"
                                     accept="image/*"

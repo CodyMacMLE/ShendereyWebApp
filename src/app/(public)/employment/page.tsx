@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { EmploymentQuote, SponsorsQuote } from "@/public/files/quotes"
+import { EmploymentQuote } from "@/public/files/quotes"
 import { getCoaches, getJobs } from "@/lib/actions";
 import EmploymentTable from "@/components/UI/Tables/EmploymentTable/page";
 import { Metadata } from "next";
@@ -80,7 +80,7 @@ export default async function EmploymentPage() {
                                     />
                                     <blockquote className="mt-6 text-xl/8 font-semibold text-white">
                                         <p>
-                                            “{SponsorsQuote.quote}”
+                                            "{EmploymentQuote.quote}"
                                         </p>
                                     </blockquote>
                                     <figcaption className="mt-6 text-sm/6 text-gray-300">

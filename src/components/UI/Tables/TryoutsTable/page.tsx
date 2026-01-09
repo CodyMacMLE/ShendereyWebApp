@@ -40,6 +40,7 @@ interface Props {
 export default function TryoutsTable({ tryouts, setTryouts, isLoading }: Props) {
 
     const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
+    const [deletingStates, setDeletingStates] = useState<{ [key: number]: boolean }>({});
     const [selectedTryout, setSelectedTryout] = useState<Tryout | null>(null);
     const [tryoutModalEnabled, setTryoutModalEnabled] = useState(false);
 
@@ -59,6 +60,7 @@ export default function TryoutsTable({ tryouts, setTryouts, isLoading }: Props) 
 
     // Delete Sponsor
     const deleteTryout = async (tryoutId : number) => {
+        setDeletingStates(prev => ({ ...prev, [tryoutId]: true }));
         try {
             const res = await fetch(`/api/tryouts/${tryoutId}`, {
                 method: 'DELETE',
@@ -73,6 +75,17 @@ export default function TryoutsTable({ tryouts, setTryouts, isLoading }: Props) 
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setDeletingStates(prev => {
+                const newState = { ...prev };
+                delete newState[tryoutId];
+                return newState;
+            });
+            setEnabledStates(prev => {
+                const newState = { ...prev };
+                delete newState[tryoutId];
+                return newState;
+            });
         }
     }
 
@@ -200,8 +213,10 @@ export default function TryoutsTable({ tryouts, setTryouts, isLoading }: Props) 
                     <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
                       {tryouts.map((tryout: Tryout, idx: number) => {
                         const enabled = enabledStates[tryout.id] || false;
+                        const isDeleting = deletingStates[tryout.id] || false;
 
                         const handleDeleteClick = async () => {
+                          if (isDeleting) return;
                           if (!enabled) {
                             toggleEnabled(tryout.id);
                           } else {
@@ -277,14 +292,21 @@ export default function TryoutsTable({ tryouts, setTryouts, isLoading }: Props) 
                                   e.stopPropagation();
                                   handleDeleteClick();
                                 }}
-                                className={`confirm-delete-button cursor-pointer group relative inline-flex h-6 w-16 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
+                                disabled={isDeleting}
+                                className={`confirm-delete-button relative inline-flex h-6 w-16 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'bg-[var(--background) hover:bg-[var(--muted)]/5 cursor-pointer'} ring-1 ring-[var(--border)]`}
                               >
-                                <span className="text-xs text-white font-semibold">
-                                  {enabled ? 'Confirm' : ''}
-                                </span>
-                                <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
-                                  {!enabled ? 'Delete' : ''}
-                                </span>
+                                {isDeleting ? (
+                                  <span className="text-xs text-white font-semibold">...</span>
+                                ) : (
+                                  <>
+                                    <span className="text-xs text-white font-semibold">
+                                      {enabled ? 'Confirm' : ''}
+                                    </span>
+                                    <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
+                                      {!enabled ? 'Delete' : ''}
+                                    </span>
+                                  </>
+                                )}
                               </button>
                             </td>
                           </tr>

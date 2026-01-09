@@ -75,10 +75,12 @@ export default function EditSponsor({ sponsor, setSponsors, setModalEnable }: {
             setSponsors((prevSponsors) => prevSponsors.map(s => s.id === sponsor.id ? data.body : s));
             if (setModalEnable) setModalEnable(false);
         } else {
-            console.error('Upload failed.', await res.json());
+            const errorData = await res.json();
+            setFormErrors([{ msg: errorData.error || 'Failed to update sponsor. Please try again.' }]);
         }
         } catch (err) {
-        console.error('Error submitting form', err);
+            console.error('Error submitting form', err);
+            setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
         } finally {
             setIsSubmitting(false);
         }

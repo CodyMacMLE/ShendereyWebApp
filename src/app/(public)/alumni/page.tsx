@@ -7,6 +7,7 @@ export type Athlete = {
     school: string | null;
     graduationYear: number | null;
     imageSrc: string | null;
+    description: string | null;
 }
 
 export default async function Alumni() {
@@ -16,8 +17,9 @@ export default async function Alumni() {
     id: alumni.alumni.id,
     name: alumni.users.name || '',
     school: alumni.alumni.school,
-    graduationYear: alumni.alumni.year ? new Date(alumni.alumni.year).getFullYear() : null,
+    graduationYear: alumni.alumni.year ? new Date(alumni.alumni.year).getUTCFullYear() : null,
     imageSrc: alumni.user_images.alumniUrl || null,
+    description: alumni.alumni.description || null,
   }));
   
   return (

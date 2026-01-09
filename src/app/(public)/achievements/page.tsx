@@ -1,5 +1,5 @@
 import { getAchievementsByYear } from '@/lib/actions';
-import { AchievementsQuote } from '@/public/files/quotes';
+import { AchievementsQuote } from "@/public/files/quotes";
 import { AchievementsStats } from '@/public/files/stats';
 import { Metadata } from 'next';
 import Image from 'next/image';

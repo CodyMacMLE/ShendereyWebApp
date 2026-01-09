@@ -1,3 +1,4 @@
+import ErrorModal from "@/components/UI/ErrorModal/page";
 import { Resource } from "@/lib/types";
 import { Dispatch, SetStateAction, useState } from "react";
 
@@ -9,6 +10,7 @@ interface Props {
 
 export default function EditResource({ resource, setResources, setModalEnable }: Props ) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,6 +31,7 @@ export default function EditResource({ resource, setResources, setModalEnable }:
         }
 
         setIsSubmitting(true);
+        setFormErrors([]);
         try {
             const res = await fetch('/api/resources', {
                 method: 'PUT',
@@ -38,15 +41,23 @@ export default function EditResource({ resource, setResources, setModalEnable }:
             if (data.success) {
                 setResources(prev => prev.map(r => r.id === resource.id ? data.body : r));
                 setModalEnable(false);
+            } else {
+                setFormErrors([{ msg: data.error || 'Failed to update resource. Please try again.' }]);
             }
         } catch (err) {
             console.error('Error submitting form', err);
+            setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
         } finally {
             setIsSubmitting(false);
         }
     }
     return (
-        <div>   
+        <div>
+            {formErrors.length > 0 && (
+                <div className="px-4 pt-6 sm:px-8">
+                    <ErrorModal errors={formErrors} />
+                </div>
+            )}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <input type="text" name="name" placeholder="Name" className="border border-gray-300 rounded-md p-2" />
                 <input type="file" name="resourceFile" className="border border-gray-300 rounded-md p-2" />

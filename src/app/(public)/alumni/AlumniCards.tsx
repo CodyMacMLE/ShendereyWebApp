@@ -21,6 +21,8 @@ export default function AlumniCards({athletes}: {athletes: Athlete[]}) {
     const [alumni, setAlumni] = useState<Athlete[]>(athletes);
     const [sort, setSort] = useState<'School' | 'Graduation Year'>('School');
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedAlumni, setSelectedAlumni] = useState<Athlete | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         // Always sort the incoming athletes prop when it changes
@@ -40,8 +42,98 @@ export default function AlumniCards({athletes}: {athletes: Athlete[]}) {
         setIsLoading(false);
     }, [athletes, sort]);
 
+  const openModal = (athlete: Athlete) => {
+    setSelectedAlumni(athlete);
+    setModalOpen(true);
+  };
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (modalOpen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position when modal closes
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [modalOpen]);
+
   return (
     <>
+        {modalOpen && selectedAlumni && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+                {/* Background overlay */}
+                <div 
+                    className="fixed inset-0 bg-black opacity-75"
+                    onClick={() => {
+                        setModalOpen(false);
+                        setSelectedAlumni(null);
+                    }}
+                />
+                {/* Modal container - scrollable */}
+                <div className="min-h-full flex flex-col items-center justify-center p-4 md:p-8 py-8 md:py-8">
+                    {/* Modal shell */}
+                    <div
+                        className="relative bg-[var(--card-bg)] rounded-lg ring-1 ring-[var(--border)] z-50
+                                 w-full max-w-5xl flex flex-col md:flex-row md:max-h-[90vh]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={() => {
+                                setModalOpen(false);
+                                setSelectedAlumni(null);
+                            }}
+                            className="absolute top-4 right-4 z-50 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        {/* Image Section - Left */}
+                        <div className="w-full md:w-1/2 flex-shrink-0 bg-black flex items-center justify-center aspect-[2/3] md:aspect-auto md:max-h-[90vh] rounded-t-lg md:rounded-l-lg md:rounded-tr-none overflow-hidden">
+                            <Image
+                                alt={selectedAlumni.name}
+                                src={selectedAlumni.imageSrc || '/default-profile.png'}
+                                width={600}
+                                height={800}
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/default-profile.png';
+                                }}
+                            />
+                        </div>
+                        {/* Content Section - Right (or below on mobile) */}
+                        <div className="w-full md:w-1/2 flex flex-col p-6 overflow-y-auto md:max-h-[90vh]">
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-bold text-[var(--foreground)] mb-2">{selectedAlumni.name}</h3>
+                                <p className="text-lg text-[var(--muted)]">
+                                    {selectedAlumni.school || 'N/A'} • {selectedAlumni.graduationYear || 'N/A'}
+                                </p>
+                            </div>
+                            {selectedAlumni.description && (
+                                <div className="pt-6 border-t border-[var(--border)]">
+                                    <h4 className="text-lg font-semibold text-[var(--foreground)] mb-4">About</h4>
+                                    <p className="text-base text-[var(--foreground)] whitespace-pre-wrap leading-relaxed">{selectedAlumni.description}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
         {/* Filters */}
         <section aria-labelledby="filter-heading" className="border-t border-gray-200 pt-6">
             <div className="flex items-center justify-between">
@@ -90,20 +182,28 @@ export default function AlumniCards({athletes}: {athletes: Athlete[]}) {
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
                     {alumni.map((athlete) => (
-                    <a key={athlete.id} href={`/alumni/${athlete.id}`} className="group">
+                    <button
+                        key={athlete.id}
+                        onClick={() => openModal(athlete)}
+                        className="group text-left"
+                    >
                         <Image
                             alt={athlete.name}
-                            src={athlete.imageSrc || '/images/placeholder.png'}
+                            src={athlete.imageSrc || '/default-profile.png'}
                             width={800}
                             height={1000}
                             className="aspect-square w-full rounded-lg object-cover group-hover:opacity-75 sm:aspect-[2/3]"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/default-profile.png';
+                            }}
                         />
                         <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
                             <h3>{athlete.name}</h3>
                             <p>{athlete.graduationYear}</p>
                         </div>
                         <p className="mt-1 text-sm italic text-gray-500">{athlete.school}</p>
-                    </a>
+                    </button>
                     ))}
                 </div>
             </section>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import ErrorModal from '@/components/UI/ErrorModal/page';
 
@@ -71,10 +71,12 @@ export function EditGalleryMedia({ media, closeModal, onSuccess }: {
                 onSuccess(updatedMedia);
                 if (closeModal) closeModal();
             } else {
-                console.error('Upload failed.', await res.json());
+                const errorData = await res.json();
+                setFormErrors([{ msg: errorData.error || 'Failed to update media. Please try again.' }]);
             }
         } catch (err) {
             console.error('Error submitting form', err);
+            setFormErrors([{ msg: 'An unexpected error occurred. Please try again.' }]);
         } finally {
             setIsSubmitting(false);
         }

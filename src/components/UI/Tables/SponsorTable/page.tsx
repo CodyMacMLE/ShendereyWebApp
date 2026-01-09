@@ -1,11 +1,11 @@
 "use client"
 
-import { SetStateAction, Dispatch, useState, useEffect } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
-import Modal from "@/components/UI/Modal/page";
-import SponsorTableSkeleton from "./SponsorTableSkeleton";
 import AddSponsor from '@/components/Form/AddSponsor/page';
 import EditSponsor from '@/components/Form/EditSponsor/page';
+import Modal from "@/components/UI/Modal/page";
+import SponsorTableSkeleton from "./SponsorTableSkeleton";
 
 type Sponsor = {
   id: number;
@@ -28,6 +28,7 @@ export default function SponsorTable({ sponsors, setSponsors, isLoading }: Props
     const [addModal, setAddModal] = useState(false);
     const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | -1>(-1);
     const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
+    const [deletingStates, setDeletingStates] = useState<{ [key: number]: boolean }>({});
 
     // Global click detection for delete confirm button
     useEffect(() => {
@@ -45,6 +46,7 @@ export default function SponsorTable({ sponsors, setSponsors, isLoading }: Props
 
     // Delete Sponsor
     const deleteSponsor = async (sponsorId : number) => {
+        setDeletingStates(prev => ({ ...prev, [sponsorId]: true }));
         try {
             const res = await fetch(`/api/sponsors/${sponsorId}`, {
                 method: 'DELETE',
@@ -55,12 +57,6 @@ export default function SponsorTable({ sponsors, setSponsors, isLoading }: Props
                 if (data.success && data.body) {
                     const newArray = sponsors.filter(sponsor => sponsor.id !== data.body);
                     setSponsors(newArray);
-                    // Reset enabled state after successful deletion
-                    setEnabledStates(prev => {
-                        const newState = { ...prev };
-                        delete newState[sponsorId];
-                        return newState;
-                    });
                 } else {
                     console.error('Delete failed:', data);
                 }
@@ -70,6 +66,17 @@ export default function SponsorTable({ sponsors, setSponsors, isLoading }: Props
             }
         } catch (error) {
             console.error('Error deleting sponsor:', error);
+        } finally {
+            setDeletingStates(prev => {
+                const newState = { ...prev };
+                delete newState[sponsorId];
+                return newState;
+            });
+            setEnabledStates(prev => {
+                const newState = { ...prev };
+                delete newState[sponsorId];
+                return newState;
+            });
         }
     }
 
@@ -156,8 +163,10 @@ export default function SponsorTable({ sponsors, setSponsors, isLoading }: Props
                     <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
                       {sponsors.map((sponsor: Sponsor, idx: number) => {
                         const enabled = enabledStates[sponsor.id] || false;
+                        const isDeleting = deletingStates[sponsor.id] || false;
 
                         const handleDeleteClick = async () => {
+                          if (isDeleting) return;
                           if (!enabled) {
                             toggleEnabled(sponsor.id);
                           } else {
@@ -188,14 +197,21 @@ export default function SponsorTable({ sponsors, setSponsors, isLoading }: Props
                                     onClick={() => {
                                         handleDeleteClick();
                                     }}
-                                    className={`confirm-delete-button cursor-pointer group relative inline-flex h-6 w-16 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
+                                    disabled={isDeleting}
+                                    className={`confirm-delete-button relative inline-flex h-6 w-16 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'bg-[var(--background) hover:bg-[var(--muted)]/5 cursor-pointer'} ring-1 ring-[var(--border)]`}
                                 >
-                                    <span className="text-xs text-white font-semibold">
-                                        {enabled ? 'Confirm' : ''}
-                                    </span>
-                                    <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
-                                        {!enabled ? 'Delete' : ''}
-                                    </span>
+                                    {isDeleting ? (
+                                        <span className="text-xs text-white font-semibold">...</span>
+                                    ) : (
+                                        <>
+                                            <span className="text-xs text-white font-semibold">
+                                                {enabled ? 'Confirm' : ''}
+                                            </span>
+                                            <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
+                                                {!enabled ? 'Delete' : ''}
+                                            </span>
+                                        </>
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => {

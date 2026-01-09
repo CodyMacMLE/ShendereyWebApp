@@ -33,6 +33,7 @@ export default function AchievementsTable({ athlete } : { athlete : Athlete}) {
     const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
 
     const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
+    const [deletingStates, setDeletingStates] = useState<{ [key: number]: boolean }>({});
     const [athleteAchievements, setAthleteAchievements] = useState<Achievement[] | []>([]);
 
 useEffect(() => {
@@ -72,6 +73,7 @@ useEffect(() => {
 
     // Delete Achievement
     const deleteAchievement = async (athleteId : number, achievementId: number) => {
+        setDeletingStates(prev => ({ ...prev, [achievementId]: true }));
         try {
             const res = await fetch(`/api/users/${athlete.id}/achievements/${achievementId}`, {
                 method: 'DELETE',
@@ -84,6 +86,17 @@ useEffect(() => {
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setDeletingStates(prev => {
+                const newState = { ...prev };
+                delete newState[achievementId];
+                return newState;
+            });
+            setEnabledStates(prev => {
+                const newState = { ...prev };
+                delete newState[achievementId];
+                return newState;
+            });
         }
     }
 
@@ -167,8 +180,10 @@ useEffect(() => {
                                 <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
                                     {athleteAchievements.map((achievement: Achievement) => { 
                                         const enabled = enabledStates[achievement.id] || false;
+                                        const isDeleting = deletingStates[achievement.id] || false;
 
                                         const handleDeleteClick = async () => {
+                                        if (isDeleting) return;
                                         if (!enabled) {
                                             toggleEnabled(achievement.id);
                                         } else {
@@ -191,15 +206,22 @@ useEffect(() => {
                                                 <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6 ml-5">
                                                     <button
                                                         onClick={handleDeleteClick}
-                                                        className={`confirm-delete-button cursor-pointer group relative inline-flex p-1 items-center justify-center rounded-full ${enabled ? 'bg-red-600 hover:bg-red-500' : 'hover:bg-red-600'}`}
+                                                        disabled={isDeleting}
+                                                        className={`confirm-delete-button relative inline-flex p-1 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'hover:bg-red-600 cursor-pointer'}`}
                                                     >
                                                         <span className="relative w-[60px] h-[20px] flex items-center justify-center">
-                                                          <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
-                                                            Confirm
-                                                          </span>
-                                                          <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
-                                                            <TrashIcon className="w-4 h-4" />
-                                                          </span>
+                                                          {isDeleting ? (
+                                                            <span className="text-xs text-white font-semibold">...</span>
+                                                          ) : (
+                                                            <>
+                                                              <span className={`absolute transition-opacity duration-150 text-xs text-white font-semibold ${enabled ? 'opacity-100' : 'opacity-0'}`}>
+                                                                Confirm
+                                                              </span>
+                                                              <span className={`absolute transition-opacity duration-150 text-xs text-[var(--foreground)] group-hover:text-white font-semibold ${enabled ? 'opacity-0' : 'opacity-100'}`}>
+                                                                <TrashIcon className="w-4 h-4" />
+                                                              </span>
+                                                            </>
+                                                          )}
                                                         </span>
                                                     </button>
                                                     <button

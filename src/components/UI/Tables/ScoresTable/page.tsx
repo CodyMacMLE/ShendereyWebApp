@@ -40,6 +40,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
   const [selectedScore, setSelectedScore] = useState<Score | null>(null);
 
   const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
+  const [deletingStates, setDeletingStates] = useState<{ [key: number]: boolean }>({});
   const [athleteScores, setAthleteScores] = useState<Score[] | []>([]);
 
   // Read Score
@@ -95,6 +96,7 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
 
   // Delete Score
   const deleteScore = async (athleteId : number, scoreId: number) => {
+    setDeletingStates(prev => ({ ...prev, [scoreId]: true }));
     try {
       const res = await fetch(`/api/users/${athlete.id}/score/${scoreId}`, {
         method: 'DELETE',
@@ -109,6 +111,17 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setDeletingStates(prev => {
+        const newState = { ...prev };
+        delete newState[scoreId];
+        return newState;
+      });
+      setEnabledStates(prev => {
+        const newState = { ...prev };
+        delete newState[scoreId];
+        return newState;
+      });
     }
   }
 
@@ -208,8 +221,10 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                       .filter((score): score is Score => !!score && typeof score.id === 'number')
                       .map((score: Score) => { 
                         const enabled = enabledStates[score.id] || false;
+                        const isDeleting = deletingStates[score.id] || false;
 
                         const handleDeleteClick = async () => {
+                          if (isDeleting) return;
                           if (!enabled) {
                             toggleEnabled(score.id);
                           } else {
@@ -246,14 +261,21 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
                                 <td className="whitespace-nowrap pr-6 py-4 text-sm text-[var(--foreground)] flex items-center justify-end gap-6">
                                     <button
                                         onClick={handleDeleteClick}
-                                        className={`confirm-delete-button cursor-pointer group relative inline-flex h-6 w-16 items-center justify-center rounded-full  ${enabled ? 'bg-red-600 hover:bg-red-500' : 'bg-[var(--background) hover:bg-[var(--muted)]/5'} ring-1 ring-[var(--border)]`}
+                                        disabled={isDeleting}
+                                        className={`confirm-delete-button relative inline-flex h-6 w-16 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'bg-[var(--background) hover:bg-[var(--muted)]/5 cursor-pointer'} ring-1 ring-[var(--border)]`}
                                     >
-                                        <span className="text-xs text-white font-semibold">
-                                            {enabled ? 'Confirm' : ''}
-                                        </span>
-                                        <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
-                                            {!enabled ? 'Delete' : ''}
-                                        </span>
+                                        {isDeleting ? (
+                                            <span className="text-xs text-white font-semibold">...</span>
+                                        ) : (
+                                            <>
+                                                <span className="text-xs text-white font-semibold">
+                                                    {enabled ? 'Confirm' : ''}
+                                                </span>
+                                                <span className="text-xs text-[var(--foreground)] group-hover:text-red-600 text-right-1 font-semibold">
+                                                    {!enabled ? 'Delete' : ''}
+                                                </span>
+                                            </>
+                                        )}
                                     </button>
                                     <button
                                       type="button"
