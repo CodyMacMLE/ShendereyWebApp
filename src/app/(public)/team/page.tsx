@@ -21,7 +21,7 @@ return (
         <>
             <div className="relative bg-gray-900 shadow-hero">
                 {/* Decorative image and overlay */}
-                <div aria-hidden="true" className="absolute inset-0 overflow-hidden max-w-[1920px]">
+                <div aria-hidden="true" className="absolute inset-y-0 left-1/2 -translate-x-1/2 overflow-hidden max-w-[1920px] w-full">
                     <Image
                         alt=""
                         src="/images/Shenderey_2024-2025.JPG"
