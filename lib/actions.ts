@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, resources, scores, sponsors, userImages, users, registrationPolicies, registrationImage } from "@/lib/schema";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, count, and } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
     const seniorStaffWithUsers = await db.select({
@@ -11,7 +11,7 @@ export const getSeniorStaff = async () => {
     .from(coaches)
     .innerJoin(users, eq(coaches.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .where(eq(coaches.isSeniorStaff, true));
+    .where(and(eq(coaches.isSeniorStaff, true), eq(users.isActive, true)));
 
     seniorStaffWithUsers.sort((a, b) => {
         const dateA = a.coach.createdAt?.getTime();
@@ -33,7 +33,7 @@ export const getJuniorStaff = async () => {
     .from(coaches)
     .innerJoin(users, eq(coaches.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .where(eq(coaches.isSeniorStaff, false));
+    .where(and(eq(coaches.isSeniorStaff, false), eq(users.isActive, true)));
 
     juniorStaffWithUsers.sort((a, b) => {
         const dateA = a.coach.createdAt?.getTime();
@@ -55,6 +55,7 @@ export const getCoaches = async () => {
     .from(coaches)
     .innerJoin(users, eq(coaches.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
+    .where(eq(users.isActive, true))
 
     coachesWithUsers.sort((a, b) => {
         const dateA = a.coach.createdAt?.getTime();
@@ -76,7 +77,7 @@ export const getCoach = async (coachName: string) => {
     .from(coaches)
     .innerJoin(users, eq(coaches.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .where(eq(users.name, coachName));
+    .where(and(eq(users.name, coachName), eq(users.isActive, true)));
     return coachesWithUsers;
 }
 
@@ -94,7 +95,7 @@ export const getCurrentAthletes = async () => {
     .from(athletes)
     .innerJoin(users, eq(athletes.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .where(eq(users.isAlumni, false));
+    .where(and(eq(users.isAlumni, false), eq(users.isActive, true)));
 
     athletesWithUsers.sort((a, b) => {
       const aIndex = sortOrder.indexOf(a.athlete.level || '');
@@ -113,7 +114,8 @@ export const getAchievementsByYear = async () => {
     .from(achievements)
     .innerJoin(athletes, eq(achievements.athlete, athletes.id))
     .innerJoin(users, eq(athletes.user, users.id))
-    .innerJoin(userImages, eq(users.id, userImages.user));
+    .innerJoin(userImages, eq(users.id, userImages.user))
+    .where(eq(users.isActive, true));
 
     const sortedAchievements = achievementsWithUsers.sort((a, b) => {
       const dateA = a.achievement.date?.getTime();
@@ -158,7 +160,7 @@ export const getGroups = async (programId: number) => {
         .innerJoin(coachGroupLines, eq(groups.id, coachGroupLines.groupId))
         .innerJoin(coaches, eq(coachGroupLines.coachId, coaches.id))
         .innerJoin(users, eq(coaches.user, users.id))
-        .where(eq(groups.program, programId))
+        .where(and(eq(groups.program, programId), eq(users.isActive, true)))
         .orderBy(asc(groups.startDate));
     return groupsWithCoaches;
 }
@@ -187,7 +189,8 @@ export const getAlumni = async () => {
     const alumniData = await db.select()
     .from(alumni)
     .innerJoin(users, eq(alumni.user, users.id))
-    .innerJoin(userImages, eq(users.id, userImages.user));
+    .innerJoin(userImages, eq(users.id, userImages.user))
+    .where(eq(users.isActive, true));
     return alumniData;
 }
 
@@ -196,7 +199,8 @@ export const getProspects = async () => {
     .from(prospects)
     .innerJoin(users, eq(prospects.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
-    .innerJoin(athletes, eq(prospects.user, athletes.user));
+    .innerJoin(athletes, eq(prospects.user, athletes.user))
+    .where(eq(users.isActive, true));
     return prospectsData;
 }
 
@@ -206,7 +210,7 @@ export const getProspect = async (prospectId: number) => {
     .innerJoin(users, eq(prospects.user, users.id))
     .innerJoin(userImages, eq(users.id, userImages.user))
     .innerJoin(athletes, eq(prospects.user, athletes.user))
-    .where(eq(prospects.id, prospectId));
+    .where(and(eq(prospects.id, prospectId), eq(users.isActive, true)));
     return prospect[0];
 }
 
@@ -225,12 +229,35 @@ export const getAthleteAchievements = async (athleteId: number) => {
     return athleteAchievements;
 }
 
-export const getGalleryMedia = async () => {
-    const galleryMedia = await db.select().from(gallery).orderBy(desc(gallery.date));
-    return galleryMedia.map(item => ({
-        ...item,
-        id: item.id.toString()
-    }));
+export const getGalleryMedia = async (page: number = 1, limit: number = 20) => {
+    const offset = (page - 1) * limit;
+    
+    const [galleryMedia, totalCountResult] = await Promise.all([
+        db.select()
+            .from(gallery)
+            .orderBy(desc(gallery.date))
+            .limit(limit)
+            .offset(offset),
+        db.select({ count: count() }).from(gallery)
+    ]);
+    
+    const totalCount = totalCountResult[0]?.count || 0;
+    const totalPages = Math.ceil(totalCount / limit);
+    
+    return {
+        data: galleryMedia.map(item => ({
+            ...item,
+            id: item.id.toString()
+        })),
+        pagination: {
+            page,
+            limit,
+            totalCount,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1
+        }
+    };
 }
 
 export const getResources = async () => {

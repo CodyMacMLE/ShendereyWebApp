@@ -7,8 +7,15 @@ export const metadata: Metadata = {
     title: 'Gallery',
 };
 
-export default async function Gallery() {
-    const galleryMedia = await getGalleryMedia();
+interface GalleryPageProps {
+    searchParams: Promise<{ page?: string }>;
+}
+
+export default async function Gallery({ searchParams }: GalleryPageProps) {
+    const params = await searchParams;
+    const page = parseInt(params.page || '1', 10);
+    const limit = 20; // Items per page
+    const result = await getGalleryMedia(page, limit);
 
     return (
         <div className="bg-white">
@@ -20,7 +27,10 @@ export default async function Gallery() {
             </div>
 
             {/* Gallery Images */}
-            <PublicGallery galleryMedia={galleryMedia} />
+            <PublicGallery 
+                galleryMedia={result.data} 
+                pagination={result.pagination}
+            />
         </div>
     )
 }

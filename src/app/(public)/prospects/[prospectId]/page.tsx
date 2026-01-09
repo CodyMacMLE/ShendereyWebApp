@@ -54,7 +54,7 @@ export default async function ProspectPage({ params }: PageProps) {
                             <div className="flex flex-col gap-2 items-center justify-between md:justify-start">
                                 <h1 className="text-3xl font-bold">{prospect.users.name}</h1>
                                 <p className="text-gray-500 font-bold">
-                                    {prospect.prospects?.graduationYear ? new Date(prospect.prospects.graduationYear).getFullYear() : 'N/A'} &bull; {isNaN(parseInt(prospect.athletes.level || '')) ? prospect.athletes.level : `Level ${prospect.athletes.level}`}
+                                    {prospect.prospects?.graduationYear ? new Date(prospect.prospects.graduationYear).getUTCFullYear() : 'N/A'} &bull; {isNaN(parseInt(prospect.athletes.level || '')) ? prospect.athletes.level : `Level ${prospect.athletes.level}`}
                                 </p>
                                 <div className="flex gap-2 mt-8 gap-x-10">
                                     <div className="flex flex-col justify-center items-center">

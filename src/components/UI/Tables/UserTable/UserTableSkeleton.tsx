@@ -5,6 +5,9 @@ export default function LoadingTable() {
         <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)] animate-pulse opacity-50">
             {[...Array(5)].map((_, i) => (
                 <tr key={i}>
+                <td className="relative w-12 px-6 sm:w-16 sm:px-8 py-4">
+                    <div className="h-4 w-4 rounded bg-[var(--muted)]" />
+                </td>
                 <td className="pl-3 pr-3 sm:pl-6 py-4">
                     <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[var(--muted)]" />

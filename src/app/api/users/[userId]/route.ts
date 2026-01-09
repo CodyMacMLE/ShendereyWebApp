@@ -373,6 +373,33 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
   }
 }
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ userId: string }> }
+) {
+  const { userId } = await params;
+  const id = parseInt(userId);
+
+  try {
+    const { isActive } = await req.json();
+
+    await db.update(users)
+      .set({
+        isActive,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id));
+
+    return NextResponse.json({ success: true, isActive });
+  } catch (error) {
+    console.error('PATCH error:', error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }

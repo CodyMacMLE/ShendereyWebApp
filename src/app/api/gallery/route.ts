@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { gallery } from '@/lib/schema';
 import { NextRequest, NextResponse } from 'next/server';
+import { desc, count } from 'drizzle-orm';
 
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
@@ -185,10 +186,38 @@ export async function POST(
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        const fetchedMedia = await db.select().from(gallery);
-        return NextResponse.json({ success: true, body: fetchedMedia });
+        const searchParams = req.nextUrl.searchParams;
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        const limit = parseInt(searchParams.get('limit') || '20', 10);
+        
+        const offset = (page - 1) * limit;
+        
+        const [fetchedMedia, totalCountResult] = await Promise.all([
+            db.select()
+                .from(gallery)
+                .orderBy(desc(gallery.date))
+                .limit(limit)
+                .offset(offset),
+            db.select({ count: count() }).from(gallery)
+        ]);
+        
+        const totalCount = totalCountResult[0]?.count || 0;
+        const totalPages = Math.ceil(totalCount / limit);
+        
+        return NextResponse.json({ 
+            success: true, 
+            body: fetchedMedia,
+            pagination: {
+                page,
+                limit,
+                totalCount,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        });
     } catch (error) {
         return NextResponse.json(
             { success: false, error: error instanceof Error ? error.message : String(error) },

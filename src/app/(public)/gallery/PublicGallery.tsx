@@ -1,7 +1,9 @@
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
 
 interface GalleryMedia {
@@ -12,16 +14,72 @@ interface GalleryMedia {
     videoThumbnail?: string | null;
 }
 
-export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryMedia[] }) {
-    const [media, setMedia] = useState<GalleryMedia[]>(galleryMedia ?? []);
+interface PaginationInfo {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+}
 
+export default function PublicGallery({ 
+    galleryMedia, 
+    pagination 
+}: { 
+    galleryMedia: GalleryMedia[];
+    pagination: PaginationInfo;
+}) {
+    const [media, setMedia] = useState<GalleryMedia[]>(galleryMedia ?? []);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState<GalleryMedia | null>(null);
-
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     useEffect(() => {
         setMedia(galleryMedia ?? []);
     }, [galleryMedia]);
+
+    const handlePageChange = (newPage: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (newPage === 1) {
+            params.delete('page');
+        } else {
+            params.set('page', newPage.toString());
+        }
+        router.push(`/gallery?${params.toString()}`);
+        // Scroll to top of gallery
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const getPageNumbers = () => {
+        const pages: (number | string)[] = [];
+        const totalPages = pagination.totalPages;
+        const currentPage = pagination.page;
+
+        if (totalPages <= 7) {
+            // Show all pages if 7 or fewer
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+
+            if (currentPage <= 3) {
+                // Near the start
+                pages.push(2, 3, 4, '...', totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                // Near the end
+                pages.push('...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                // In the middle
+                pages.push('...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+            }
+        }
+
+        return pages;
+    };
 
     const openModal = (item: GalleryMedia) => {
         setSelectedMedia(item);
@@ -68,6 +126,80 @@ export default function PublicGallery({ galleryMedia }: { galleryMedia: GalleryM
                                 </div>
                             </div>
                         ))}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {pagination.totalPages > 1 && (
+                        <div className="mt-12 mb-8 flex items-center justify-center">
+                            <nav className="flex items-center gap-2" aria-label="Pagination">
+                                {/* Previous Button */}
+                                <button
+                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                    disabled={!pagination.hasPreviousPage}
+                                    className={`relative inline-flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                                        pagination.hasPreviousPage
+                                            ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                            : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <ChevronLeftIcon className="h-5 w-5" />
+                                    <span className="sr-only">Previous</span>
+                                </button>
+
+                                {/* Page Numbers */}
+                                <div className="flex items-center gap-1">
+                                    {getPageNumbers().map((pageNum, index) => {
+                                        if (pageNum === '...') {
+                                            return (
+                                                <span
+                                                    key={`ellipsis-${index}`}
+                                                    className="px-3 py-2 text-sm text-gray-500"
+                                                >
+                                                    ...
+                                                </span>
+                                            );
+                                        }
+
+                                        const pageNumber = pageNum as number;
+                                        const isCurrentPage = pageNumber === pagination.page;
+
+                                        return (
+                                            <button
+                                                key={pageNumber}
+                                                onClick={() => handlePageChange(pageNumber)}
+                                                className={`relative inline-flex items-center px-4 py-2 rounded-md text-sm font-medium ${
+                                                    isCurrentPage
+                                                        ? 'z-10 bg-[var(--primary)] text-white'
+                                                        : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                                aria-current={isCurrentPage ? 'page' : undefined}
+                                            >
+                                                {pageNumber}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Next Button */}
+                                <button
+                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                    disabled={!pagination.hasNextPage}
+                                    className={`relative inline-flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                                        pagination.hasNextPage
+                                            ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                            : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <span className="sr-only">Next</span>
+                                    <ChevronRightIcon className="h-5 w-5" />
+                                </button>
+                            </nav>
+                        </div>
+                    )}
+
+                    {/* Results Count */}
+                    <div className="mt-8 text-center text-sm text-gray-600">
+                        Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.totalCount)} of {pagination.totalCount} items
                     </div>
         
                     <Transition show={modalOpen} as={Fragment}>

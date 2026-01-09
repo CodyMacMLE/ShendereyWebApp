@@ -1,10 +1,10 @@
 "use client"
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 import { EditGalleryMedia } from "@/components/Form/EditGalleryMedia/page";
 import { Dialog, Transition } from "@headlessui/react";
-import { EllipsisVerticalIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon, MagnifyingGlassIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 
 import Modal from "@/components/UI/Modal/page";
 import imageCompression from 'browser-image-compression';
@@ -27,6 +27,8 @@ export default function OldGallery() {
     // Add State
     const [addModalEnabled, setAddModalEnabled] = useState(false);
     const [media, setMedia] = useState<Media[] | []>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState<'date' | 'name'>('date');
 
     useEffect(() => {
         fetchMedia();
@@ -56,6 +58,8 @@ export default function OldGallery() {
     const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
     const [actionModalOpen, setActionModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
+    const [selectedMediaIds, setSelectedMediaIds] = useState<Set<number>>(new Set());
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
     const openMediaModal = (item: Media) => {
         setSelectedMedia(item);
@@ -67,9 +71,18 @@ export default function OldGallery() {
         setSelectedMedia(null);
     };
 
+    // Helper function to format today's date as YYYY-MM-DD
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(getTodayDateString());
     const [mediaFile, setMediaFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,7 +91,7 @@ export default function OldGallery() {
     const resetForm = () => {
         setName('');
         setDescription('');
-        setDate('');
+        setDate(getTodayDateString());
         setMediaFile(null);
         setFormErrors([]);
     };
@@ -284,8 +297,14 @@ export default function OldGallery() {
             if (res.ok) {
                 setActionModalOpen(false);
                 setMediaModalOpen(false);
-                // Optionally trigger a refetch or update local state
+                // Remove from media list
                 setMedia((prev) => prev.filter(item => item.id !== selectedMedia.id));
+                // Remove from selected items if it was selected
+                setSelectedMediaIds(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(selectedMedia.id);
+                    return newSet;
+                });
             } else {
                 setIsDeleting(false);
             }
@@ -299,6 +318,111 @@ export default function OldGallery() {
       setActionModalOpen(false);
       setEditModalOpen(true);
     }
+
+    // Handle checkbox selection
+    const handleSelectMedia = (mediaId: number) => {
+        setSelectedMediaIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(mediaId)) {
+                newSet.delete(mediaId);
+            } else {
+                newSet.add(mediaId);
+            }
+            return newSet;
+        });
+    };
+
+    // Handle select all
+    const handleSelectAll = () => {
+        if (selectedMediaIds.size === filteredAndSortedMedia.length) {
+            setSelectedMediaIds(new Set());
+        } else {
+            setSelectedMediaIds(new Set(filteredAndSortedMedia.map(item => item.id)));
+        }
+    };
+
+    // Bulk delete
+    const handleBulkDelete = async () => {
+        if (selectedMediaIds.size === 0 || isBulkDeleting) return;
+        
+        if (!confirm(`Are you sure you want to delete ${selectedMediaIds.size} media item(s)?`)) {
+            return;
+        }
+
+        setIsBulkDeleting(true);
+        const idsToDelete = Array.from(selectedMediaIds);
+        
+        try {
+            // Delete all selected items in parallel
+            const deletePromises = idsToDelete.map(id => 
+                fetch(`/api/gallery/${id}`, {
+                    method: "DELETE",
+                })
+            );
+
+            const results = await Promise.all(deletePromises);
+            const successful = results.filter(res => res.ok);
+            
+            if (successful.length === idsToDelete.length) {
+                // Remove deleted items from state
+                setMedia(prev => prev.filter(item => !selectedMediaIds.has(item.id)));
+                setSelectedMediaIds(new Set());
+            } else {
+                console.error('Some deletions failed');
+                // Still remove successfully deleted items
+                const failedIds = new Set(
+                    idsToDelete.filter((_, index) => !results[index].ok)
+                );
+                setMedia(prev => prev.filter(item => !selectedMediaIds.has(item.id) || failedIds.has(item.id)));
+                setSelectedMediaIds(failedIds);
+            }
+        } catch (error) {
+            console.error('Bulk delete error:', error);
+        } finally {
+            setIsBulkDeleting(false);
+        }
+    };
+
+    // Filter and sort media
+    const filteredAndSortedMedia = useMemo(() => {
+        let filtered = media;
+        
+        // Filter by search query
+        if (searchQuery.trim()) {
+            filtered = media.filter(item => 
+                item.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+        
+        // Sort media
+        const sorted = [...filtered].sort((a, b) => {
+            if (sortBy === 'name') {
+                return a.name.localeCompare(b.name);
+            } else {
+                // Sort by date (newest first)
+                // Handle both Date objects and date strings
+                const dateA = a.date instanceof Date ? a.date : new Date(a.date);
+                const dateB = b.date instanceof Date ? b.date : new Date(b.date);
+                return dateB.getTime() - dateA.getTime();
+            }
+        });
+        
+        return sorted;
+    }, [media, searchQuery, sortBy]);
+
+    // Clear selections for items that are no longer in the filtered results
+    useEffect(() => {
+        const visibleIds = new Set(filteredAndSortedMedia.map(item => item.id));
+        setSelectedMediaIds(prev => {
+            const newSet = new Set<number>();
+            prev.forEach(id => {
+                if (visibleIds.has(id)) {
+                    newSet.add(id);
+                }
+            });
+            return newSet;
+        });
+    }, [filteredAndSortedMedia]);
 
     return (
         <>
@@ -450,7 +574,10 @@ export default function OldGallery() {
                     </div>
                     <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                     <button
-                        onClick={() => setAddModalEnabled(true)}
+                        onClick={() => {
+                            setDate(getTodayDateString());
+                            setAddModalEnabled(true);
+                        }}
                         type="button"
                         className="block rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[var(--primary-hover)]"
                     >
@@ -459,46 +586,166 @@ export default function OldGallery() {
                     </div>
                 </div>
 
+                {/* Search and Sort Controls */}
+                {media.length > 0 && (
+                    <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                        {/* Search Input */}
+                        <div className="flex-1">
+                            <label htmlFor="search" className="block text-sm/6 font-medium text-[var(--foreground)] mb-2">
+                                Search by Name
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <MagnifyingGlassIcon className="h-5 w-5 text-[var(--muted)]" />
+                                </div>
+                                <input
+                                    id="search"
+                                    name="search"
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search media..."
+                                    className="block w-full pl-10 pr-3 py-2 rounded-md bg-[var(--card-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent sm:text-sm"
+                                />
+                            </div>
+                        </div>
+                        
+                        {/* Sort Dropdown */}
+                        <div className="sm:w-48">
+                            <label htmlFor="sort" className="block text-sm/6 font-medium text-[var(--foreground)] mb-2">
+                                Sort By
+                            </label>
+                            <select
+                                id="sort"
+                                name="sort"
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as 'date' | 'name')}
+                                className="block w-full px-3 py-2 rounded-md bg-[var(--card-bg)] text-[var(--foreground)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent sm:text-sm"
+                            >
+                                <option value="date">Date (Newest First)</option>
+                                <option value="name">Name (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                )}
+
+                {/* Bulk Actions Bar */}
+                {selectedMediaIds.size > 0 && (
+                    <div className="mb-4 flex items-center justify-between rounded-md bg-[var(--card-bg)] p-4 border border-[var(--border)]">
+                        <span className="text-sm font-medium text-[var(--foreground)]">
+                            {selectedMediaIds.size} item{selectedMediaIds.size !== 1 ? 's' : ''} selected
+                        </span>
+                        <button
+                            onClick={handleBulkDelete}
+                            disabled={isBulkDeleting}
+                            className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isBulkDeleting ? 'Deleting...' : `Delete ${selectedMediaIds.size} item${selectedMediaIds.size !== 1 ? 's' : ''}`}
+                        </button>
+                    </div>
+                )}
+
                 {media.length > 0 ? (
                     <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {media.map((item) => (
-                            <div
-                                key={item.id}
-                                onClick={() => openMediaModal(item)}
-                                className="flex flex-col h-full group overflow-hidden rounded-lg bg-[var(--card-bg)] shadow hover:shadow-lg cursor-pointer hover:ring-1 hover:ring-[var(--border)]"
-                            >
-                                {/* Media Section */}
-                                <div className="relative flex-grow">
-                                    {item.mediaType.startsWith("video/") ? (
-                                        <Image
-                                            src={item.videoThumbnail}
-                                            alt={item.name}
-                                            className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
-                                            width={1000}
-                                            height={1000}
-                                        />
-                                    ) : (
-                                        <Image
-                                            src={item.mediaUrl}
-                                            alt={item.name}
-                                            className="h-60 w-full object-cover transition duration-300 group-hover:brightness-75"
-                                            width={1000}
-                                            height={1000}
-                                        />
-                                    )}
-                                </div>
-                                {/* Title Section */}
-                                <div className="px-4 py-3 sm:px-6 flex justify-between items-center">
-                                    <span className="font-semibold overflow-ellipsis">{item.name}</span>
-                                    {item.mediaType.startsWith("video/") ? (
-                                        <VideoCameraIcon className="w-5 h-5" />
-                                    ) : (
-                                        <PhotoIcon className="w-5 h-5" />
-                                    )}
+                    <div className="mt-8 flow-root">
+                        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                                <div className="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
+                                    <table className="min-w-full divide-y divide-[var(--border)]">
+                                        <thead className="bg-[var(--card-bg)]">
+                                            <tr>
+                                                <th scope="col" className="relative w-12 px-6 sm:w-16 sm:px-8">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="h-4 w-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
+                                                        checked={filteredAndSortedMedia.length > 0 && selectedMediaIds.size === filteredAndSortedMedia.length}
+                                                        onChange={handleSelectAll}
+                                                        aria-label="Select all media"
+                                                    />
+                                                </th>
+                                                <th scope="col" className="pl-3 pr-3.5 text-left text-sm font-semibold text-[var(--foreground)] sm:pl-6">
+                                                    Name
+                                                </th>
+                                                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
+                                                    Date
+                                                </th>
+                                                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[var(--foreground)]">
+                                                    Type
+                                                </th>
+                                                <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-[var(--foreground)]">
+                                                    Preview
+                                                </th>
+                                                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                                    <span className="sr-only">Actions</span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-[var(--border)] bg-[var(--card-bg)]">
+                                            {filteredAndSortedMedia.length > 0 ? (
+                                                filteredAndSortedMedia.map((item) => (
+                                                <tr
+                                                    key={item.id}
+                                                    className="transition-colors duration-150"
+                                                >
+                                                    <td className="relative w-12 px-6 sm:w-16 sm:px-8">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="h-4 w-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
+                                                            checked={selectedMediaIds.has(item.id)}
+                                                            onChange={() => handleSelectMedia(item.id)}
+                                                            aria-label={`Select ${item.name}`}
+                                                        />
+                                                    </td>
+                                                    <td className="whitespace-nowrap pl-3 pr-3 text-sm font-medium text-[var(--foreground)] sm:pl-6">
+                                                        <div className="flex items-center gap-3">
+                                                            {item.mediaType.startsWith("video/") ? (
+                                                                <VideoCameraIcon className="w-5 h-5 text-[var(--muted)]" />
+                                                            ) : (
+                                                                <PhotoIcon className="w-5 h-5 text-[var(--muted)]" />
+                                                            )}
+                                                            <span>{item.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
+                                                        {formatShortDate(item.date)}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)]">
+                                                        {item.mediaType.startsWith("video/") ? "Video" : "Image"}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--foreground)] text-center">
+                                                        <button
+                                                            onClick={() => openMediaModal(item)}
+                                                            className="text-[var(--primary)] bg-[var(--card-bg)] hover:text-[var(--background)] hover:bg-[var(--primary)] cursor-pointer rounded-full ring-1 ring-[var(--border)] py-1 px-3"
+                                                        >
+                                                            Preview<span className="sr-only">, {item.name}</span>
+                                                        </button>
+                                                    </td>
+                                                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedMedia(item);
+                                                                setActionModalOpen(true);
+                                                            }}
+                                                            className="text-[var(--primary)] bg-[var(--card-bg)] hover:text-[var(--background)] hover:bg-[var(--primary)] cursor-pointer rounded-full ring-1 ring-[var(--border)] py-1 px-3"
+                                                        >
+                                                            <EllipsisVerticalIcon className="w-5 h-5" />
+                                                            <span className="sr-only">Actions, {item.name}</span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-[var(--muted)]">
+                                                        No media found matching your search.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        ))}
+                        </div>
                     </div>
 
                     <Transition show={mediaModalOpen} as={Fragment}>

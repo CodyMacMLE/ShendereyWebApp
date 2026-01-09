@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Modal from "@/components/UI/Modal/page";
 
@@ -62,6 +62,12 @@ export default function DisplayUser({ user } : { user : UserData }) {
     const router = useRouter();
     const [deleteModal, setDeleteModal] = useState(false)
     const [editModal, setEditModal] = useState(false)
+    const [isActive, setIsActive] = useState(user.isActive)
+
+    // Sync local state with prop when user prop changes
+    useEffect(() => {
+        setIsActive(user.isActive);
+    }, [user.isActive]);
 
     const deleteUser = async () => {
         try {
@@ -74,6 +80,28 @@ export default function DisplayUser({ user } : { user : UserData }) {
             }
         } catch (error) {
             console.error('Delete error:', error);
+        }
+    }
+
+    const handleToggleStatus = async () => {
+        const newStatus = !isActive;
+        
+        try {
+            const res = await fetch(`/api/users/${user.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isActive: newStatus }),
+            });
+
+            if (res.ok) {
+                setIsActive(newStatus);
+            } else {
+                console.error('Failed to update user status');
+            }
+        } catch (error) {
+            console.error('Error toggling user status:', error);
         }
     }
 
@@ -139,8 +167,12 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                       className="object-cover h-[175px] w-[175px] rounded-full ring-1 ring-[var(--border)]"
                                     />
                                   {/* Status Icon */}
-                                  <div className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring-1 ring-[var(--border)] flex justify-center items-center rounded-full">
-                                    {user.isActive ? (
+                                  <div 
+                                    className="absolute bottom-5 right-5 translate-x-1/2 translate-y-1/2 w-8 h-8 bg-[var(--card-bg)] ring-1 ring-[var(--border)] flex justify-center items-center rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+                                    onClick={handleToggleStatus}
+                                    title={isActive ? "Click to deactivate" : "Click to activate"}
+                                  >
+                                    {isActive ? (
                                       <EyeIcon className="w-5 h-5 text-green-600" />
                                     ) : (
                                       <EyeSlashIcon className="w-5 h-5 text-red-600" />

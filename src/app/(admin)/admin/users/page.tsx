@@ -63,7 +63,7 @@ export default function Users() {
 
 
     return (
-        <UserTable users={users} isLoading={isLoading} />
+        <UserTable users={users} setUsers={setUsers} isLoading={isLoading} />
     )
     
 }

@@ -476,6 +476,8 @@ export default function TryoutForm() {
                                             value={formData.contactEmail}
                                             onChange={handleInputChange}
                                             type="email"
+                                            placeholder="example@email.com"
+                                            autoComplete="email"
                                             className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                                             required
                                         />
@@ -496,6 +498,9 @@ export default function TryoutForm() {
                                             value={formData.contactPhone}
                                             onChange={handleInputChange}
                                             type="tel"
+                                            placeholder="(123) 456-7890"
+                                            autoComplete="tel"
+                                            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}|[0-9]{10}|\\([0-9]{3}\\)\\s?[0-9]{3}-[0-9]{4}"
                                             className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                                             required
                                         />
