@@ -23,6 +23,7 @@ export default function ProgramLayout({ programs, category }: { programs: Progra
                              className="mx-auto size-32 shrink-0 rounded-full shadow-md"
                              width={1000}
                              height={1000}
+                             loading="lazy"
                            />
                            <h3 className="mt-6 text-sm font-medium text-[var(--foreground)]">{program.name}</h3>
                            <dl className="mt-1 flex grow flex-col justify-between">

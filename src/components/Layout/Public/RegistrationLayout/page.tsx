@@ -1,47 +1,10 @@
-"use client"
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { getRegistrationPolicies, getRegistrationImage } from "@/lib/actions";
 
-interface Policy {
-    id?: number;
-    policy: string;
-    order: number;
-  }
-  
-  interface RegistrationImage {
-    id: number;
-    imageUrl: string | null;
-    title: string | null;
-  }
-
-export default function RegistrationLayout() {
-
-    const [policies, setPolicies] = useState<Policy[]>([]);
-    const [registrationImage, setRegistrationImage] = useState<RegistrationImage | null>(null);
-  
-    useEffect(() => {
-      const fetchPolicies = async () => {
-        const policies = await fetch('/api/register/policies');
-        const data = await policies.json();
-        if (data.success) {
-          setPolicies(data.body);
-        }
-      };
-      fetchPolicies();
-    }, []);
-  
-    useEffect(() => {
-      const fetchRegistrationImage = async () => {
-        const registrationImage = await fetch('/api/register/session-image');
-        const data = await registrationImage.json();
-        if (data.success) {
-          setRegistrationImage(data.body);
-        }
-      };
-      fetchRegistrationImage();
-    }, []);
+export default async function RegistrationLayout() {
+    const policies = await getRegistrationPolicies();
+    const registrationImage = await getRegistrationImage();
 
     
     return (
@@ -106,6 +69,8 @@ export default function RegistrationLayout() {
                         width={1200}
                         height={800}
                         className="w-full h-auto max-w-4xl rounded-lg border border-[var(--border)]"
+                        loading="lazy"
+                        quality={85}
                     />
                 </div>
             )}

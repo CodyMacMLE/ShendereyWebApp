@@ -65,9 +65,11 @@ function classNames(...classes: string[]) {
 
 export default async function Home() {
 
-  const seniorStaff = await getSeniorStaff();
-  const juniorStaff = await getJuniorStaff();
-  const fetchedSponsors = await getSponsors();
+  const [seniorStaff, juniorStaff, fetchedSponsors] = await Promise.all([
+    getSeniorStaff(),
+    getJuniorStaff(),
+    getSponsors()
+  ]);
   const sponsors = [...fetchedSponsors.diamondSponsors, ...fetchedSponsors.goldSponsors, ...fetchedSponsors.silverSponsors, ...fetchedSponsors.affiliates]
 
   return (
@@ -83,6 +85,8 @@ export default async function Home() {
             className="size-full object-cover"
             width={1920}
             height={1080}
+            priority
+            quality={85}
           />
         </div>
         <div aria-hidden="true" className="absolute inset-0 bg-gray-900 opacity-70" />
@@ -182,6 +186,7 @@ export default async function Home() {
                   className="size-10 flex-none rounded-full bg-gray-50"
                   width={50}
                   height={50}
+                  loading="lazy"
                 />
                 <div className="flex-auto">
                   <div className="font-semibold">{featuredTestimonial.author.name}</div>
@@ -209,7 +214,7 @@ export default async function Home() {
                           <p>{`“${testimonial.body}”`}</p>
                         </blockquote>
                         <figcaption className="mt-6 flex items-center gap-x-4">
-                          <Image alt="" src={testimonial.author.imageUrl} className="size-10 rounded-full bg-gray-50" width={50} height={50}/>
+                          <Image alt="" src={testimonial.author.imageUrl} className="size-10 rounded-full bg-gray-50" width={50} height={50} loading="lazy"/>
                           <div>
                             <div className="font-semibold">{testimonial.author.name}</div>
                           </div>
@@ -271,6 +276,7 @@ export default async function Home() {
                   width={100}
                   height={100}
                   style={{ objectFit: 'cover', objectPosition: 'top'}}
+                  loading="lazy"
                 />
                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{person.user.name}</h3>
                 <p className="text-sm/6 text-gray-600">{person.coach.title || 'Coach'}</p>
@@ -285,6 +291,7 @@ export default async function Home() {
                   width={100}
                   height={100}
                   style={{ objectFit: 'cover', objectPosition: 'top'}}
+                  loading="lazy"
                 />
                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{person.user.name}</h3>
                 <p className="text-sm/6 text-gray-600">Coach</p>
@@ -327,6 +334,8 @@ export default async function Home() {
                 width={2432}
                 height={1442}
                 className="w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem]"
+                loading="lazy"
+                quality={85}
               />
             </div>
           </div>
@@ -423,6 +432,7 @@ export default async function Home() {
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2867.333038384778!2d-79.4301737232174!3d44.05583117108584
                   !2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f80!3m3!1m2!1s0x882ad27e9e07fc4f%3A0x242cef020575425b!2sShenderey%20Gymnastics%20Centre
                   !5e0!3m2!1sen!2sca!4v1735844155049!5m2!1sen!2sca"
+              loading="lazy"
               />
             </div>
           </div>

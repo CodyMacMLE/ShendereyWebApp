@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, resources, scores, sponsors, userImages, users } from "@/lib/schema";
+import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, resources, scores, sponsors, userImages, users, registrationPolicies, registrationImage } from "@/lib/schema";
 import { asc, desc, eq } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
@@ -262,4 +262,14 @@ export const incrementResourceView = async (resourceId: number) => {
         console.error("Error incrementing resource view:", error);
         throw error;
     }
+}
+
+export const getRegistrationPolicies = async () => {
+    const policies = await db.select().from(registrationPolicies).orderBy(asc(registrationPolicies.order));
+    return policies;
+}
+
+export const getRegistrationImage = async () => {
+    const images = await db.select().from(registrationImage).limit(1);
+    return images.length > 0 ? images[0] : null;
 }   

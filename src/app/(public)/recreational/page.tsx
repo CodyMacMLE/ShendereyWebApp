@@ -51,6 +51,8 @@ export default async function Recreational() {
                                 width={2000}
                                 height={900}
                                 className="w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem]"
+                                priority
+                                quality={85}
                             />
                         </div>
                     </div>

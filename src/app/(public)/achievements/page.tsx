@@ -83,7 +83,7 @@ export default async function Achievements() {
                     </div>
                     <div>
                         <div className="text-base/7 text-gray-700 lg:max-w-lg">
-                            <p className="text-base/7 font-semibold text-magenta-600">Team Accomplishments</p>
+                            <p className="text-base/7 font-semibold text-[var(--primary)]">Team Accomplishments</p>
                             <h1 className="mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                               Proud Moments, Bright Futures
                             </h1>

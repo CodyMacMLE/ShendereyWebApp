@@ -24,6 +24,8 @@ export default function EmblaCarousel({ images }: { images: { url: string, alt: 
               <Image className="embla__slide__img" src={image.url} alt={image.alt}
                 width={1000}
                 height={1000}
+                loading="lazy"
+                quality={75}
               />
             </a>
           </div>
