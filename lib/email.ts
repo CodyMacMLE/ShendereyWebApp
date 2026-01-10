@@ -239,7 +239,7 @@ Contact Information:
     try {
         await transporter.sendMail({
             from: process.env.SMTP_USER,
-            to: 'codymacdonald.dsml@gmail.com',
+            to: 'shendereycomp@gmail.com',
             subject: `New Tryout Registration - ${data.athleteName || 'Unknown'}`,
             text: textContent,
             html: htmlContent,
