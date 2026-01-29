@@ -1,13 +1,13 @@
 "use client"
 
-import { Dispatch, SetStateAction, useEffect, useState, useMemo } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 
 import Modal from "@/components/UI/Modal/page";
 import TryoutsTableSkeleton from "@/components/UI/Tables/TryoutsTable/TryoutsTableSkeleton";
 
 import TryoutDisplay from '@/components/Layout/Admin/TryoutDisplay/page';
+import { formatFullDate } from '@/lib/utils';
 import { EnvelopeIcon, EnvelopeOpenIcon } from '@heroicons/react/24/outline';
-import { formatFullDate } from '../../../../lib/utils';
 
 type Tryout = {
   id: number;

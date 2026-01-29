@@ -1,4 +1,4 @@
-import { formatFullDate } from '../../../../lib/utils';
+import { formatFullDate } from '@/lib/utils';
 
 type Tryout = {
   id: number;

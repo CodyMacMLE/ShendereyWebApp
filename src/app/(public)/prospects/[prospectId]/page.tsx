@@ -33,11 +33,11 @@ export default async function ProspectPage({ params }: PageProps) {
                     <div className="h-full w-full md:w-[30%] flex-col items-center justify-center gap-2 p-4">
                         <div className="flex justify-center items-center">
                             <Image
-                                src={prospect.user_images.prospectUrl || ''}
+                                src={prospect.user_images.prospectUrl || '/logos/default-profile.png'}
                                 alt={prospect.users.name}
                                 width={100}
                                 height={100}
-                                className="h-[150px] w-[150px] object-cover rounded-full shadow-lg border border-gray-200"
+                                className={`h-[150px] w-[150px] object-cover rounded-full shadow-lg border border-gray-200 ${!prospect.user_images.prospectUrl ? 'grayscale' : ''}`}
                             />
                         </div>
                         <div className="mt-4 flex flex-row gap-2 text-gray-500 justify-center items-center w-full">

@@ -322,9 +322,15 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                              <dd className="text-sm text-gray-500">{program.ages} years</dd>
                              <dt className="sr-only">Role</dt>
                              <dd className="mt-3">
-                               <span className="inline-flex items-center rounded-full bg-[var(--primary)]/50 px-2 py-1 text-xs font-medium text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]">
-                                 {program.category}
-                               </span>
+                                {program.category === 'competitive' ? (
+                                    <span className="inline-flex items-center rounded-full bg-[var(--primary)]/50 px-2 py-1 text-xs font-medium text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]">
+                                        Competitive
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center rounded-full bg-green-50/5 px-2 py-1 text-xs font-medium text-green-600 ring-1 ring-inset ring-green-600">
+                                        Recreational
+                                    </span>
+                                )}
                              </dd>
                            </dl>
                          </div>

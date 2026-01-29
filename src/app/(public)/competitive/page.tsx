@@ -1,10 +1,11 @@
-import Image from "next/image"
-import { Metadata } from 'next'
-import { CheckIcon } from '@heroicons/react/24/outline'
-import { CompetitiveFeatures } from "@/public/files/features";
 import ProgramLayout from "@/components/Layout/Public/ProgramLayout/page";
 import { getCompetitivePrograms } from "@/lib/actions";
 import { Program } from "@/lib/types";
+import { CompetitiveFeatures } from "@/public/files/features";
+import { CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { Metadata } from 'next';
+import Image from "next/image";
+import Link from "next/link";
 
 
 export const metadata: Metadata = {
@@ -67,6 +68,29 @@ export default async function Competitive() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Programs */}
                 <ProgramLayout programs={programs as unknown as Program[]} category="competitive" />
+            </div>
+
+            {/* Tryout CTA */}
+            <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-28">
+                <div className="relative overflow-hidden rounded-2xl bg-[var(--primary)]/5 px-8 py-16 sm:px-16 sm:py-20">
+                    <div className="mx-auto max-w-2xl text-center">
+                        <SparklesIcon className="mx-auto h-12 w-12 text-[var(--primary)]" aria-hidden="true" />
+                        <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+                            Ready to take the next step?
+                        </h2>
+                        <p className="mt-4 text-lg text-gray-600">
+                            Tryouts are your chance to join our competitive stream and train with coaches who have shaped national and international athletes. Whether you&apos;re new to competitive gymnastics or looking to level up, we&apos;ll help you discover your potential.
+                        </p>
+                        <div className="mt-10 flex items-center justify-center gap-x-6">
+                            <Link
+                                href="/tryouts"
+                                className="rounded-md bg-[var(--primary)] px-8 py-3 text-base font-semibold text-white shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                            >
+                                Sign up for tryouts
+                            </Link>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>

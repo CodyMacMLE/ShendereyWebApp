@@ -10,8 +10,8 @@ import Modal from "@/components/UI/Modal/page";
 import imageCompression from 'browser-image-compression';
 
 import ErrorModal from "@/components/UI/ErrorModal/page";
+import { formatShortDate } from '@/lib/utils';
 import Image from "next/image";
-import { formatShortDate } from '../../../../lib/utils';
 
 type Media = {
     id: number,

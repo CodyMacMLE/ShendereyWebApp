@@ -166,9 +166,9 @@ export default async function Staff() {
                     >
                         {seniorStaff.map((person: StaffData) => (
                             <li key={person.user.id} className="flex flex-col gap-6 xl:flex-row">
-                                <Image alt="" src={person.staffUrl || '/default-profile.png'} className="aspect-[4/5] w-52 flex-none rounded-2xl object-cover max-h-[300px]" width={600} height={300} style={{ objectFit: 'cover' }}/>
+                                <Image alt="" src={person.staffUrl || '/logos/default-profile.png'} className={`aspect-[4/5] w-52 flex-none rounded-2xl object-cover max-h-[300px] ${!person.staffUrl ? 'grayscale' : ''}`} width={600} height={300} style={{ objectFit: 'cover' }}/>
                                 <div className="flex-auto">
-                                    <h3 className="text-lg/8 font-semibold tracking-tight text-gray-900">{formatName(person.user.name)}</h3>
+                                    <h3 className="text-lg/8 font-semibold tracking-tight text-gray-900">{person.user.name}</h3>
                                     <p className="text-base/7 text-gray-600">{person.coach.title}</p>
                                     <p className="mt-6 text-base/7 text-gray-600">{person.coach.description}</p>
                                 </div>
@@ -189,7 +189,7 @@ export default async function Staff() {
                     >
                         {juniorStaff.map((coach: StaffData) => (
                             <li key={coach.user.id}>
-                                <Image alt="" src={coach.staffUrl || '/default-profile.png'} className="mx-auto size-24 rounded-full" width={100} height={100} style={{ objectFit: 'cover', objectPosition: 'top'}}/>
+                                <Image alt="" src={coach.staffUrl || '/logos/default-profile.png'} className={`mx-auto size-24 rounded-full ${!coach.staffUrl ? 'grayscale' : ''}`} width={100} height={100} style={{ objectFit: 'cover', objectPosition: 'top'}}/>
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{formatName(coach.user.name)}</h3>
                                 <p className="text-sm/6 text-gray-600">{coach.coach.title}</p>
                             </li>

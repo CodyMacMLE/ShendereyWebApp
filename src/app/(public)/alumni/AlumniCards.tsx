@@ -105,13 +105,13 @@ export default function AlumniCards({athletes}: {athletes: Athlete[]}) {
                         <div className="w-full md:w-1/2 flex-shrink-0 bg-black flex items-center justify-center aspect-[2/3] md:aspect-auto md:max-h-[90vh] rounded-t-lg md:rounded-l-lg md:rounded-tr-none overflow-hidden">
                             <Image
                                 alt={selectedAlumni.name}
-                                src={selectedAlumni.imageSrc || '/default-profile.png'}
+                                src={selectedAlumni.imageSrc || '/logos/default-profile.png'}
                                 width={600}
                                 height={800}
-                                className="w-full h-full object-contain"
+                                className={`w-full h-full object-contain ${!selectedAlumni.imageSrc ? 'grayscale' : ''}`}
                                 onError={(e) => {
                                     const target = e.target as HTMLImageElement;
-                                    target.src = '/default-profile.png';
+                                    target.src = '/logos/default-profile.png';
                                 }}
                             />
                         </div>
@@ -189,13 +189,13 @@ export default function AlumniCards({athletes}: {athletes: Athlete[]}) {
                     >
                         <Image
                             alt={athlete.name}
-                            src={athlete.imageSrc || '/default-profile.png'}
+                            src={athlete.imageSrc || '/logos/default-profile.png'}
                             width={800}
                             height={1000}
-                            className="aspect-square w-full rounded-lg object-cover group-hover:opacity-75 sm:aspect-[2/3]"
+                            className={`aspect-square w-full rounded-lg object-cover group-hover:opacity-75 sm:aspect-[2/3] ${!athlete.imageSrc ? 'grayscale' : ''}`}
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.src = '/default-profile.png';
+                                target.src = '/logos/default-profile.png';
                             }}
                         />
                         <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">

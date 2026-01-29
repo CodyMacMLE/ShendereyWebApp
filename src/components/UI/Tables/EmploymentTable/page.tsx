@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Employment } from "@/lib/types";
 
 import Modal from "@/components/UI/Modal/page";
-import { formatFullDate } from '../../../../lib/utils';
+import { formatFullDate } from '@/lib/utils';
 
 
 interface Props {

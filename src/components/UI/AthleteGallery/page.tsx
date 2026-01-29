@@ -1,11 +1,11 @@
 "use client"
 
 import { EditUserMedia } from "@/components/Form/EditUserMedia/page";
+import { formatShortDate } from '@/lib/utils';
 import { Dialog, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
 import { Fragment, useEffect, useState } from "react";
-import { formatShortDate } from '../../../lib/utils';
 
 type Athlete = {
     userId: number,

@@ -1,14 +1,15 @@
-import { SparklesIcon, StarIcon, EnvelopeOpenIcon, GlobeAmericasIcon, GlobeAltIcon } from '@heroicons/react/20/solid'
-import { BuildingOffice2Icon, EnvelopeIcon, PhoneIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { EnvelopeOpenIcon, GlobeAltIcon, GlobeAmericasIcon, SparklesIcon, StarIcon } from '@heroicons/react/20/solid'
+import { BuildingOffice2Icon, ClockIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 
-import { featuredTestimonial, testimonials } from '@/public/files/testemonials'
-import { HomeStats } from '@/public/files/stats'
-import { facilityFeatures } from '@/public/files/features'
-import { contactDetails } from '@/public/files/contactDetails'
 import { getJuniorStaff, getSeniorStaff, getSponsors } from '@/lib/actions'
+import { contactDetails } from '@/public/files/contactDetails'
+import { facilityFeatures } from '@/public/files/features'
+import { HomeStats } from '@/public/files/stats'
+import { featuredTestimonial, testimonials } from '@/public/files/testemonials'
 
 import RollingGallery from '@/components/UI/RollingGallery/page'
+import { formatName } from '@/lib/utils'
 
 /* For changing programs */
 const programs = [
@@ -271,14 +272,14 @@ export default async function Home() {
               <li key={person.user.id}>
                 <Image
                   alt=""
-                  src={person.staffUrl || '/default-profile.png'}
-                  className="flex justify-center mx-auto size-24 rounded-full shadow-md"
+                  src={person.staffUrl || '/logos/default-profile.png'}
+                  className={`flex justify-center mx-auto size-24 rounded-full shadow-md ${!person.staffUrl ? 'grayscale' : ''}`}
                   width={100}
                   height={100}
                   style={{ objectFit: 'cover', objectPosition: 'top'}}
                   loading="lazy"
                 />
-                <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{person.user.name}</h3>
+                <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{formatName(person.user.name)}</h3>
                 <p className="text-sm/6 text-gray-600">{person.coach.title || 'Coach'}</p>
               </li>
             ))}
@@ -286,14 +287,14 @@ export default async function Home() {
               <li key={person.user.id}>
                 <Image
                   alt=""
-                  src={person.staffUrl || '/default-profile.png'}
-                  className="flex justify-center mx-auto size-24 rounded-full shadow-md"
+                  src={person.staffUrl || '/logos/default-profile.png'}
+                  className={`flex justify-center mx-auto size-24 rounded-full shadow-md ${!person.staffUrl ? 'grayscale' : ''}`}
                   width={100}
                   height={100}
                   style={{ objectFit: 'cover', objectPosition: 'top'}}
                   loading="lazy"
                 />
-                <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{person.user.name}</h3>
+                <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{formatName(person.user.name)}</h3>
                 <p className="text-sm/6 text-gray-600">Coach</p>
               </li>
             ))}

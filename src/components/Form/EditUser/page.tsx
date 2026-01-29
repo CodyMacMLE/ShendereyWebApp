@@ -97,11 +97,11 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                         setAlumniDescription(body.athlete.alumni.description ?? '');
                     }
                 }
-                // Photos - use default images if URLs are null/undefined
-                setStaffPhotoPreview(body.images.staffUrl || '/default-user-icon.png');
-                setAthletePhotoPreview(body.images.athleteUrl || '/default-user-icon.png');
-                setProspectPhotoPreview(body.images.prospectUrl || '/default-profile.png');
-                setAlumniPhotoPreview(body.images.alumniUrl || '/default-profile.png');
+                // Photos - use default images if URLs are null/undefined (display in grayscale)
+                setStaffPhotoPreview(body.images.staffUrl || '/logos/default-profile.png');
+                setAthletePhotoPreview(body.images.athleteUrl || '/logos/default-profile.png');
+                setProspectPhotoPreview(body.images.prospectUrl || '/logos/default-profile.png');
+                setAlumniPhotoPreview(body.images.alumniUrl || '/logos/default-profile.png');
             
                 setLoading(false);
             } catch (error) {
@@ -570,27 +570,27 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                                 <div className="mt-2 flex items-center gap-x-3">
                                     {!isSeniorStaff && (
                                     <Image 
-                                        src={staffPhotoPreview || '/default-user-icon.png'} 
+                                        src={staffPhotoPreview || '/logos/default-profile.png'} 
                                         alt="Staff" 
-                                        className="h-12 w-12 rounded-full object-cover" 
+                                        className={`h-12 w-12 rounded-full object-cover ${!staffPhotoPreview || staffPhotoPreview === '/logos/default-profile.png' ? 'grayscale' : ''}`}
                                         width={1000} 
                                         height={1000}
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
-                                            target.src = '/default-user-icon.png';
+                                            target.src = '/logos/default-profile.png';
                                         }}
                                     />
                                     )}
                                     {isSeniorStaff && (
                                     <Image 
-                                        src={staffPhotoPreview || '/default-profile.png'} 
+                                        src={staffPhotoPreview || '/logos/default-profile.png'} 
                                         alt="Staff" 
-                                        className="h-[225px] w-[150px] rounded-md object-cover" 
+                                        className={`h-[225px] w-[150px] rounded-md object-cover ${!staffPhotoPreview || staffPhotoPreview === '/logos/default-profile.png' ? 'grayscale' : ''}`}
                                         width={1000} 
                                         height={1000}
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
-                                            target.src = '/default-profile.png';
+                                            target.src = '/logos/default-profile.png';
                                         }}
                                     />
                                     )}
@@ -671,14 +671,14 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                                 <label htmlFor="athlete-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Athlete Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                     <Image 
-                                        src={athletePhotoPreview || '/default-user-icon.png'} 
+                                        src={athletePhotoPreview || '/logos/default-profile.png'} 
                                         alt="Athlete" 
-                                        className="h-12 w-12 rounded-full object-cover" 
+                                        className={`h-12 w-12 rounded-full object-cover ${!athletePhotoPreview || athletePhotoPreview === '/logos/default-profile.png' ? 'grayscale' : ''}`}
                                         width={1000} 
                                         height={1000}
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
-                                            target.src = '/default-user-icon.png';
+                                            target.src = '/logos/default-profile.png';
                                         }}
                                     />
                                     <input
@@ -749,14 +749,14 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                               <label htmlFor="prospect-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Prospect Photo</label>
                               <div className="mt-2 flex items-center gap-x-3">
                                 <Image 
-                                    src={prospectPhotoPreview || '/default-profile.png'} 
+                                    src={prospectPhotoPreview || '/logos/default-profile.png'} 
                                     alt="Prospect" 
-                                    className="h-[225px] w-[150px] rounded-md object-cover" 
+                                    className={`h-[225px] w-[150px] rounded-md object-cover ${!prospectPhotoPreview || prospectPhotoPreview === '/logos/default-profile.png' ? 'grayscale' : ''}`}
                                     width={1000} 
                                     height={1000}
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
-                                        target.src = '/default-profile.png';
+                                        target.src = '/logos/default-profile.png';
                                     }}
                                 />
                                 <input
@@ -943,14 +943,14 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                                 <label htmlFor="alumni-photo" className="block text-sm/6 font-medium text-[var(--foreground)]">Alumni Photo</label>
                                 <div className="mt-2 flex items-center gap-x-3">
                                     <Image 
-                                        src={alumniPhotoPreview || '/default-profile.png'} 
+                                        src={alumniPhotoPreview || '/logos/default-profile.png'} 
                                         alt="Alumni" 
-                                        className="h-[225px] w-[150px] rounded-md object-cover" 
+                                        className={`h-[225px] w-[150px] rounded-md object-cover ${!alumniPhotoPreview || alumniPhotoPreview === '/logos/default-profile.png' ? 'grayscale' : ''}`}
                                         width={1000} 
                                         height={1000}
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
-                                            target.src = '/default-profile.png';
+                                            target.src = '/logos/default-profile.png';
                                         }}
                                     />
                                     <input

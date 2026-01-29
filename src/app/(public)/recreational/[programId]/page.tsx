@@ -1,8 +1,8 @@
 import { getGroups, getProgram } from "@/lib/actions";
+import { formatShortDate } from '@/lib/utils';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import Image from "next/image";
 import Link from "next/link";
-import { formatShortDate } from '../../../../lib/utils';
 
 export default async function ProgramPage({ params }: { params: Promise<{ programId: string }> }) {
 

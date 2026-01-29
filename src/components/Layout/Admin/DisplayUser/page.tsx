@@ -2,14 +2,13 @@
 
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import Modal from "@/components/UI/Modal/page";
 
 import EditUser from "@/components/Form/EditUser/page";
 import { Role, RoleTag } from "@/components/UI/RoleTag/page";
 import { ExclamationTriangleIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { FaInstagram } from "react-icons/fa6";
 
@@ -155,16 +154,17 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                 user.images.athleteUrl ||
                                 user.images.prospectUrl ||
                                 user.images.alumniUrl ||
-                                "/default-user-icon.png";
+                                null;
+                              const isDefault = !imageUrl;
 
                               return (
                                 <div className="relative mt-3">
                                     <Image
-                                      src={imageUrl}
+                                      src={imageUrl || "/logos/default-profile.png"}
                                       alt="User Image"
                                       width={150}
                                       height={150}
-                                      className="object-cover h-[175px] w-[175px] rounded-full ring-1 ring-[var(--border)]"
+                                      className={`object-cover h-[175px] w-[175px] rounded-full ring-1 ring-[var(--border)] ${isDefault ? "grayscale" : ""}`}
                                     />
                                   {/* Status Icon */}
                                   <div 
@@ -294,19 +294,13 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                 Photo
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
-                                {user.images.athleteUrl ? (
-                                    <Image 
-                                        src={user.images.athleteUrl} 
-                                        alt="Athlete Image" 
-                                        height={200} 
-                                        width={200} 
-                                        className="h-70 w-50 rounded-lg"
-                                    />
-                                ) : (
-                                    <div className='flex items-center justify-center bg-[var(--card-bg)] ring ring-[var(--border)] mt-8 h-70 w-50 rounded-full'>
-                                        <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
-                                    </div>
-                                )}
+                                <Image 
+                                    src={user.images.athleteUrl || "/logos/default-profile.png"} 
+                                    alt="Athlete Image" 
+                                    height={200} 
+                                    width={200} 
+                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.athleteUrl ? "grayscale" : ""}`}
+                                />
                             </p>
 
                         </div>
@@ -380,19 +374,13 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                 Photo
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
-                                {user.images.prospectUrl ? (
-                                    <Image 
-                                        src={user.images.prospectUrl} 
-                                        alt="Athlete Image" 
-                                        height={200} 
-                                        width={200} 
-                                        className="h-70 w-50 rounded-lg"
-                                    />
-                                ) : (
-                                    <div className='flex items-center justify-center bg-[var(--card-bg)] ring ring-[var(--border)] mt-8 h-70 w-50 rounded-full'>
-                                        <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
-                                    </div>
-                                )}
+                                <Image 
+                                    src={user.images.prospectUrl || "/logos/default-profile.png"} 
+                                    alt="Prospect Image" 
+                                    height={200} 
+                                    width={200} 
+                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.prospectUrl ? "grayscale" : ""}`}
+                                />
                             </p>
 
                             <h4 className="col-span-2 block text-md font-bold text-[var(--foreground)]">
@@ -433,19 +421,13 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                 Photo
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
-                                {user.images.alumniUrl ? (
-                                    <Image 
-                                        src={user.images.alumniUrl} 
-                                        alt="Athlete Image" 
-                                        height={200} 
-                                        width={200} 
-                                        className="h-70 w-50 rounded-lg"
-                                    />
-                                ) : (
-                                    <div className='flex items-center justify-center bg-[var(--card-bg)] ring ring-[var(--border)] mt-8 h-70 w-50 rounded-full'>
-                                        <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
-                                    </div>
-                                )}
+                                <Image 
+                                    src={user.images.alumniUrl || "/logos/default-profile.png"} 
+                                    alt="Alumni Image" 
+                                    height={200} 
+                                    width={200} 
+                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.alumniUrl ? "grayscale" : ""}`}
+                                />
                             </p>
 
                             <h4 className="col-span-2 block text-md font-bold text-[var(--foreground)]">

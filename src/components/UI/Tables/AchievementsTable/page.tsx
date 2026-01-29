@@ -6,10 +6,10 @@ import AddAchievement from "@/components/Form/AddAchievement/page";
 import EditAchievement from "@/components/Form/EditAchievement/page";
 import Modal from "@/components/UI/Modal/page";
 
+import { formatShortDate } from "@/lib/utils";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
-import { formatShortDate } from "../../../../lib/utils";
 
 type Athlete = {
     id: number,

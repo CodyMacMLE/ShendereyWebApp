@@ -3,10 +3,9 @@
 import AddScore from "@/components/Form/AddScore/page";
 import EditScore from "@/components/Form/EditScore/page";
 import Modal from "@/components/UI/Modal/page";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { formatShortDate } from "@/lib/utils";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { formatShortDate } from "../../../../lib/utils";
 
 type Score =  {
     id: number,
@@ -151,21 +150,15 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
         {/* Header Display */}
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto flex items-center gap-5">
-          {images.athleteUrl ? (
-                <div className="h-[50px] w-[50px] rounded-full overflow-hidden ring-1 ring-[var(--border)]">
-                    <Image
-                        src={images.athleteUrl}
-                        alt="Athlete Image"
-                        width={100}
-                        height={100}
-                        className="object-cover"
-                    />
-                </div>
-            ) : (
-                <div className='flex items-center justify-center bg-[var(--card-bg)] ring ring-[var(--border)] mt-8 h-[50px] w-[50px] rounded-full'>
-                    <UserCircleIcon aria-hidden="true" className="size-20 text-[var(--muted)]" />
-                </div> 
-            )}
+          <div className="h-[50px] w-[50px] rounded-full overflow-hidden ring-1 ring-[var(--border)] shrink-0">
+                <Image
+                    src={images.athleteUrl || "/logos/default-profile.png"}
+                    alt="Athlete Image"
+                    width={100}
+                    height={100}
+                    className={`object-cover h-full w-full ${!images.athleteUrl ? "grayscale" : ""}`}
+                />
+            </div>
             <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}&apos;s Scores</h1>
           </div>
           <div className="mt-10 sm:ml-16 sm:mt-0 sm:flex-none">

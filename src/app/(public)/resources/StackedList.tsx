@@ -1,9 +1,9 @@
 'use client'
 
 import { Resource } from '@/lib/types';
+import { formatFullDate } from '@/lib/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import { useState } from 'react';
-import { formatFullDate } from '../../../lib/utils';
 
 export default function StackedList({ resources }: { resources: Resource[] }) {
 

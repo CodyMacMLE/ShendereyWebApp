@@ -1,3 +1,6 @@
+/** Default profile image shown when user has no photo URL (display in grayscale). */
+export const DEFAULT_PROFILE_IMAGE = '/logos/default-profile.png';
+
 /**
  * Formats a date string to avoid timezone issues that cause dates to appear one day earlier
  * @param dateString - The date string to format
@@ -15,6 +18,18 @@ export function formatDate(dateString: string | Date, options?: Intl.DateTimeFor
   );
   
   return utcDate.toLocaleDateString('en-US', options);
+}
+
+/**
+ * Formats a name to display only the first and last name
+ * @param name - The name to format
+ * @returns Formatted name string
+ */
+export function formatName(name: string): string {
+  if (!name) return '';
+  const parts = name.trim().split(' ');
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[1][0]}.`;
 }
 
 /**

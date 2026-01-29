@@ -120,110 +120,112 @@ export default async function Sponsors() {
                 </div>
             </div>
 
-            {/* Sponsors */}
+            {/* Sponsors Section */}
             <div className="bg-white py-10 sm:py-32">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                   
-                    {/* Diamond Level Sponsors */}
+                { diamondSponsors.length > 0 && (
                     <div>
-                      {/* Year */}
                       <div className="mx-auto max-w-2xl sm:text-center">
                         <h2 className="text-3xl text-balance font-semibold tracking-tight sm:text-4xl pt-20 text-gray-900">
                             Diamond Sponsors
                         </h2>
                       </div>
 
-                      {/* Achievements */}
                       <ul
                       role="list"
                       className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6 m-t-10"
                       >
-                                          {diamondSponsors.map((sponsor) => (
+                        {diamondSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
-                                <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                                <div className="relative mx-auto h-24 w-24 flex shrink-0 items-center justify-center">
+                                    <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} fill className="object-contain" sizes="96px" />
+                                </div>
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
                           </li>
                       ))}
                       </ul>
                     </div>
-                  
-                    {/* Gold Level Sponsors */}
+                )}
+                { goldSponsors.length > 0 && (
                     <div>
-                      {/* Year */}
                       <div className="mx-auto max-w-2xl sm:text-center">
                         <h2 className="text-3xl text-balance font-semibold tracking-tight text-gray-900 sm:text-4xl pt-20">
                             Gold Sponsors
                         </h2>
                       </div>
 
-                      {/* Achievements */}
                       <ul
                       role="list"
                       className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6 m-t-10"
                       >
                       {goldSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
-                                <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                                <div className="relative mx-auto h-24 w-24 flex shrink-0 items-center justify-center">
+                                    <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} fill className="object-contain" sizes="96px" />
+                                </div>
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
                           </li>
                       ))}
                       </ul>
                     </div>
-
-                    {/* Silver Level Sponsors */}
+                )}
+                { silverSponsors.length > 0 && (
                     <div>
-                      {/* Year */}
+                      {/* title */}
                       <div className="mx-auto max-w-2xl sm:text-center">
                         <h2 className="text-3xl text-balance font-semibold tracking-tight text-gray-900 sm:text-4xl pt-20">
                             Silver Sponsors
                         </h2>
                       </div>
 
-                      {/* Achievements */}
+                      {/* sponsors */}
                       <ul
                       role="list"
                       className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6 m-t-10"
                       >
                       {silverSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
-                                <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                                <div className="relative mx-auto h-24 w-24 flex shrink-0 items-center justify-center">
+                                    <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} fill className="object-contain" sizes="96px" />
+                                </div>
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
                           </li>
                       ))}
                       </ul>
                     </div>
-
-                    {/* Affiliates */}
+                )}
+                { affiliates.length > 0 && (
                     <div>
-                      {/* Year */}
                       <div className="mx-auto max-w-2xl sm:text-center">
                         <h2 className="text-3xl text-balance font-semibold tracking-tight text-gray-900 sm:text-4xl pt-20">
                             Affiliates
                         </h2>
                       </div>
 
-                      {/* Affiliates */}
                       <ul
                       role="list"
                       className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6 m-t-10"
                       >
                       {affiliates.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
-                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer">
-                                <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} className="mx-auto size-24 w-auto" height={100} width={100} />
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                                <div className="relative mx-auto h-24 w-24 flex shrink-0 items-center justify-center">
+                                    <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} fill className="object-contain" sizes="96px" />
+                                </div>
                                 <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
                             </a>
                           </li>
                       ))}
                       </ul>
                     </div>
-
+                )}
                 </div>
             </div>
         </div>
