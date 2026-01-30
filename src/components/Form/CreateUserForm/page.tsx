@@ -1045,19 +1045,21 @@ export default function CreateUserForm() {
             )}
 
             {/* Submit Form */}
-            <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-3">
                 <div className="px-4 sm:px-0"></div>
                 <div className="md:col-span-2">
-                    <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-3 px-4 py-4 sm:px-8">
-                        <label className="flex items-center gap-2 cursor-pointer text-sm/6 text-[var(--foreground)]">
+                    <div className="flex flex-wrap items-center justify-end gap-x-6 px-4 py-4 sm:px-8">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm/6 text-[var(--foreground)] mt-4">
                             <input
                                 type="checkbox"
                                 checked={addAnotherAfterSave}
                                 onChange={(e) => setAddAnotherAfterSave(e.target.checked)}
                                 className="rounded border-[var(--border)] bg-[var(--background)] text-[var(--primary)] focus:ring-[var(--primary)]"
                             />
-                            <span>Add another athlete after save</span>
+                            <span>Create Another User</span>
                         </label>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-3 px-4 py-4 sm:px-8">
                         <button 
                             type="button" 
                             className="text-sm/6 font-semibold text-[var(--foreground)] hover:text-red-600 cursor-pointer"
