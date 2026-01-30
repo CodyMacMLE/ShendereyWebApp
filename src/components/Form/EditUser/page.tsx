@@ -74,26 +74,28 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                 // Athlete Info
                 if (body.athlete) {
                     setAthleteLevel(body.athlete.level ?? '');
-                    // Prospect Info
+                    // Prospect Info (API returns graduationYear)
                     if (body.athlete.prospect) {
                         setProspectGPA(body.athlete.prospect.gpa ?? '');
                         setProspectMajor(body.athlete.prospect.major ?? '');
                         setProspectInstitution(body.athlete.prospect.institution ?? '');
-                        const graduationYear = body.athlete.prospect.graduationYear
-                            ? new Date(body.athlete.prospect.graduationYear).getFullYear().toString()
-                            : '';
-                        setProspectGraduationYear(graduationYear);
+                        const prospectYear = body.athlete.prospect.graduationYear;
+                        const prospectYearNum = prospectYear
+                            ? (typeof prospectYear === 'number' ? prospectYear : new Date(prospectYear).getUTCFullYear())
+                            : null;
+                        setProspectGraduationYear(prospectYearNum != null && !Number.isNaN(prospectYearNum) ? String(prospectYearNum) : '');
                         setProspectAbout(body.athlete.prospect.description ?? '');
                         setProspectInstagram(body.athlete.prospect.instagramLink ?? '');
                         setProspectYoutube(body.athlete.prospect.youtubeLink ?? '');
                     }
-                    // Alumni Info
+                    // Alumni Info (API returns year, not graduationYear)
                     if (body.athlete.alumni) {
                         setAlumniSchool(body.athlete.alumni.school ?? '');
-                        const graduationYear = body.athlete.alumni.graduationYear
-                            ? new Date(body.athlete.alumni.graduationYear).getFullYear().toString()
-                            : '';
-                        setAlumniGraduationYear(graduationYear);
+                        const alumniYear = body.athlete.alumni.year;
+                        const alumniYearNum = alumniYear
+                            ? (typeof alumniYear === 'number' ? alumniYear : new Date(alumniYear).getUTCFullYear())
+                            : null;
+                        setAlumniGraduationYear(alumniYearNum != null && !Number.isNaN(alumniYearNum) ? String(alumniYearNum) : '');
                         setAlumniDescription(body.athlete.alumni.description ?? '');
                     }
                 }

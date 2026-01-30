@@ -68,11 +68,15 @@ export default function UserTable({ users, setUsers, isLoading }: Props) {
             );
         }
         
-        // Filter by role
+        // Filter by role (Athlete filter excludes alumni even if they have athlete tag)
         if (filterRole !== 'All') {
             filtered = filtered.filter(user => {
                 const roles = getUserRoles(user);
-                return roles.some(role => role === filterRole);
+                const hasRole = roles.some(role => role === filterRole);
+                if (filterRole === Role.Athlete && user.isAlumni) {
+                    return false;
+                }
+                return hasRole;
             });
         }
         
@@ -442,7 +446,7 @@ export default function UserTable({ users, setUsers, isLoading }: Props) {
                                 {person.isCoach && (
                                   <RoleTag role={Role.Coach} />
                                 )}
-                                {person.isAthlete && (
+                                {person.isAthlete && (!person.isAlumni || person.isProspect) && (
                                   <RoleTag role={Role.Athlete} />
                                 )}
                                 {person.isProspect && (
