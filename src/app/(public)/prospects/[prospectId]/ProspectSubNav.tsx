@@ -1,11 +1,11 @@
 'use client';
 
 import { Achievement, Media, Score } from "@/lib/types";
+import { formatShortDate } from '@/lib/utils';
 import { Dialog, Transition } from "@headlessui/react";
 import { PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
-import { formatShortDate } from '../../../../lib/utils';
 
 enum NavPages {
     Scores = 'Scores',
