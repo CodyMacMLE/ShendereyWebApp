@@ -52,6 +52,43 @@ export default function CreateUserForm() {
     
     // Submission state
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [addAnotherAfterSave, setAddAnotherAfterSave] = useState(false);
+
+    const resetForm = () => {
+      // Revoke object URLs to avoid memory leaks
+      if (staffPhotoPreview) URL.revokeObjectURL(staffPhotoPreview);
+      if (athletePhotoPreview) URL.revokeObjectURL(athletePhotoPreview);
+      if (prospectPhotoPreview) URL.revokeObjectURL(prospectPhotoPreview);
+      if (alumniPhotoPreview) URL.revokeObjectURL(alumniPhotoPreview);
+      setIsStaff(true);
+      setIsAthlete(false);
+      setIsProspect(false);
+      setIsAlumni(false);
+      setIsSeniorStaff(false);
+      setStaffPhotoFile(null);
+      setStaffPhotoPreview(null);
+      setAthletePhotoFile(null);
+      setAthletePhotoPreview(null);
+      setProspectPhotoFile(null);
+      setProspectPhotoPreview(null);
+      setAlumniPhotoFile(null);
+      setAlumniPhotoPreview(null);
+      setName('');
+      setStaffTitle('');
+      setStaffAbout('');
+      setAthleteLevel('');
+      setProspectGPA('');
+      setProspectMajor('');
+      setProspectInstitution('');
+      setProspectGraduationYear('');
+      setProspectAbout('');
+      setProspectInstagram('');
+      setProspectYoutube('');
+      setAlumniSchool('');
+      setAlumniGraduationYear('');
+      setAlumniDescription('');
+      setFormErrors([]);
+    };
 
     const handleSubmit = async () => {
       // Prevent multiple submissions
@@ -138,7 +175,10 @@ export default function CreateUserForm() {
         if (res.ok) {
           try {
             const data = await res.json();
-            if (data.redirect) {
+            if (addAnotherAfterSave) {
+              resetForm();
+              setIsSubmitting(false);
+            } else if (data.redirect) {
               window.location.href = data.redirect;
             } else {
               setIsSubmitting(false);
@@ -1008,7 +1048,16 @@ export default function CreateUserForm() {
             <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
                 <div className="px-4 sm:px-0"></div>
                 <div className="md:col-span-2">
-                    <div className="flex items-center justify-end gap-x-6 px-4 py-4 sm:px-8">
+                    <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-3 px-4 py-4 sm:px-8">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm/6 text-[var(--foreground)]">
+                            <input
+                                type="checkbox"
+                                checked={addAnotherAfterSave}
+                                onChange={(e) => setAddAnotherAfterSave(e.target.checked)}
+                                className="rounded border-[var(--border)] bg-[var(--background)] text-[var(--primary)] focus:ring-[var(--primary)]"
+                            />
+                            <span>Add another athlete after save</span>
+                        </label>
                         <button 
                             type="button" 
                             className="text-sm/6 font-semibold text-[var(--foreground)] hover:text-red-600 cursor-pointer"
