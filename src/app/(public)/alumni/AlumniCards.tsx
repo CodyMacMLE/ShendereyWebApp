@@ -19,7 +19,7 @@ const sortOptions = [
 export default function AlumniCards({athletes}: {athletes: Athlete[]}) {
 
     const [alumni, setAlumni] = useState<Athlete[]>(athletes);
-    const [sort, setSort] = useState<'School' | 'Graduation Year'>('School');
+    const [sort, setSort] = useState<'School' | 'Graduation Year'>('Graduation Year');
     const [isLoading, setIsLoading] = useState(true);
     const [selectedAlumni, setSelectedAlumni] = useState<Athlete | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function AlumniCards({athletes}: {athletes: Athlete[]}) {
                     if (a.graduationYear === b.graduationYear) {
                         return a.school?.localeCompare(b.school || '') || 0;
                     }
-                    return a.graduationYear && b.graduationYear ? a.graduationYear - b.graduationYear : 0;
+                    return a.graduationYear && b.graduationYear ? b.graduationYear - a.graduationYear : 0;
                 }
                 return 0;
             })
