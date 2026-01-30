@@ -1,9 +1,29 @@
 'use client';
  
 import ErrorModal from '@/components/UI/ErrorModal/page';
+import Dropdown from '@/components/UI/Dropdown/page';
 import imageCompression from 'browser-image-compression';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+
+const athleteLevelOptions = [
+    { id: 1, name: 'Xcel Bronze' },
+    { id: 2, name: 'Xcel Silver' },
+    { id: 3, name: 'Xcel Gold' },
+    { id: 4, name: '1' },
+    { id: 5, name: '2' },
+    { id: 6, name: '3' },
+    { id: 7, name: '4' },
+    { id: 8, name: '5' },
+    { id: 9, name: '6' },
+    { id: 10, name: '7' },
+    { id: 11, name: '8' },
+    { id: 12, name: '9' },
+    { id: 13, name: '10' },
+    { id: 14, name: 'Novice' },
+    { id: 15, name: 'Junior' },
+    { id: 16, name: 'Senior' },
+];
 
 export default function EditUser({ userId, setModalEnable }: { userId: number, setModalEnable?: Dispatch<SetStateAction<boolean>> }) {
 
@@ -36,7 +56,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
     const [staffTitle, setStaffTitle] = useState('');
     const [staffAbout, setStaffAbout] = useState('');
     // Athlete
-    const [athleteLevel, setAthleteLevel] = useState('');
+    const [selectedAthleteLevel, setSelectedAthleteLevel] = useState(athleteLevelOptions[0]);
     // Prospect
     const [prospectGPA, setProspectGPA] = useState('');
     const [prospectMajor, setProspectMajor] = useState('');
@@ -73,7 +93,8 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                 }
                 // Athlete Info
                 if (body.athlete) {
-                    setAthleteLevel(body.athlete.level ?? '');
+                    const levelStr = body.athlete.level ?? '';
+                    setSelectedAthleteLevel(athleteLevelOptions.find(o => o.name === levelStr) ?? athleteLevelOptions[0]);
                     // Prospect Info (API returns graduationYear)
                     if (body.athlete.prospect) {
                         setProspectGPA(body.athlete.prospect.gpa ?? '');
@@ -123,7 +144,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
       if (!name.trim()) errors.push({ msg: 'Name is required.' });
       if (isStaff && !staffTitle.trim()) errors.push({ msg: 'Staff title is required.' });
       if (isStaff && isSeniorStaff && !staffAbout.trim()) errors.push({ msg: 'Senior staff must have a description.' });
-      if (isAthlete && !athleteLevel.trim()) errors.push({ msg: 'Athlete level is required.' });
+      if (isAthlete && !selectedAthleteLevel?.name?.trim()) errors.push({ msg: 'Athlete level is required.' });
       if (isProspect) {
         if (!prospectGPA) errors.push({ msg: 'Prospect GPA is required.' });
         if (!prospectGraduationYear.trim()) errors.push({ msg: 'Prospect graduation year is required.' });
@@ -166,7 +187,7 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
 
         // Athlete fields
         if (isAthlete) {
-            form.append('athleteLevel', athleteLevel);
+            form.append('athleteLevel', selectedAthleteLevel.name);
             if (athletePhotoFile) form.append('athleteImg', athletePhotoFile);
         }
 
@@ -716,16 +737,11 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
                                 <label htmlFor="athlete-level" className="block text-sm/6 font-medium text-[var(--foreground)]">
                                 Athlete Level
                                 </label>
-                                <div className="mt-2">
-                                <input
-                                    id="athlete-level"
-                                    name="athlete-level"
-                                    type="athlete-level"
-                                    value={athleteLevel}
-                                    onChange={(e) => setAthleteLevel(e.target.value)}
-                                    className="block w-full rounded-md bg-[var(--background)] px-3 py-1.5 text-base text-[var(--foreground)] outline outline-1 -outline-offset-1 outline-[var(--muted)] placeholder:text-[var(--muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-[var(--primary)] sm:text-sm/6"
+                                <Dropdown
+                                    items={athleteLevelOptions}
+                                    selected={selectedAthleteLevel}
+                                    setSelected={setSelectedAthleteLevel}
                                 />
-                                </div>
                             </div>
 
                         </div>
