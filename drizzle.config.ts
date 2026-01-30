@@ -1,5 +1,5 @@
 require('dotenv').config();
-import type { Config } from 'drizzle-kit'
+import type { Config } from 'drizzle-kit';
 
 // Disable SSL certificate verification for development
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -7,7 +7,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 export default {
   schema: './lib/schema.ts',
   out: './drizzle',
-  driver: 'pg',
+  dialect: 'postgresql',
   dbCredentials: {
     host: process.env.DB_HOST!,
     database: process.env.DB_NAME!,
