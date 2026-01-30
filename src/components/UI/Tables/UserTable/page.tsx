@@ -426,13 +426,12 @@ export default function UserTable({ users, setUsers, isLoading }: Props) {
                                       person.images?.prospectUrl ||
                                       person.images?.alumniUrl ||
                                       null;
-                                    const isDefault = !photoUrl;
                                     return (
                                       <Image
-                                        src={photoUrl || "/logos/default-profile.png"}
+                                        src={photoUrl || "/logos/sg_logo.png"}
                                         alt="User Photo"
                                         fill
-                                        className={`object-cover ${isDefault ? "grayscale" : ""}`}
+                                        className="object-cover"
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                       />
                                     );

@@ -1,4 +1,4 @@
-/** Default profile image shown when user has no photo URL (display in grayscale). */
+/** Default profile image shown when user has no photo URL. */
 export const DEFAULT_PROFILE_IMAGE = '/logos/default-profile.png';
 
 /**

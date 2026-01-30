@@ -130,7 +130,7 @@ export default async function Achievements() {
                       >
                       {yearAchievements.map((achievement) => (
                           <li key={`${achievement.achievement.date?.getFullYear()}-${achievement.user.name}-${achievement.achievement.title}`}>
-                          <Image alt="" src={achievement.imageUrl || '/default-profile.png'} className="mx-auto size-24 rounded-full" width={100} height={100} />
+                          <Image alt="" src={achievement.imageUrl || '/logos/sg_logo.png'} className="mx-auto size-24 rounded-full" width={100} height={100} />
                           <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{formatName(achievement.user.name)}</h3>
                           <p className="text-sm/6 text-gray-600">
                             {achievement.achievement.title}

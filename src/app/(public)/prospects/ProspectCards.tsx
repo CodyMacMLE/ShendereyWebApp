@@ -95,10 +95,10 @@ export default function ProspectCards({athletes}: {athletes: Athlete[]}) {
                 <a key={athlete.id} href={`/prospects/${athlete.id}`} className="group">
                     <Image
                         alt={athlete.name}
-                        src={athlete.imageSrc || '/logos/default-profile.png'}
+                        src={athlete.imageSrc || '/logos/sg_logo.png'}
                         width={1000}
                         height={1000}
-                        className={`aspect-square w-full rounded-lg object-cover group-hover:opacity-75 sm:aspect-[2/3] ${!athlete.imageSrc ? 'grayscale' : ''}`}
+                        className="aspect-square w-full rounded-lg object-cover group-hover:opacity-75 sm:aspect-[2/3]"
                     />
                     <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
                         <h3>{athlete.name}</h3>

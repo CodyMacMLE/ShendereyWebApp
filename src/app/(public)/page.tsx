@@ -272,8 +272,8 @@ export default async function Home() {
               <li key={person.user.id}>
                 <Image
                   alt=""
-                  src={person.staffUrl || '/logos/default-profile.png'}
-                  className={`flex justify-center mx-auto size-24 rounded-full shadow-md ${!person.staffUrl ? 'grayscale' : ''}`}
+                  src={person.staffUrl || '/logos/sg_logo.png'}
+                  className={`flex justify-center mx-auto size-24 rounded-full shadow-md ${!person.staffUrl ? '' : ''}`}
                   width={100}
                   height={100}
                   style={{ objectFit: 'cover', objectPosition: 'top'}}
@@ -287,8 +287,8 @@ export default async function Home() {
               <li key={person.user.id}>
                 <Image
                   alt=""
-                  src={person.staffUrl || '/logos/default-profile.png'}
-                  className={`flex justify-center mx-auto size-24 rounded-full shadow-md ${!person.staffUrl ? 'grayscale' : ''}`}
+                  src={person.staffUrl || '/logos/sg_logo.png'}
+                  className={`flex justify-center mx-auto size-24 rounded-full shadow-md ${!person.staffUrl ? '' : ''}`}
                   width={100}
                   height={100}
                   style={{ objectFit: 'cover', objectPosition: 'top'}}

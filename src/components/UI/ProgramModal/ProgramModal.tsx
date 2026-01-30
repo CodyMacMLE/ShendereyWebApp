@@ -45,7 +45,7 @@ export default function ProgramModal({ programs, CallToAction, CallToActionHref 
                         onMouseLeave={() => setHoveredProgram(null)}
                     >
                         <div className="flex flex-1 flex-col p-8 cursor-pointer" onClick={() => openModal(program)}>
-                            <Image alt="" src={program.imageUrl || '/default-profile.png'} className="mx-auto size-32 shrink-0 rounded-full" height={300} width={300} style={{ objectFit: 'cover'}}/>
+                            <Image alt="" src={program.imageUrl || '/logos/sg_logo.png'} className="mx-auto size-32 shrink-0 rounded-full" height={300} width={300} style={{ objectFit: 'cover'}}/>
                             <h3 className="mt-6 text-sm font-medium text-gray-900">{program.name}</h3>
                             <dl className="mt-1 flex grow flex-col justify-between">
                                 <dt className="sr-only">Title</dt>

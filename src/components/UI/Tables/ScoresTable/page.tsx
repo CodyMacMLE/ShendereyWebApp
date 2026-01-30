@@ -152,11 +152,11 @@ export default function ScoresTable({ athlete, images } : { athlete : Athlete, i
           <div className="sm:flex-auto flex items-center gap-5">
           <div className="h-[50px] w-[50px] rounded-full overflow-hidden ring-1 ring-[var(--border)] shrink-0">
                 <Image
-                    src={images.athleteUrl || "/logos/default-profile.png"}
+                    src={images.athleteUrl || "/logos/sg_logo.png"}
                     alt="Athlete Image"
                     width={100}
                     height={100}
-                    className={`object-cover h-full w-full ${!images.athleteUrl ? "grayscale" : ""}`}
+                    className="object-cover h-full w-full"
                 />
             </div>
             <h1 className="text-2xl font-semibold text-[var(--foreground)]">{athlete.name}&apos;s Scores</h1>

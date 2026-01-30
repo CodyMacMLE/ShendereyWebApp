@@ -155,16 +155,14 @@ export default function DisplayUser({ user } : { user : UserData }) {
                                 user.images.prospectUrl ||
                                 user.images.alumniUrl ||
                                 null;
-                              const isDefault = !imageUrl;
-
                               return (
                                 <div className="relative mt-3">
                                     <Image
-                                      src={imageUrl || "/logos/default-profile.png"}
+                                      src={imageUrl || "/logos/sg_logo.png"}
                                       alt="User Image"
                                       width={150}
                                       height={150}
-                                      className={`object-cover h-[175px] w-[175px] rounded-full ring-1 ring-[var(--border)] ${isDefault ? "grayscale" : ""}`}
+                                      className="object-cover h-[175px] w-[175px] rounded-full ring-1 ring-[var(--border)]"
                                     />
                                   {/* Status Icon */}
                                   <div 
@@ -295,11 +293,11 @@ export default function DisplayUser({ user } : { user : UserData }) {
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
                                 <Image 
-                                    src={user.images.athleteUrl || "/logos/default-profile.png"} 
+                                    src={user.images.athleteUrl || "/logos/sg_logo.png"} 
                                     alt="Athlete Image" 
                                     height={200} 
                                     width={200} 
-                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.athleteUrl ? "grayscale" : ""}`}
+                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.athleteUrl ? "" : ""}`}
                                 />
                             </p>
 
@@ -375,11 +373,11 @@ export default function DisplayUser({ user } : { user : UserData }) {
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
                                 <Image 
-                                    src={user.images.prospectUrl || "/logos/default-profile.png"} 
+                                    src={user.images.prospectUrl || "/logos/sg_logo.png"} 
                                     alt="Prospect Image" 
                                     height={200} 
                                     width={200} 
-                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.prospectUrl ? "grayscale" : ""}`}
+                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.prospectUrl ? "" : ""}`}
                                 />
                             </p>
 
@@ -422,11 +420,11 @@ export default function DisplayUser({ user } : { user : UserData }) {
                             </h4>
                             <p className="col-span-2 text-[var(--foreground)] mb-5 lg:mb-0">
                                 <Image 
-                                    src={user.images.alumniUrl || "/logos/default-profile.png"} 
+                                    src={user.images.alumniUrl || "/logos/sg_logo.png"} 
                                     alt="Alumni Image" 
                                     height={200} 
                                     width={200} 
-                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.alumniUrl ? "grayscale" : ""}`}
+                                    className={`h-70 w-50 rounded-lg object-cover ${!user.images.alumniUrl ? "" : ""}`}
                                 />
                             </p>
 
