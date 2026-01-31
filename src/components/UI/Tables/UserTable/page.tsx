@@ -234,7 +234,13 @@ export default function UserTable({ users, setUsers, isLoading }: Props) {
       <>
         {editModal && selectedUser !== 0 && (
           <Modal title="Edit User" setModalEnable={setEditModal}>
-            <EditUser userId={selectedUser} setModalEnable={setEditModal} />
+            <EditUser
+              userId={selectedUser}
+              setModalEnable={setEditModal}
+              onSave={(updatedUser) => {
+                setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+              }}
+            />
           </Modal>
         )}
         <div className="px-4 sm:px-6 lg:px-8">

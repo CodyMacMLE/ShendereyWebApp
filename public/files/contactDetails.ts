@@ -28,3 +28,8 @@ export const contactDetails = {
       },
     ]
 }
+
+export const socialLinks = {
+  facebook: 'https://www.facebook.com/shendereygymnastics',
+  instagram: 'https://www.instagram.com/shendereygymnastics/'
+}

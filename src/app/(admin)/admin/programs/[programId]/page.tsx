@@ -187,7 +187,7 @@ export default function Program() {
     useEffect(() => {
         if (program) {
             setProgramName(program.name);
-            setProgramCategory(program.category);
+            setProgramCategory(program.category.charAt(0).toUpperCase() + program.category.slice(1).toLowerCase());
             setProgramDescription(program.description);
             setProgramLength(program.length);
             setProgramAges(program.ages);

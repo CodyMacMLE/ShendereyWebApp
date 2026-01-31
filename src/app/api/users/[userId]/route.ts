@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { achievements, alumni, athletes, coaches, media, prospects, scores, userImages, users } from '@/lib/schema';
+import { achievements, alumni, athletes, coachGroupLines, coaches, media, prospects, scores, userImages, users } from '@/lib/schema';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm/sql';
@@ -262,6 +262,138 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
       console.error('Error updating user:', err);
     }
 
+    const oldUser = user[0];
+
+    // ====== ROLE REMOVAL CLEANUP ======
+
+    // Coach removed
+    if (oldUser.isCoach && !isCoach) {
+      try {
+        const coachRecords = await db.select({ id: coaches.id }).from(coaches).where(eq(coaches.user, id));
+        if (coachRecords.length > 0) {
+          await db.delete(coachGroupLines).where(eq(coachGroupLines.coachId, coachRecords[0].id));
+        }
+        const images = await db.select({ staffUrl: userImages.staffUrl }).from(userImages).where(eq(userImages.user, id));
+        if (images[0]?.staffUrl) {
+          try {
+            await s3.send(new DeleteObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: images[0].staffUrl.split('/').slice(3).join('/'),
+            }));
+          } catch (err) {
+            console.error('Error deleting staff image from S3:', err);
+          }
+        }
+        await db.update(userImages).set({ staffUrl: null }).where(eq(userImages.user, id));
+        await db.delete(coaches).where(eq(coaches.user, id));
+      } catch (err) {
+        console.error('Error removing coach role:', err);
+      }
+    }
+
+    // Athlete removed (also removes prospect, alumni, scores, media, achievements)
+    if (oldUser.isAthlete && !isAthlete) {
+      try {
+        const athleteRecords = await db.select({ id: athletes.id }).from(athletes).where(eq(athletes.user, id));
+        if (athleteRecords.length > 0) {
+          const athleteId = athleteRecords[0].id;
+
+          // Delete media files from S3
+          const mediaRecords = await db.select({ mediaUrl: media.mediaUrl }).from(media).where(eq(media.athlete, athleteId));
+          for (const m of mediaRecords) {
+            if (m.mediaUrl) {
+              try {
+                await s3.send(new DeleteObjectCommand({
+                  Bucket: BUCKET_NAME,
+                  Key: m.mediaUrl.split('/').slice(3).join('/'),
+                }));
+              } catch (err) {
+                console.error('Error deleting media from S3:', err);
+              }
+            }
+          }
+
+          await db.delete(scores).where(eq(scores.athlete, athleteId));
+          await db.delete(media).where(eq(media.athlete, athleteId));
+          await db.delete(achievements).where(eq(achievements.athlete, athleteId));
+        }
+
+        await db.delete(prospects).where(eq(prospects.user, id));
+        await db.delete(alumni).where(eq(alumni.user, id));
+
+        // Delete athlete/prospect/alumni images from S3
+        const images = await db.select({
+          athleteUrl: userImages.athleteUrl,
+          prospectUrl: userImages.prospectUrl,
+          alumniUrl: userImages.alumniUrl,
+        }).from(userImages).where(eq(userImages.user, id));
+
+        if (images[0]) {
+          for (const url of [images[0].athleteUrl, images[0].prospectUrl, images[0].alumniUrl]) {
+            if (url) {
+              try {
+                await s3.send(new DeleteObjectCommand({
+                  Bucket: BUCKET_NAME,
+                  Key: url.split('/').slice(3).join('/'),
+                }));
+              } catch (err) {
+                console.error('Error deleting image from S3:', err);
+              }
+            }
+          }
+        }
+
+        await db.update(userImages).set({ athleteUrl: null, prospectUrl: null, alumniUrl: null }).where(eq(userImages.user, id));
+        await db.delete(athletes).where(eq(athletes.user, id));
+      } catch (err) {
+        console.error('Error removing athlete role:', err);
+      }
+    }
+
+    // Prospect removed (athlete still kept, not transitioning to alumni)
+    if (oldUser.isProspect && !isProspect && isAthlete && !isAlumni) {
+      try {
+        const images = await db.select({ prospectUrl: userImages.prospectUrl }).from(userImages).where(eq(userImages.user, id));
+        if (images[0]?.prospectUrl) {
+          try {
+            await s3.send(new DeleteObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: images[0].prospectUrl.split('/').slice(3).join('/'),
+            }));
+          } catch (err) {
+            console.error('Error deleting prospect image from S3:', err);
+          }
+        }
+        await db.update(userImages).set({ prospectUrl: null }).where(eq(userImages.user, id));
+        await db.delete(prospects).where(eq(prospects.user, id));
+      } catch (err) {
+        console.error('Error removing prospect role:', err);
+      }
+    }
+
+    // Alumni removed (athlete still kept, not transitioning to prospect)
+    if (oldUser.isAlumni && !isAlumni && isAthlete && !isProspect) {
+      try {
+        const images = await db.select({ alumniUrl: userImages.alumniUrl }).from(userImages).where(eq(userImages.user, id));
+        if (images[0]?.alumniUrl) {
+          try {
+            await s3.send(new DeleteObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: images[0].alumniUrl.split('/').slice(3).join('/'),
+            }));
+          } catch (err) {
+            console.error('Error deleting alumni image from S3:', err);
+          }
+        }
+        await db.update(userImages).set({ alumniUrl: null }).where(eq(userImages.user, id));
+        await db.delete(alumni).where(eq(alumni.user, id));
+      } catch (err) {
+        console.error('Error removing alumni role:', err);
+      }
+    }
+
+    // ====== ROLE UPSERTS ======
+
     if (isCoach) {
       try {
         const existingCoach = await db.select().from(coaches).where(eq(coaches.user, id));
@@ -308,8 +440,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
 
     if (isProspect) {
       try {
-        // Delete alumni if prospect is updated to not be a prospect
-        if (user[0].isAlumni) {
+        // Transition from alumni to prospect
+        if (oldUser.isAlumni) {
           const images = await db.select().from(userImages).where(eq(userImages.user, id));
           if (images[0].alumniUrl) {
             await s3.send(new DeleteObjectCommand({
@@ -317,6 +449,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
               Key: images[0].alumniUrl.split('/').slice(3).join('/'),
             }));
           }
+          await db.update(userImages).set({ alumniUrl: null }).where(eq(userImages.user, id));
           await db.delete(alumni).where(eq(alumni.user, id));
 
           await db.insert(prospects).values({
@@ -331,7 +464,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
           });
         }
 
-        if (user[0].isProspect) {
+        if (oldUser.isProspect) {
           await db.update(prospects)
             .set({
               gpa: prospectGPA ? parseFloat(prospectGPA) : null,
@@ -351,7 +484,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
 
     if (isAlumni) {
       try {
-        if (user[0].isProspect) {
+        // Transition from prospect to alumni
+        if (oldUser.isProspect) {
           const images = await db.select().from(userImages).where(eq(userImages.user, id));
           if (images[0].prospectUrl) {
             await s3.send(new DeleteObjectCommand({
@@ -359,6 +493,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
               Key: images[0].prospectUrl.split('/').slice(3).join('/'),
             }));
           }
+          await db.update(userImages).set({ prospectUrl: null }).where(eq(userImages.user, id));
           await db.delete(prospects).where(eq(prospects.user, id));
           await db.insert(alumni).values({
             user: id,
@@ -368,7 +503,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
           });
         }
 
-        if (user[0].isAlumni) {
+        if (oldUser.isAlumni) {
           await db.update(alumni).set({
             school: alumniSchool,
             year: alumniGraduationYear ? new Date(`${alumniGraduationYear}-01-01`) : null,

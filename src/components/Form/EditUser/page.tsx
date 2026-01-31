@@ -25,7 +25,30 @@ const athleteLevelOptions = [
     { id: 16, name: 'Senior' },
 ];
 
-export default function EditUser({ userId, setModalEnable }: { userId: number, setModalEnable?: Dispatch<SetStateAction<boolean>> }) {
+interface EditUserProps {
+    userId: number;
+    setModalEnable?: Dispatch<SetStateAction<boolean>>;
+    onSave?: (updatedUser: {
+        id: number;
+        name: string;
+        isActive: boolean;
+        isAthlete: boolean;
+        isCoach: boolean;
+        isProspect: boolean;
+        isScouted: boolean;
+        isAlumni: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        images?: {
+            staffUrl: string | null;
+            athleteUrl: string | null;
+            prospectUrl: string | null;
+            alumniUrl: string | null;
+        };
+    }) => void;
+}
+
+export default function EditUser({ userId, setModalEnable, onSave }: EditUserProps) {
 
     const [loading, setLoading] = useState(true);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
@@ -217,11 +240,37 @@ export default function EditUser({ userId, setModalEnable }: { userId: number, s
           });
 
         if (res.ok) {
-          const data = await res.json();
-          if (data.redirect) {
-            window.location.href = data.redirect;
-          } else if (setModalEnable) {
+          if (setModalEnable) {
+            if (onSave) {
+              try {
+                const userRes = await fetch(`/api/users/${userId}`);
+                if (userRes.ok) {
+                  const userData = await userRes.json();
+                  const body = userData.body;
+                  onSave({
+                    id: body.id,
+                    name: body.name,
+                    isActive: body.isActive ?? false,
+                    isAthlete: body.isAthlete ?? false,
+                    isCoach: body.isCoach ?? false,
+                    isProspect: body.isProspect ?? false,
+                    isScouted: body.isScouted ?? false,
+                    isAlumni: body.isAlumni ?? false,
+                    createdAt: body.createdAt ? new Date(body.createdAt) : new Date(),
+                    updatedAt: body.updatedAt ? new Date(body.updatedAt) : new Date(),
+                    images: body.images ?? undefined,
+                  });
+                }
+              } catch (err) {
+                console.error('Error fetching updated user:', err);
+              }
+            }
             setModalEnable(false);
+          } else {
+            const data = await res.json();
+            if (data.redirect) {
+              window.location.href = data.redirect;
+            }
           }
         } else {
           const errorData = await res.json();

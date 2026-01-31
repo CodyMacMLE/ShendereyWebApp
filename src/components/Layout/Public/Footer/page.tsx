@@ -1,3 +1,4 @@
+import { socialLinks } from "@/public/files/contactDetails"
 import Image from "next/image"
 
 const navigation = {
@@ -30,7 +31,7 @@ const navigation = {
     social: [
       {
         name: 'Facebook',
-        href: 'https://www.facebook.com/shendereygymnastics',
+        href: socialLinks.facebook,
         icon: (props: React.SVGProps<SVGSVGElement>) => (
           <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
             <path
@@ -43,7 +44,7 @@ const navigation = {
       },
       {
         name: 'Instagram',
-        href: 'https://www.instagram.com/shendereygymnastics/',
+        href: socialLinks.instagram,
         icon: (props: React.SVGProps<SVGSVGElement>) => (
           <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
             <path

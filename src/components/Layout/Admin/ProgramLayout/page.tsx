@@ -80,8 +80,14 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
 
       if (res.ok) {
           const data = await res.json();
-          setModalEnabled(false);
           if (data.body && setPrograms) setPrograms(prevPrograms => [...prevPrograms, data.body]);
+          setName("");
+          setCategory(categories[0]);
+          setAges("");
+          setLength("");
+          setDescription("");
+          setProgramImgFile(null);
+          setModalEnabled(false);
       } else {
           let errorMessage = 'Failed to upload program. Please try again.';
           try {
@@ -112,6 +118,15 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
 
   const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState<"all" | "recreational" | "competitive">("all");
+
+  const filteredPrograms = programs.filter((program) => {
+    const matchesCategory = filterCategory === "all" || program.category === filterCategory;
+    const matchesSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
       <>
@@ -297,13 +312,42 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                 </button>
                 </div>
             </div>
-            
+
+            {/* Filter & Search */}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex gap-2">
+                    {(["all", "recreational", "competitive"] as const).map((cat) => (
+                        <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setFilterCategory(cat)}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+                                filterCategory === cat
+                                    ? "bg-[var(--primary)] text-[var(--button-text)]"
+                                    : "bg-[var(--card-bg)] text-[var(--foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--border)]"
+                            }`}
+                        >
+                            {cat === "all" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </button>
+                    ))}
+                </div>
+                <div className="flex items-center rounded-md bg-white pl-3 overflow-hidden outline outline-1 -outline-offset-1 outline-[var(--border)] focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)] sm:max-w-xs w-full">
+                    <input
+                        type="text"
+                        placeholder="Search programs..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-[#161616] placeholder:text-[var(--muted)] focus:outline focus:outline-0 sm:text-sm/6"
+                    />
+                </div>
+            </div>
+
             {/* Content */}
             {isLoading ? (
                 <div className="flex mt-10 p-6 text-sm text-[var(--muted)] items-center justify-center">Loading...</div>
-            ) : programs.length > 0 ? (
+            ) : filteredPrograms.length > 0 ? (
                 <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-5">
-                    {programs.map((program) => (
+                    {filteredPrograms.map((program) => (
                          <li
                          key={program.id}
                          className="col-span-1 flex flex-col divide-y divide-[var(--border)] rounded-lg bg-[var(--card-bg)] text-center shadow"
@@ -346,7 +390,9 @@ export default function ProgramLayout({ programs, setPrograms, isLoading }: Prog
                     ))}
                 </ul>
             ) : (
-                <div className="flex mt-10 p-6 text-sm text-[var(--muted)] items-center justify-center">No programs available.</div>
+                <div className="flex mt-10 p-6 text-sm text-[var(--muted)] items-center justify-center">
+                    {programs.length > 0 ? "No programs match your filters." : "No programs available."}
+                </div>
             )}
           
         </div>

@@ -165,7 +165,9 @@ export const getCompetitivePrograms = async () => {
             const match = ages.match(/^(\d+)/);
             return match ? parseInt(match[1], 10) : Infinity;
         };
-        return getStartAge(a.ages) - getStartAge(b.ages);
+        const ageDiff = getStartAge(a.ages) - getStartAge(b.ages);
+        if (ageDiff !== 0) return ageDiff;
+        return (a.name || '').localeCompare(b.name || '');
     });
 
     return competitivePrograms;
