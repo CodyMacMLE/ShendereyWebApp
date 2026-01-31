@@ -142,11 +142,32 @@ export const getAchievementsByYear = async () => {
 
 export const getRecreationalPrograms = async () => {
     const recreationalPrograms = await db.select().from(programs).where(eq(programs.category, "recreational"));
+
+    recreationalPrograms.sort((a, b) => {
+        const getStartAge = (ages: string | null): number => {
+            if (!ages) return Infinity;
+            if (ages.toLowerCase().trim().startsWith('walking')) return -1;
+            const match = ages.match(/^(\d+)/);
+            return match ? parseInt(match[1], 10) : Infinity;
+        };
+        return getStartAge(a.ages) - getStartAge(b.ages);
+    });
+
     return recreationalPrograms;
 }
 
 export const getCompetitivePrograms = async () => {
     const competitivePrograms = await db.select().from(programs).where(eq(programs.category, "competitive"));
+
+    competitivePrograms.sort((a, b) => {
+        const getStartAge = (ages: string | null): number => {
+            if (!ages) return Infinity;
+            const match = ages.match(/^(\d+)/);
+            return match ? parseInt(match[1], 10) : Infinity;
+        };
+        return getStartAge(a.ages) - getStartAge(b.ages);
+    });
+
     return competitivePrograms;
 }
 
