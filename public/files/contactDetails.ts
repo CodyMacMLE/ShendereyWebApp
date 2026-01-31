@@ -3,24 +3,28 @@ export const contactDetails = {
     city: 'Newmarket',
     region: 'ON',
     postal: 'L3Y 8E1',
-    telephone: '+1 (905) 895-6838',
-    email: 'shendereygymnastics@gmail.com',
+    telephone: '+1 (905) 895-4194',
+    email: 'sgcrecreational@gmail.com',
     officeHours: [
       {
         day: 'Monday',
-        time: '1:00-6:00pm',
+        time: '1:00-8:45pm',
       },
       {
         day: 'Tuesday',
-        time: '1:00-7:30pm',
+        time: '1:00-8:30pm',
       },
       {
         day: 'Thursday',
-        time: '12:00-5:00pm',
+        time: '12:00-8:30pm',
       },
       {
         day: 'Friday',
-        time: '1:00-7:30pm',
+        time: '1:00-8:30pm',
+      },
+      {
+        day: 'Saturday',
+        time: '9:00-5:00pm',
       },
     ]
 }
