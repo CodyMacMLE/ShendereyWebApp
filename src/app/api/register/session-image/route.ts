@@ -130,6 +130,64 @@ export async function POST(req: NextRequest) {
     }
 }
 
+export async function PATCH(req: NextRequest) {
+    try {
+        const { action } = await req.json();
+
+        if (action !== 'promote-next') {
+            return NextResponse.json(
+                { success: false, error: 'Invalid action' },
+                { status: 400 }
+            );
+        }
+
+        // Find the next session image
+        const nextImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, 'next'));
+
+        if (nextImages.length === 0) {
+            return NextResponse.json(
+                { success: false, error: 'No next session image to promote' },
+                { status: 404 }
+            );
+        }
+
+        // Delete the current session image if it exists
+        const currentImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, 'current'));
+
+        if (currentImages.length > 0) {
+            try {
+                await s3.send(new DeleteObjectCommand({
+                    Bucket: BUCKET_NAME,
+                    Key: `registration/current`,
+                }));
+            } catch (error) {
+                console.error('S3 delete error (non-fatal):', error);
+            }
+            await db.delete(registrationImage).where(eq(registrationImage.id, currentImages[0].id));
+        }
+
+        // Update the next session record to become current
+        const [result] = await db.update(registrationImage)
+            .set({
+                slot: 'current',
+                updatedAt: new Date(),
+            })
+            .where(eq(registrationImage.id, nextImages[0].id))
+            .returning();
+
+        return NextResponse.json({
+            success: true,
+            body: result,
+        }, { status: 200 });
+    } catch (error) {
+        console.error("Error in PATCH /api/register/session-image:", error);
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
+    }
+}
+
 export async function DELETE(req: NextRequest) {
     try {
         const { slot } = await req.json();

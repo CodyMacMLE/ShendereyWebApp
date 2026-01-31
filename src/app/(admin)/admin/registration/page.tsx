@@ -49,6 +49,7 @@ export default function Registration() {
     const [sessionTitle, setSessionTitle] = useState<string>("");
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<SlotKey | null>(null);
+    const [isPromoting, setIsPromoting] = useState(false);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
     const placeholderSession = `Fall ${new Date().getFullYear()}`;
 
@@ -328,6 +329,42 @@ export default function Registration() {
         }
     };
 
+    // Handle promoting next session to current
+    const handlePromoteNext = async () => {
+        try {
+            setIsPromoting(true);
+            const response = await fetch('/api/register/session-image', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'promote-next' }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                const promotedImage = {
+                    ...data.body,
+                    imageUrl: data.body.imageUrl ? `${data.body.imageUrl}?t=${Date.now()}` : data.body.imageUrl,
+                };
+                setImagesBySlot(prev => ({
+                    ...prev,
+                    current: promotedImage,
+                    next: null,
+                }));
+                setMessage({ type: 'success', text: 'Next session promoted to current session!' });
+                setTimeout(() => setMessage(null), 3000);
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Failed to promote session' });
+                setTimeout(() => setMessage(null), 5000);
+            }
+        } catch (error) {
+            console.error("Error promoting session:", error);
+            setMessage({ type: 'error', text: 'Error promoting session. Please try again.' });
+            setTimeout(() => setMessage(null), 5000);
+        } finally {
+            setIsPromoting(false);
+        }
+    };
+
     // Cleanup preview URL
     useEffect(() => {
         return () => {
@@ -388,30 +425,42 @@ export default function Registration() {
                                         <span className="text-sm text-[var(--muted)]">No image</span>
                                     </div>
                                 )}
-                                <div className="mt-3 flex gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setActiveSlot(key);
-                                            setImageModalOpen(true);
-                                            if (slotImage) {
-                                                setSessionTitle(slotImage.title || '');
-                                            } else {
-                                                setSessionTitle('');
-                                            }
-                                        }}
-                                        className="flex-1 rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
-                                    >
-                                        {slotImage ? 'Change' : 'Upload'}
-                                    </button>
-                                    {slotImage && (
+                                <div className="mt-3 flex flex-col gap-2">
+                                    <div className="flex gap-2">
                                         <button
                                             type="button"
-                                            onClick={() => handleRemoveImage(key)}
-                                            disabled={isDeleting === key}
-                                            className="rounded-md bg-red-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            onClick={() => {
+                                                setActiveSlot(key);
+                                                setImageModalOpen(true);
+                                                if (slotImage) {
+                                                    setSessionTitle(slotImage.title || '');
+                                                } else {
+                                                    setSessionTitle('');
+                                                }
+                                            }}
+                                            className="flex-1 rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
                                         >
-                                            {isDeleting === key ? '...' : 'Remove'}
+                                            {slotImage ? 'Change' : 'Upload'}
+                                        </button>
+                                        {slotImage && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveImage(key)}
+                                                disabled={isDeleting === key}
+                                                className="rounded-md bg-red-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isDeleting === key ? '...' : 'Remove'}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {key === 'next' && slotImage && (
+                                        <button
+                                            type="button"
+                                            onClick={handlePromoteNext}
+                                            disabled={isPromoting}
+                                            className="w-full rounded-md bg-amber-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isPromoting ? 'Moving...' : 'Move to Current Session'}
                                         </button>
                                     )}
                                 </div>
