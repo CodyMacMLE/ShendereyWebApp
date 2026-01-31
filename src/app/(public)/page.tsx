@@ -107,7 +107,7 @@ export default async function Home() {
               Recreational
             </a>
             <a
-              href="/tryouts"
+              href="/competitive"
               className="mt-8 inline-block rounded-md border border-transparent bg-[var(--primary)] px-8 py-3 text-base font-medium text-white hover:bg-[var(--primary-hover)]"
             >
               Competitive
@@ -457,7 +457,7 @@ export default async function Home() {
               Recreational
             </a>
             <a
-              href="/tryouts"
+              href="/competitive"
               className="mt-8 inline-block rounded-md border border-transparent bg-[var(--primary)] px-8 py-3 text-base font-medium text-white hover:bg-[var(--primary-hover)] shadow-lg"
             >
               Competitive
