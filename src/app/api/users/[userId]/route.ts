@@ -264,13 +264,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
 
     if (isCoach) {
       try {
-        await db.update(coaches)
-          .set({
+        const existingCoach = await db.select().from(coaches).where(eq(coaches.user, id));
+        if (existingCoach.length > 0) {
+          await db.update(coaches)
+            .set({
+              title: coachTitle,
+              description: coachDescription,
+              isSeniorStaff
+            })
+            .where(eq(coaches.user, id));
+        } else {
+          await db.insert(coaches).values({
+            user: id,
             title: coachTitle,
             description: coachDescription,
-            isSeniorStaff
-          })
-          .where(eq(coaches.user, id));
+            isSeniorStaff,
+          });
+        }
       } catch (err) {
         console.error('Error updating coach:', err);
       }
@@ -278,11 +288,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ user
 
     if (isAthlete) {
       try {
-        await db.update(athletes)
-          .set({
-            level: athleteLevel
-          })
-          .where(eq(athletes.user, id));
+        const existingAthlete = await db.select().from(athletes).where(eq(athletes.user, id));
+        if (existingAthlete.length > 0) {
+          await db.update(athletes)
+            .set({
+              level: athleteLevel
+            })
+            .where(eq(athletes.user, id));
+        } else {
+          await db.insert(athletes).values({
+            user: id,
+            level: athleteLevel,
+          });
+        }
       } catch (err) {
         console.error('Error updating athlete:', err);
       }
