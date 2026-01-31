@@ -59,7 +59,7 @@ export default async function ProgramPage({ params }: { params: Promise<{ progra
                                 height={1000}
                             />
                             {/* Description */}
-                            <div className="flex-1 text-sm text-[var(--muted)]">
+                            <div className="flex-1 text-md text-[var(--muted)]">
                                 {program.description}
                             </div>
                         </div>
