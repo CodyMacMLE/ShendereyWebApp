@@ -19,7 +19,7 @@ export const AchievementsQuote: Quote = {
 export const SponsorsQuote: Quote = {
     name: 'Melissa',
     position: 'President',
-    quote: 'Our sponsors and affiliates are vital partners, your belief and investment help us create opportunities where young athletes thrive, compete, and succeed at the highest levels.',
+    quote: 'Our sponsors and affiliates are vital partners; their belief and investment helps us create opportunities where young athletes thrive, compete, and succeed at the highest levels.',
 }
 
 export const EmploymentQuote: Quote = {
