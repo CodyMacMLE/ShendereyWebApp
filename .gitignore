@@ -42,3 +42,6 @@ next-env.d.ts
 
 # mac metadata
 ._*
+
+# Claude
+.claude/

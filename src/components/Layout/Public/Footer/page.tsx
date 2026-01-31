@@ -24,7 +24,7 @@ const navigation = {
     ],
     Recruitment: [
       { name: 'Prospects', href: '/prospects' },
-      { name: 'Almuni', href: '/alumni' },
+      { name: 'Alumni', href: '/alumni' },
     ],
 
     social: [
