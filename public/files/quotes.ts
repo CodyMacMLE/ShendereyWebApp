@@ -12,7 +12,7 @@ export const StaffQuote: Quote = {
 
 export const AchievementsQuote: Quote = {
     name: 'Chris Hanley',
-    position: 'Technical Director',
+    position: 'Competitive Coach',
     quote: 'Our athletes\' achievements are built on relentless work ethic, daily accountability, and the discipline to pursue excellence long before results ever appear.',
 }
 
