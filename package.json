@@ -22,7 +22,7 @@
     "@types/nodemailer": "^7.0.4",
     "@vercel/speed-insights": "^1.2.0",
     "browser-image-compression": "^2.0.2",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.45.1",
     "embla-carousel-auto-scroll": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "ffmpeg-static": "^5.2.0",

@@ -17,7 +17,16 @@ interface RegistrationImage {
     id: number;
     imageUrl: string | null;
     title: string | null;
+    slot: string | null;
 }
+
+const SLOT_CONFIG = [
+    { key: 'current', label: 'Current Session' },
+    { key: 'next', label: 'Next Session' },
+    { key: 'camp', label: 'Camp' },
+] as const;
+
+type SlotKey = typeof SLOT_CONFIG[number]['key'];
 
 export default function Registration() {
 
@@ -28,12 +37,18 @@ export default function Registration() {
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [enabledStates, setEnabledStates] = useState<{ [key: number]: boolean }>({});
     const [deletingStates, setDeletingStates] = useState<{ [key: number]: boolean }>({});
-    const [registrationImage, setRegistrationImage] = useState<RegistrationImage | null>(null);
+    const [imagesBySlot, setImagesBySlot] = useState<Record<SlotKey, RegistrationImage | null>>({
+        current: null,
+        next: null,
+        camp: null,
+    });
     const [imageModalOpen, setImageModalOpen] = useState(false);
+    const [activeSlot, setActiveSlot] = useState<SlotKey | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [sessionTitle, setSessionTitle] = useState<string>("");
     const [isUploading, setIsUploading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<SlotKey | null>(null);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
     const placeholderSession = `Fall ${new Date().getFullYear()}`;
 
@@ -65,7 +80,7 @@ export default function Registration() {
         };
     }, []);
 
-    // Fetch registration image and policies on mount
+    // Fetch registration images and policies on mount
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -74,7 +89,7 @@ export default function Registration() {
                     fetch('/api/register/policies'),
                     fetch('/api/register/session-image')
                 ]);
-                
+
                 const policiesData = await policiesResponse.json();
                 if (policiesData.success) {
                     setPolicies(policiesData.body || []);
@@ -84,8 +99,17 @@ export default function Registration() {
 
                 const imageData = await imageResponse.json();
                 if (imageData.success && imageData.body) {
-                    setRegistrationImage(imageData.body);
-                    setSessionTitle(imageData.body.title || placeholderSession);
+                    const slotMap: Record<SlotKey, RegistrationImage | null> = {
+                        current: null,
+                        next: null,
+                        camp: null,
+                    };
+                    for (const img of imageData.body as RegistrationImage[]) {
+                        if (img.slot && (img.slot === 'current' || img.slot === 'next' || img.slot === 'camp')) {
+                            slotMap[img.slot as SlotKey] = img;
+                        }
+                    }
+                    setImagesBySlot(slotMap);
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -95,7 +119,7 @@ export default function Registration() {
             }
         };
         fetchData();
-    }, [placeholderSession]);
+    }, []);
 
     // Handle policy text change
     const handlePolicyChange = (index: number, value: string) => {
@@ -196,10 +220,10 @@ export default function Registration() {
             let processedFile = file;
             if (file.type.startsWith('image/')) {
                 try {
-                    processedFile = await imageCompression(file, { 
-                        maxSizeMB: 0.8, 
-                        maxWidthOrHeight: 1024, 
-                        useWebWorker: true 
+                    processedFile = await imageCompression(file, {
+                        maxSizeMB: 0.8,
+                        maxWidthOrHeight: 1024,
+                        useWebWorker: true
                     });
                 } catch (error) {
                     console.error("Image compression error:", error);
@@ -215,12 +239,15 @@ export default function Registration() {
     // Handle image upload
     const handleImageUpload = async () => {
         const errors: { msg: string }[] = [];
-        
+
         if (!imageFile) {
             errors.push({ msg: 'Image file is required' });
         }
         if (!sessionTitle.trim()) {
             errors.push({ msg: 'Title is required' });
+        }
+        if (!activeSlot) {
+            errors.push({ msg: 'No slot selected' });
         }
 
         if (errors.length > 0) {
@@ -235,6 +262,7 @@ export default function Registration() {
             const formData = new FormData();
             formData.append('image', imageFile!);
             formData.append('title', sessionTitle);
+            formData.append('slot', activeSlot!);
 
             const response = await fetch('/api/register/session-image', {
                 method: 'POST',
@@ -243,17 +271,20 @@ export default function Registration() {
 
             const data = await response.json();
             if (data.success) {
-                // Add cache-busting query parameter to force image reload
                 const updatedImage = {
                     ...data.body,
                     imageUrl: data.body.imageUrl ? `${data.body.imageUrl}?t=${Date.now()}` : data.body.imageUrl
                 };
-                setRegistrationImage(updatedImage);
+                setImagesBySlot(prev => ({
+                    ...prev,
+                    [activeSlot!]: updatedImage,
+                }));
                 setImageModalOpen(false);
+                setActiveSlot(null);
                 setImageFile(null);
                 setImagePreview(null);
                 setSessionTitle("");
-                setMessage({ type: 'success', text: 'Registration schedule image updated successfully!' });
+                setMessage({ type: 'success', text: 'Schedule image updated successfully!' });
                 setTimeout(() => setMessage(null), 3000);
             } else {
                 setFormErrors([{ msg: data.error || 'Failed to upload image' }]);
@@ -263,6 +294,37 @@ export default function Registration() {
             setFormErrors([{ msg: 'Error uploading image. Please try again.' }]);
         } finally {
             setIsUploading(false);
+        }
+    };
+
+    // Handle image removal
+    const handleRemoveImage = async (slot: SlotKey) => {
+        try {
+            setIsDeleting(slot);
+            const response = await fetch('/api/register/session-image', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slot }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setImagesBySlot(prev => ({
+                    ...prev,
+                    [slot]: null,
+                }));
+                setMessage({ type: 'success', text: 'Image removed successfully!' });
+                setTimeout(() => setMessage(null), 3000);
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Failed to remove image' });
+                setTimeout(() => setMessage(null), 5000);
+            }
+        } catch (error) {
+            console.error("Error removing image:", error);
+            setMessage({ type: 'error', text: 'Error removing image. Please try again.' });
+            setTimeout(() => setMessage(null), 5000);
+        } finally {
+            setIsDeleting(null);
         }
     };
 
@@ -278,56 +340,90 @@ export default function Registration() {
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-0">
 
-            {/* Registration Schedule Title */}
+            {/* Schedule Images Title */}
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
-                <h1 className="text-base font-semibold text-[var(--foreground)]">Recreational Class Schedule</h1>
-                <p className="text-sm text-[var(--muted)] mt-2">Edit the recreational class schedule for the gym.</p>
-                </div>
-                <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setImageModalOpen(true);
-                            if (registrationImage) {
-                                setSessionTitle(registrationImage.title || placeholderSession);
-                            }
-                        }}
-                        className="block rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
-                    >
-                        Change Schedule
-                    </button>
+                <h1 className="text-base font-semibold text-[var(--foreground)]">Schedule Images</h1>
+                <p className="text-sm text-[var(--muted)] mt-2">Manage schedule images for the registration page. Upload up to 3 images: Current Session, Next Session, and Camp.</p>
                 </div>
             </div>
 
-            {/* Registration Schedule Content */}
+            {/* Message Display */}
+            {message && (
+                <div className={`mt-4 rounded-md p-4 ${
+                    message.type === 'success'
+                        ? 'bg-green-50 text-green-800 border border-green-200'
+                        : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                    <p className="text-sm font-medium">{message.text}</p>
+                </div>
+            )}
+
+            {/* Schedule Image Slots */}
             {isLoading ? (
                 <div className="flex mt-10 p-6 text-sm text-[var(--muted)] items-center justify-center">Loading...</div>
             ) : (
-                <>
-                    {/* Registration Schedule Image */}
-                    {registrationImage?.imageUrl ? (
-                        <div className="mt-6 flex justify-center">
-                            <Image
-                                key={registrationImage.imageUrl}
-                                src={registrationImage.imageUrl}
-                                alt={registrationImage.title || "Registration Schedule"}
-                                width={1200}
-                                height={800}
-                                className="w-full h-auto max-w-4xl rounded-lg border border-[var(--border)]"
-                            />
-                        </div>
-                    ) : (
-                        <div className="mt-6 p-6 text-sm text-[var(--muted)] text-center border border-[var(--border)] rounded-lg">
-                            No recreational class schedule image uploaded. Click &quot;Change Schedule&quot; to upload one.
-                        </div>
-                    )}
-                </>
+                <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {SLOT_CONFIG.map(({ key, label }) => {
+                        const slotImage = imagesBySlot[key];
+                        return (
+                            <div key={key} className="rounded-lg border border-[var(--border)] bg-[var(--card-bg)] p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-sm font-semibold text-[var(--foreground)]">{label}</h3>
+                                </div>
+                                {slotImage?.imageUrl ? (
+                                    <div className="relative">
+                                        <Image
+                                            key={slotImage.imageUrl}
+                                            src={slotImage.imageUrl}
+                                            alt={slotImage.title || label}
+                                            width={600}
+                                            height={400}
+                                            className="w-full h-auto rounded-md border border-[var(--border)]"
+                                        />
+                                        <p className="mt-2 text-xs text-[var(--muted)] truncate">{slotImage.title}</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-center h-40 bg-[var(--border)] rounded-md">
+                                        <span className="text-sm text-[var(--muted)]">No image</span>
+                                    </div>
+                                )}
+                                <div className="mt-3 flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setActiveSlot(key);
+                                            setImageModalOpen(true);
+                                            if (slotImage) {
+                                                setSessionTitle(slotImage.title || '');
+                                            } else {
+                                                setSessionTitle('');
+                                            }
+                                        }}
+                                        className="flex-1 rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                                    >
+                                        {slotImage ? 'Change' : 'Upload'}
+                                    </button>
+                                    {slotImage && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveImage(key)}
+                                            disabled={isDeleting === key}
+                                            className="rounded-md bg-red-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isDeleting === key ? '...' : 'Remove'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             )}
 
             {/* Image Upload Modal */}
-            {imageModalOpen && (
-                <Modal title="Change Recreational Class Schedule" setModalEnable={setImageModalOpen}>
+            {imageModalOpen && activeSlot && (
+                <Modal title={`${imagesBySlot[activeSlot] ? 'Change' : 'Upload'} Schedule — ${SLOT_CONFIG.find(s => s.key === activeSlot)?.label}`} setModalEnable={setImageModalOpen}>
                     <div>
                         {formErrors.length > 0 && (
                             <div className="mb-4">
@@ -339,7 +435,7 @@ export default function Registration() {
                                 {/* Title Input */}
                                 <div>
                                     <label htmlFor="session-title" className="block text-sm/6 font-medium text-[var(--foreground)]">
-                                        Session
+                                        Title
                                     </label>
                                     <div className="mt-2">
                                         <input
@@ -369,10 +465,10 @@ export default function Registration() {
                                                 height={200}
                                                 className="h-32 w-auto rounded-md object-cover border border-[var(--border)]"
                                             />
-                                        ) : registrationImage?.imageUrl ? (
+                                        ) : imagesBySlot[activeSlot]?.imageUrl ? (
                                             <Image
-                                                key={registrationImage.imageUrl}
-                                                src={getImageUrlWithCacheBust(registrationImage.imageUrl) || registrationImage.imageUrl}
+                                                key={imagesBySlot[activeSlot]!.imageUrl!}
+                                                src={getImageUrlWithCacheBust(imagesBySlot[activeSlot]!.imageUrl) || imagesBySlot[activeSlot]!.imageUrl!}
                                                 alt="Current"
                                                 width={300}
                                                 height={200}
@@ -408,6 +504,7 @@ export default function Registration() {
                                     type="button"
                                     onClick={() => {
                                         setImageModalOpen(false);
+                                        setActiveSlot(null);
                                         setImageFile(null);
                                         setImagePreview(null);
                                         setFormErrors([]);
@@ -437,17 +534,6 @@ export default function Registration() {
                 <p className="text-sm text-[var(--muted)] mt-2">Edit the registration policies for the gym.</p>
                 </div>
             </div>
-
-            {/* Policies Message Display */}
-            {message && (
-                <div className={`mt-4 rounded-md p-4 ${
-                    message.type === 'success' 
-                        ? 'bg-green-50 text-green-800 border border-green-200' 
-                        : 'bg-red-50 text-red-800 border border-red-200'
-                }`}>
-                    <p className="text-sm font-medium">{message.text}</p>
-                </div>
-            )}
 
             {/* Policies Content */}
             {isLoading ? (
@@ -498,9 +584,9 @@ export default function Registration() {
                                 <td className="w-16 whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
                                   {(() => {
                                     const enabled = enabledStates[index] || false;
-                                    const isDeleting = deletingStates[index] || false;
+                                    const isDeletingPolicy = deletingStates[index] || false;
                                     const handleDeleteClick = () => {
-                                      if (isDeleting) return;
+                                      if (isDeletingPolicy) return;
                                       if (!enabled) {
                                         toggleEnabled(index);
                                       } else {
@@ -510,11 +596,11 @@ export default function Registration() {
                                     return (
                                       <button
                                         onClick={handleDeleteClick}
-                                        disabled={isDeleting}
-                                        className={`confirm-delete-button relative inline-flex p-1 items-center justify-center rounded-full ${isDeleting ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'hover:bg-red-600 cursor-pointer'}`}
+                                        disabled={isDeletingPolicy}
+                                        className={`confirm-delete-button relative inline-flex p-1 items-center justify-center rounded-full ${isDeletingPolicy ? 'bg-gray-400 cursor-not-allowed opacity-60' : enabled ? 'bg-red-600 hover:bg-red-500 cursor-pointer' : 'hover:bg-red-600 cursor-pointer'}`}
                                       >
                                         <span className="relative w-[60px] h-[20px] flex items-center justify-center">
-                                          {isDeleting ? (
+                                          {isDeletingPolicy ? (
                                             <span className="text-xs text-white font-semibold">...</span>
                                           ) : (
                                             <>

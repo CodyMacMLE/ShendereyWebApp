@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { registrationImage } from '@/lib/schema';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -52,19 +52,12 @@ async function uploadToS3(file: File, keyPrefix: string, fileTitle: string) {
 
 export async function GET() {
     try {
-        const registrationImages = await db.select().from(registrationImage).limit(1);
-        
-        if (registrationImages.length > 0) {
-            return NextResponse.json({
-                success: true,
-                body: registrationImages[0],
-            }, { status: 200 });
-        } else {
-            return NextResponse.json({
-                success: true,
-                body: null,
-            }, { status: 200 });
-        }
+        const registrationImages = await db.select().from(registrationImage);
+
+        return NextResponse.json({
+            success: true,
+            body: registrationImages,
+        }, { status: 200 });
     } catch (error) {
         console.error("Error in GET /api/register/session-image:", error);
         return NextResponse.json(
@@ -80,7 +73,8 @@ export async function POST(req: NextRequest) {
 
         const imageRaw = formData.get('image') as File;
         const title = formData.get('title') as string;
-        
+        const slot = formData.get('slot') as string;
+
         if (!(imageRaw instanceof File)) {
             return NextResponse.json(
                 { success: false, error: 'Image file is required' },
@@ -88,12 +82,19 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Upload image to S3 (this will replace existing file if it exists at the same key)
-        const imageUrl = await uploadToS3(imageRaw, 'registration', 'currentRegistration');
+        if (!slot) {
+            return NextResponse.json(
+                { success: false, error: 'Slot is required' },
+                { status: 400 }
+            );
+        }
 
-        // Check if a registration image already exists
-        const existingImages = await db.select().from(registrationImage).limit(1);
-        
+        // Upload image to S3 using slot as the file key
+        const imageUrl = await uploadToS3(imageRaw, 'registration', slot);
+
+        // Check if a registration image already exists for this slot
+        const existingImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, slot));
+
         let result;
         if (existingImages.length > 0) {
             // Update existing record
@@ -111,6 +112,7 @@ export async function POST(req: NextRequest) {
             [result] = await db.insert(registrationImage).values({
                 imageUrl,
                 title,
+                slot,
             }).returning();
         }
 
@@ -120,7 +122,53 @@ export async function POST(req: NextRequest) {
             imageUrl: imageUrl,
         }, { status: 200 });
     } catch (error) {
-        console.error("Error in POST /api/registerImage:", error);
+        console.error("Error in POST /api/register/session-image:", error);
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const { slot } = await req.json();
+
+        if (!slot) {
+            return NextResponse.json(
+                { success: false, error: 'Slot is required' },
+                { status: 400 }
+            );
+        }
+
+        // Find the existing record for this slot
+        const existingImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, slot));
+
+        if (existingImages.length === 0) {
+            return NextResponse.json(
+                { success: false, error: 'No image found for this slot' },
+                { status: 404 }
+            );
+        }
+
+        // Delete from S3
+        try {
+            await s3.send(new DeleteObjectCommand({
+                Bucket: BUCKET_NAME,
+                Key: `registration/${slot}`,
+            }));
+        } catch (error) {
+            console.error('S3 delete error (non-fatal):', error);
+        }
+
+        // Delete from DB
+        await db.delete(registrationImage).where(eq(registrationImage.id, existingImages[0].id));
+
+        return NextResponse.json({
+            success: true,
+        }, { status: 200 });
+    } catch (error) {
+        console.error("Error in DELETE /api/register/session-image:", error);
         return NextResponse.json(
             { success: false, error: error instanceof Error ? error.message : String(error) },
             { status: 500 }

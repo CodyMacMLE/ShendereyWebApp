@@ -317,7 +317,7 @@ export const getRegistrationPolicies = async () => {
     return policies;
 }
 
-export const getRegistrationImage = async () => {
-    const images = await db.select().from(registrationImage).limit(1);
-    return images.length > 0 ? images[0] : null;
-}   
+export const getRegistrationImages = async () => {
+    const images = await db.select().from(registrationImage);
+    return images;
+}
