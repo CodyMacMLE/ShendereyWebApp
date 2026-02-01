@@ -11,16 +11,18 @@ import React, { useState } from "react";
 const experienceLevel = [
   { id: 1, name: 'Recreational' },
   { id: 2, name: 'Pre-Competitive' },
-  { id: 3, name: 'Invitational' },
-  { id: 4, name: 'Provincial' },
-  { id: 5, name: 'National' },
+  { id: 3, name: 'Xcel' },
+  { id: 4, name: 'Compulsory' },
+  { id: 5, name: 'Provincial' },
+  { id: 6, name: 'National' },
 ]
 const tryoutPreference = [
   { id: 1, name: 'No Preference' },
   { id: 2, name: 'Pre-Competitive' },
-  { id: 3, name: 'Invitational' },
-  { id: 4, name: 'Provincial' },
-  { id: 5, name: 'National' },
+  { id: 3, name: 'Xcel' },
+  { id: 4, name: 'Compulsory' },
+  { id: 5, name: 'Provincial' },
+  { id: 6, name: 'National' },
 ]
 
 export default function TryoutForm() {

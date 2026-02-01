@@ -3,6 +3,7 @@ import Image from "next/image"
 
 const navigation = {
     About: [
+      { name: 'Contact', href: '/contact' },
       { name: 'Staff', href: '/staff' },
       { name: 'Facility', href: '/facility' },
       { name: 'Team', href: '/team' },

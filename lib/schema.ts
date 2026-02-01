@@ -238,3 +238,14 @@ export const registrationPolicies = pgTable('registration_policies', {
     createdAt: timestamp('createdAt').defaultNow(),
     updatedAt: timestamp('updatedAt').defaultNow(),
 })
+
+// PRODUCTS
+export const products = pgTable('products', {
+    id: serial('id').primaryKey(),
+    name: text('name'),
+    category: text('category'),
+    sizes: text('sizes'),
+    description: text('description'),
+    price: doublePrecision('price'),
+    productImgUrl: text('productImgUrl'),
+})

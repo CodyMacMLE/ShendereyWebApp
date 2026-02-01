@@ -1,8 +1,7 @@
 import Image from "next/image";
 
 import { EmploymentQuote } from "@/public/files/quotes"
-import { getCoaches, getJobs } from "@/lib/actions";
-import EmploymentTable from "@/components/UI/Tables/EmploymentTable/page";
+import { getCoaches } from "@/lib/actions";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -15,18 +14,6 @@ export default async function EmploymentPage() {
     const yearsServing = new Date().getFullYear() - 1984;
     const fetchedStaff = await getCoaches();
     const numEmployees = fetchedStaff.length;
-
-    const fetchedJobs = await getJobs();
-    const formattedJobs = fetchedJobs.map(job => ({
-      ...job,
-      position: job.position || '',
-      description: job.description || '',
-      requirements: job.requirements || '',
-      contract: job.contract || '',
-      isFeatured: job.isFeatured || false,
-      dateCreated: job.dateCreated || new Date(),
-      hours: job.hours || 0,
-    }));
 
     return (
         <div className="px-4 pb-5 sm:px-6 lg:px-8 pt-20 bg-white">
@@ -122,17 +109,48 @@ export default async function EmploymentPage() {
                 </div>
             </div>
 
-            {/* Current Job Postings */}
-            <div className="bg-white py-10 sm:py-32">
+            {/* How to Apply */}
+            <div className="bg-white py-10 sm:py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <h2 className="text-3xl sm:text-4xl text-balance font-semibold tracking-tight text-gray-900">
-                        Current Job Postings
-                    </h2>
-                    <EmploymentTable jobs={formattedJobs} />
+                    <div className="mx-auto max-w-3xl">
+                        <h2 className="text-3xl sm:text-4xl text-balance font-semibold tracking-tight text-gray-900 text-center">
+                            How to Apply
+                        </h2>
+                        <p className="mt-6 text-base/7 text-gray-600 text-center">
+                            We are always looking for passionate and dedicated individuals to join our team. If you are interested in a coaching or
+                            administrative position at Shenderey Gymnastics, please follow the steps below.
+                        </p>
+
+                        <div className="mt-10 space-y-8">
+                            <div className="rounded-2xl bg-gray-50 border border-gray-200 p-8">
+                                <h3 className="text-lg font-semibold text-gray-900">What to Include</h3>
+                                <ul className="mt-4 space-y-3 text-sm/6 text-gray-700 list-disc pl-5">
+                                    <li>Your resume or CV outlining relevant experience</li>
+                                    <li>A brief cover letter describing your interest in the position and availability</li>
+                                    <li>Any gymnastics coaching certifications (NCCP, First Aid, etc.)</li>
+                                    <li>References from previous coaching or related positions</li>
+                                </ul>
+                            </div>
+
+                            <div className="rounded-2xl bg-gray-50 border border-gray-200 p-8 text-center">
+                                <h3 className="text-lg font-semibold text-gray-900">Send Your Application</h3>
+                                <p className="mt-4 text-sm/6 text-gray-700">
+                                    Please email all application materials to:
+                                </p>
+                                <a
+                                    href="mailto:akcoach@gmail.ca"
+                                    className="mt-3 inline-block text-lg font-semibold text-[var(--primary)] hover:underline"
+                                >
+                                    akcoach@gmail.ca
+                                </a>
+                                <p className="mt-4 text-sm/6 text-gray-500">
+                                    We review applications on a rolling basis and will reach out if your qualifications match our current needs.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            
 
         </div>
     )

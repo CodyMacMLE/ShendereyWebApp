@@ -13,15 +13,15 @@ import {
   PopoverGroup,
   PopoverPanel,
 } from '@headlessui/react'
-import { ChevronDownIcon, } from '@heroicons/react/20/solid'
+import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import {
   Bars3Icon,
   BuildingOffice2Icon,
+  ChatBubbleBottomCenterTextIcon,
   ClipboardDocumentCheckIcon,
   ClipboardDocumentIcon,
   CurrencyDollarIcon,
   CursorArrowRaysIcon,
-  //BookOpenIcon,
   MegaphoneIcon,
   PlayCircleIcon,
   TrophyIcon,
@@ -32,7 +32,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { IoAmericanFootballOutline, IoMedalOutline, /* IoShirtOutline, */ } from 'react-icons/io5'
+import { IoAmericanFootballOutline, IoMedalOutline, IoShirtOutline } from 'react-icons/io5'
 import { LuGraduationCap, LuUserRoundSearch } from "react-icons/lu"
 
 // Define a type for the call-to-action items
@@ -43,6 +43,7 @@ interface CallToAction {
 }
 
 const about = [
+    { name: 'Contact Us', description: 'Get in contact with us', href: '/contact', icon: ChatBubbleBottomCenterTextIcon },
     { name: 'Staff', description: 'Get a better understanding of our staff', href: '/staff', icon: UsersIcon },
     { name: 'Facility', description: 'Check out our facility', href: '/facility', icon: BuildingOffice2Icon },
     { name: 'Team', description: 'Our current competitive team members', href: '/team', icon: UserGroupIcon },
@@ -57,7 +58,7 @@ const programs = [
 ]
 
 const community = [
-    //{ name: 'Merchandise', description: 'Join our community by wearing our merch', href: '/merchandise', icon: IoShirtOutline },
+    { name: 'Store', description: 'Browse our gymnastics merchandise', href: '/store', icon: IoShirtOutline },
     { name: 'Resources', description: 'Documents and other info can be found here', href: '/resources', icon: ClipboardDocumentIcon },
     { name: 'Sponsors', description: 'Check out our wonderful sponsors helping our athletes', href: '/sponsors', icon: CurrencyDollarIcon },
     { name: 'Employment', description: 'Current job postings', href: '/employment', icon: MegaphoneIcon },
@@ -395,7 +396,7 @@ export default function Navbar() {
         {/* Register */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-3">
             {social.map((item) => (
-              <a key={item.name} href={item.href} target="_blank" className="text-gray-600 hover:text-gray-800">
+              <a key={item.name} href={item.href} target="_blank" className="text-gray-600 hover:text-[var(--primary)]">
                 <span className="sr-only">{item.name}</span>
                 <item.icon aria-hidden="true" className="size-6" />
               </a>
