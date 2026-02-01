@@ -16,6 +16,7 @@ import {
   CursorArrowRaysIcon,
   DocumentDuplicateIcon,
   HomeIcon,
+  MegaphoneIcon,
   PlayCircleIcon,
   UsersIcon,
   XMarkIcon
@@ -41,6 +42,7 @@ const navigation = [
   { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
   { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
   { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
+  { name: 'Announcement', href: '/admin/announcement', icon: MegaphoneIcon },
 ]
 
 function classNames(...classes: string[]) {

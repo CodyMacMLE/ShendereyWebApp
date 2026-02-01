@@ -109,11 +109,11 @@ const social = [
   },
 ]
 
-export default function Navbar() {
+export default function Navbar({ topOffset = 0 }: { topOffset?: number }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="bg-white fixed top-0 w-full z-50 shadow-md">
+    <header className="bg-white fixed w-full z-50 shadow-md" style={{ top: topOffset + 'px' }}>
 
     {/* Tablet/Desktop Nav */}
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8 h-[75px]">

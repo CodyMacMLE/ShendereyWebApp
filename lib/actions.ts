@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
-import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, resources, scores, sponsors, userImages, users, registrationPolicies, registrationImage, products } from "@/lib/schema";
+import { achievements, alumni, athletes, coaches, coachGroupLines, employment, gallery, groups, media, programs, prospects, resources, scores, sponsors, userImages, users, registrationPolicies, registrationImage, products, announcement } from "@/lib/schema";
+import { unstable_noStore as noStore } from "next/cache";
 import { asc, desc, eq, count, and } from "drizzle-orm";
 
 export const getSeniorStaff = async () => {
@@ -327,4 +328,10 @@ export const getRegistrationImages = async () => {
 export const getProducts = async () => {
     const allProducts = await db.select().from(products);
     return allProducts;
+}
+
+export const getActiveAnnouncement = async () => {
+    noStore();
+    const result = await db.select().from(announcement).where(eq(announcement.isActive, true)).limit(1);
+    return result[0] || null;
 }

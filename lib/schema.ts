@@ -249,3 +249,13 @@ export const products = pgTable('products', {
     price: doublePrecision('price'),
     productImgUrl: text('productImgUrl'),
 })
+
+// ANNOUNCEMENT
+export const announcement = pgTable('announcement', {
+    id: serial('id').primaryKey(),
+    message: text('message').notNull(),
+    linkUrl: text('linkUrl'),
+    isActive: boolean('isActive').default(false),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow(),
+})
