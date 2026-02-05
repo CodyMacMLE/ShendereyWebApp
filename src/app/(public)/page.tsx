@@ -1,4 +1,4 @@
-import { EnvelopeOpenIcon, GlobeAltIcon, GlobeAmericasIcon, SparklesIcon, StarIcon } from '@heroicons/react/20/solid'
+import { AcademicCapIcon, EnvelopeOpenIcon, GlobeAltIcon, GlobeAmericasIcon, SparklesIcon, StarIcon } from '@heroicons/react/20/solid'
 import { BuildingOffice2Icon, ClockIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 
@@ -23,8 +23,17 @@ const programs = [
     }
   },
   {
+    name: 'Development',
+    description: 'The development program is designed for gymnasts looking to bridge the gap between recreational and competitive gymnastics. Athletes in this program will focus on building foundational skills, strength, and confidence in a supportive environment. The program emphasizes skill progression, proper technique, and physical preparation to help gymnasts reach the next level of their gymnastics journey.',
+    icon: AcademicCapIcon,
+    link: {
+      text: 'Learn More',
+      href: '/competitive'
+    }
+  },
+  {
     name: 'Pre-Competitive',
-    description: "These young female athletes aged 5 to 8 years of age that have shown a desire to learn the sport of gymnastics. The program features a fun, safe, and caring environment and focuses on developing flexibility, strength, balance, endurance, and technical form. Gymnasts in Shenderey’s Pre-Competitive Program may progress into the Invitational, Provincial, or National Program.",
+    description: "These young female athletes aged 5 to 8 years of age that have shown a desire to learn the sport of gymnastics. The program features a fun, safe, and caring environment and focuses on developing flexibility, strength, balance, endurance, and technical form. Gymnasts in Shenderey's Pre-Competitive Program may progress into the Xcel, Compulsory, Provincial, or National Program.",
     icon: StarIcon,
     link: {
       text: 'Learn More',
@@ -32,9 +41,18 @@ const programs = [
     }
   },
   {
-    name: 'Invitational',
-    description: 'The invitational program is an alternate to the provincial program. In many other sports, athletes can start competing in games and tournaments very quickly after they begin. However, with gymnastics, this is not the reality. Athletes in gymnastics will train for several years before meeting the necessary requirements to be able to compete. The invitational program bridges the gap and allows gymnasts to start competing sooner, by modifying the skill requirements at the entry level.',
+    name: 'Xcel',
+    description: 'The Xcel program is an alternate to the provincial program. In many other sports, athletes can start competing in games and tournaments very quickly after they begin. However, with gymnastics, this is not the reality. Athletes in gymnastics will train for several years before meeting the necessary requirements to be able to compete. The Xcel program bridges the gap and allows gymnasts to start competing sooner, by modifying the skill requirements at the entry level.',
     icon: EnvelopeOpenIcon,
+    link: {
+      text: 'Learn More',
+      href: '/competitive'
+    }
+  },
+  {
+    name: 'Compulsory',
+    description: 'The compulsory program focuses on mastering standardized routines set by Gymnastics Canada. Athletes learn and perfect specific required elements on each apparatus, building a strong technical foundation. This program develops discipline, consistency, and attention to detail as gymnasts work toward meeting the precise standards needed to advance through the competitive levels.',
+    icon: GlobeAmericasIcon,
     link: {
       text: 'Learn More',
       href: '/competitive'

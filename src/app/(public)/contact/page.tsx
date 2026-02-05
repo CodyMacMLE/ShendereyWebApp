@@ -1,6 +1,6 @@
-import { competitiveContact, recreationalContact, contactDetails } from "@/public/files/contactDetails";
+import { competitiveContact, contactDetails, recreationalContact } from "@/public/files/contactDetails";
+import { ClockIcon, EnvelopeIcon, MapPinIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import { Metadata } from "next";
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 export const metadata: Metadata = {
     title: 'Contact Us',
@@ -32,9 +32,9 @@ export default function Contact() {
                         {/* Competitive */}
                         <div className="rounded-2xl bg-gray-50 border border-gray-200 p-8">
                             <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
-                                {competitiveContact.name}
+                                Competitive Program
                             </h2>
-                            <p className="mt-1 text-sm font-medium text-[var(--primary)]">{competitiveContact.program} Program</p>
+                            <p className="mt-1 text-sm font-medium text-[var(--primary)]">Contact Us Here</p>
 
                             <dl className="mt-8 space-y-6">
                                 <div className="flex gap-x-4">
@@ -72,9 +72,9 @@ export default function Contact() {
                         {/* Recreational */}
                         <div className="rounded-2xl bg-gray-50 border border-gray-200 p-8">
                             <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
-                                {recreationalContact.name}
+                                Recreational Program
                             </h2>
-                            <p className="mt-1 text-sm font-medium text-[var(--primary)]">{recreationalContact.program} Program</p>
+                            <p className="mt-1 text-sm font-medium text-[var(--primary)]">Contact Us Here</p>
 
                             <dl className="mt-8 space-y-6">
                                 <div className="flex gap-x-4">

@@ -38,7 +38,6 @@ export const contactDetails = {
 }
 
 export const competitiveContact = {
-    name: 'Shenderey Gymnastics Institute (SGI)',
     program: 'Competitive',
     email: 'shendereycomp@gmail.com',
     telephone: '+1 (905) 895-6838',
@@ -49,7 +48,6 @@ export const competitiveContact = {
 }
 
 export const recreationalContact = {
-    name: 'Shenderey Gymnastics Centre (SGC)',
     program: 'Recreational',
     email: 'sgcrecreational@gmail.com',
     telephone: '+1 (905) 895-4194',
