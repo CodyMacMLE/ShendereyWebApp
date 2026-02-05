@@ -210,7 +210,7 @@ export default function Registration() {
         }
     };
 
-    // Handle image file selection
+    // Handle file selection (image or PDF)
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -219,6 +219,7 @@ export default function Registration() {
                 return;
             }
             let processedFile = file;
+            // Only compress image files, not PDFs
             if (file.type.startsWith('image/')) {
                 try {
                     processedFile = await imageCompression(file, {
@@ -237,12 +238,20 @@ export default function Registration() {
         }
     };
 
+    // Check if a URL or file is a PDF
+    const isPdf = (url: string | null | undefined) => {
+        if (!url) return false;
+        // Strip query params before checking extension
+        const clean = url.split('?')[0];
+        return clean.toLowerCase().endsWith('.pdf');
+    };
+
     // Handle image upload
     const handleImageUpload = async () => {
         const errors: { msg: string }[] = [];
 
         if (!imageFile) {
-            errors.push({ msg: 'Image file is required' });
+            errors.push({ msg: 'File is required' });
         }
         if (!sessionTitle.trim()) {
             errors.push({ msg: 'Title is required' });
@@ -381,7 +390,7 @@ export default function Registration() {
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
                 <h1 className="text-base font-semibold text-[var(--foreground)]">Schedule Images</h1>
-                <p className="text-sm text-[var(--muted)] mt-2">Manage schedule images for the registration page. Upload up to 3 images: Current Session, Next Session, and Camp.</p>
+                <p className="text-sm text-[var(--muted)] mt-2">Manage schedule files for the registration page. Upload up to 3 images or PDFs: Current Session, Next Session, and Camp.</p>
                 </div>
             </div>
 
@@ -410,14 +419,23 @@ export default function Registration() {
                                 </div>
                                 {slotImage?.imageUrl ? (
                                     <div className="relative">
-                                        <Image
-                                            key={slotImage.imageUrl}
-                                            src={slotImage.imageUrl}
-                                            alt={slotImage.title || label}
-                                            width={600}
-                                            height={400}
-                                            className="w-full h-auto rounded-md border border-[var(--border)]"
-                                        />
+                                        {isPdf(slotImage.imageUrl) ? (
+                                            <div className="flex items-center justify-center h-40 bg-red-50 rounded-md border border-[var(--border)]">
+                                                <div className="text-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                                                    <p className="mt-1 text-xs font-medium text-red-600">PDF</p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <Image
+                                                key={slotImage.imageUrl}
+                                                src={slotImage.imageUrl}
+                                                alt={slotImage.title || label}
+                                                width={600}
+                                                height={400}
+                                                className="w-full h-auto rounded-md border border-[var(--border)]"
+                                            />
+                                        )}
                                         <p className="mt-2 text-xs text-[var(--muted)] truncate">{slotImage.title}</p>
                                     </div>
                                 ) : (
@@ -502,35 +520,53 @@ export default function Registration() {
                                 {/* Image Input */}
                                 <div>
                                     <label htmlFor="schedule-image" className="block text-sm/6 font-medium text-[var(--foreground)]">
-                                        Image
+                                        File
                                     </label>
                                     <div className="mt-2 flex items-center gap-x-3">
                                         {imagePreview ? (
-                                            <Image
-                                                key={imagePreview}
-                                                src={imagePreview}
-                                                alt="Preview"
-                                                width={300}
-                                                height={200}
-                                                className="h-32 w-auto rounded-md object-cover border border-[var(--border)]"
-                                            />
+                                            imageFile?.type === 'application/pdf' ? (
+                                                <div className="flex items-center justify-center h-32 w-48 bg-red-50 rounded-md border border-[var(--border)]">
+                                                    <div className="text-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                                                        <p className="mt-1 text-xs font-medium text-red-600">{imageFile.name}</p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <Image
+                                                    key={imagePreview}
+                                                    src={imagePreview}
+                                                    alt="Preview"
+                                                    width={300}
+                                                    height={200}
+                                                    className="h-32 w-auto rounded-md object-cover border border-[var(--border)]"
+                                                />
+                                            )
                                         ) : imagesBySlot[activeSlot]?.imageUrl ? (
-                                            <Image
-                                                key={imagesBySlot[activeSlot]!.imageUrl!}
-                                                src={getImageUrlWithCacheBust(imagesBySlot[activeSlot]!.imageUrl) || imagesBySlot[activeSlot]!.imageUrl!}
-                                                alt="Current"
-                                                width={300}
-                                                height={200}
-                                                className="h-32 w-auto rounded-md object-cover border border-[var(--border)]"
-                                            />
+                                            isPdf(imagesBySlot[activeSlot]!.imageUrl) ? (
+                                                <div className="flex items-center justify-center h-32 w-48 bg-red-50 rounded-md border border-[var(--border)]">
+                                                    <div className="text-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                                                        <p className="mt-1 text-xs font-medium text-red-600">PDF</p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <Image
+                                                    key={imagesBySlot[activeSlot]!.imageUrl!}
+                                                    src={getImageUrlWithCacheBust(imagesBySlot[activeSlot]!.imageUrl) || imagesBySlot[activeSlot]!.imageUrl!}
+                                                    alt="Current"
+                                                    width={300}
+                                                    height={200}
+                                                    className="h-32 w-auto rounded-md object-cover border border-[var(--border)]"
+                                                />
+                                            )
                                         ) : (
                                             <div className="flex items-center justify-center h-32 w-48 bg-[var(--border)] rounded-md">
-                                                <span className="text-sm text-[var(--muted)]">No image</span>
+                                                <span className="text-sm text-[var(--muted)]">No file</span>
                                             </div>
                                         )}
                                         <input
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/*,.pdf"
                                             className="hidden"
                                             id="schedule-image"
                                             onChange={handleImageChange}
@@ -539,11 +575,11 @@ export default function Registration() {
                                             htmlFor="schedule-image"
                                             className="cursor-pointer rounded-md bg-[var(--background)] px-2.5 py-1.5 text-sm font-bold text-[var(--foreground)] shadow-sm ring-1 ring-inset ring-[var(--muted)] hover:bg-[var(--primary)] hover:ring-[var(--primary-hover)]"
                                         >
-                                            {imageFile ? 'Change' : 'Select Image'}
+                                            {imageFile ? 'Change' : 'Select File'}
                                         </label>
                                     </div>
                                     <p className="mt-2 text-sm text-[var(--muted)]">
-                                        Image. 100MB max.
+                                        Image or PDF. 100MB max.
                                     </p>
                                 </div>
                             </div>

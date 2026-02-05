@@ -29,12 +29,26 @@ if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
 const s3 = new S3Client(s3Config);
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
+// Extract S3 key from a full S3 URL
+function getS3KeyFromUrl(url: string): string | null {
+    try {
+        const urlObj = new URL(url);
+        // Key is the path without the leading slash
+        return urlObj.pathname.slice(1);
+    } catch {
+        return null;
+    }
+}
+
 // Upload to S3
 async function uploadToS3(file: File, keyPrefix: string, fileTitle: string) {
     try {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const key = `${keyPrefix}/${fileTitle}`;
+
+        // Determine file extension
+        const ext = file.name.split('.').pop()?.toLowerCase() || (file.type === 'application/pdf' ? 'pdf' : 'jpg');
+        const key = `${keyPrefix}/${fileTitle}.${ext}`;
 
         await s3.send(new PutObjectCommand({
         Bucket: BUCKET_NAME,
@@ -89,11 +103,23 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Upload image to S3 using slot as the file key
-        const imageUrl = await uploadToS3(imageRaw, 'registration', slot);
-
         // Check if a registration image already exists for this slot
         const existingImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, slot));
+
+        // Delete old S3 object if replacing (key may change due to different file extension)
+        if (existingImages.length > 0 && existingImages[0].imageUrl) {
+            const oldKey = getS3KeyFromUrl(existingImages[0].imageUrl);
+            if (oldKey) {
+                try {
+                    await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldKey }));
+                } catch (error) {
+                    console.error('S3 delete old file error (non-fatal):', error);
+                }
+            }
+        }
+
+        // Upload file to S3 using slot as the file key
+        const imageUrl = await uploadToS3(imageRaw, 'registration', slot);
 
         let result;
         if (existingImages.length > 0) {
@@ -155,13 +181,15 @@ export async function PATCH(req: NextRequest) {
         const currentImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, 'current'));
 
         if (currentImages.length > 0) {
-            try {
-                await s3.send(new DeleteObjectCommand({
-                    Bucket: BUCKET_NAME,
-                    Key: `registration/current`,
-                }));
-            } catch (error) {
-                console.error('S3 delete error (non-fatal):', error);
+            if (currentImages[0].imageUrl) {
+                const oldKey = getS3KeyFromUrl(currentImages[0].imageUrl);
+                if (oldKey) {
+                    try {
+                        await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldKey }));
+                    } catch (error) {
+                        console.error('S3 delete error (non-fatal):', error);
+                    }
+                }
             }
             await db.delete(registrationImage).where(eq(registrationImage.id, currentImages[0].id));
         }
@@ -210,13 +238,15 @@ export async function DELETE(req: NextRequest) {
         }
 
         // Delete from S3
-        try {
-            await s3.send(new DeleteObjectCommand({
-                Bucket: BUCKET_NAME,
-                Key: `registration/${slot}`,
-            }));
-        } catch (error) {
-            console.error('S3 delete error (non-fatal):', error);
+        if (existingImages[0].imageUrl) {
+            const s3Key = getS3KeyFromUrl(existingImages[0].imageUrl);
+            if (s3Key) {
+                try {
+                    await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: s3Key }));
+                } catch (error) {
+                    console.error('S3 delete error (non-fatal):', error);
+                }
+            }
         }
 
         // Delete from DB

@@ -67,27 +67,50 @@ export default async function RegistrationLayout() {
             </div>
 
             {/* Schedule Images */}
-            {visibleImages.map((img) => (
-                <div key={img.id}>
-                    {/* Schedule Title */}
-                    <div className="mx-auto max-w-2xl lg:mx-0 mt-10">
-                      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900 sm:text-2xl">{img.title || 'Schedule'}</h2>
-                    </div>
+            {visibleImages.map((img) => {
+                const url = img.imageUrl!;
+                const isPdf = url.split('?')[0].toLowerCase().endsWith('.pdf');
+                return (
+                    <div key={img.id}>
+                        {/* Schedule Title */}
+                        <div className="mx-auto max-w-2xl lg:mx-0 mt-10">
+                          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900 sm:text-2xl">{img.title || 'Schedule'}</h2>
+                        </div>
 
-                    {/* Schedule Image */}
-                    <div className="mt-6 flex justify-center">
-                        <Image
-                            src={img.imageUrl!}
-                            alt={img.title || 'Schedule'}
-                            width={1200}
-                            height={800}
-                            className="w-full h-auto max-w-4xl rounded-lg border border-[var(--border)]"
-                            loading="lazy"
-                            quality={85}
-                        />
+                        {/* Schedule File */}
+                        <div className="mt-6 flex justify-center">
+                            {isPdf ? (
+                                <div className="w-full max-w-4xl">
+                                    <iframe
+                                        src={url}
+                                        title={img.title || 'Schedule'}
+                                        className="w-full h-[80vh] rounded-lg border border-[var(--border)]"
+                                        loading="lazy"
+                                    />
+                                    <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-3 inline-block text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]"
+                                    >
+                                        Open PDF in new tab
+                                    </a>
+                                </div>
+                            ) : (
+                                <Image
+                                    src={url}
+                                    alt={img.title || 'Schedule'}
+                                    width={1200}
+                                    height={800}
+                                    className="w-full h-auto max-w-4xl rounded-lg border border-[var(--border)]"
+                                    loading="lazy"
+                                    quality={85}
+                                />
+                            )}
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
 
             {/* Policies Title */}
             <div className="mt-16 sm:flex sm:items-center">
