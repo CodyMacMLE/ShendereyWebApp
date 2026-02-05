@@ -141,7 +141,7 @@ export default async function EmploymentPage() {
                                     href="mailto:akcoach@gmail.ca"
                                     className="mt-3 inline-block text-lg font-semibold text-[var(--primary)] hover:underline"
                                 >
-                                    akcoach@gmail.ca
+                                    akcoach@gmail.com
                                 </a>
                                 <p className="mt-4 text-sm/6 text-gray-500">
                                     We review applications on a rolling basis and will reach out if your qualifications match our current needs.
