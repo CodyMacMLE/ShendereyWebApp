@@ -15,6 +15,10 @@ export const contactDetails = {
         time: '1:00-8:30pm',
       },
       {
+        day: 'Wednesday',
+        time: '1:00-8:30pm',
+      },
+      {
         day: 'Thursday',
         time: '12:00-8:30pm',
       },
@@ -25,6 +29,10 @@ export const contactDetails = {
       {
         day: 'Saturday',
         time: '9:00-5:00pm',
+      },
+      {
+        day: 'Sunday',
+        time: 'CLOSED',
       },
     ]
 }
