@@ -260,7 +260,7 @@ export default async function Home() {
               Our Team
             </h2>
             <p className="mt-6 text-lg/8 text-gray-600 text-left">
-              All SGI coaches are nationally certified. They are here to assist each gymnast to reach her maximum potential, and they recognize that each child is ultimately responsible for her own success,
+              All Shenderey Gymnastics coaches are nationally certified. They are here to assist each gymnast to reach her maximum potential, and they recognize that each child is ultimately responsible for her own success,
               involvement, and progress. Our coaches are dedicated and passionate about providing top quality training in a technically sound and safe manner for all of our athletes.
             </p>
           </div>
