@@ -1,21 +1,21 @@
-import Image from "next/image";
+import SessionCarousel from "@/components/UI/SessionCarousel/SessionCarousel";
+import { getRegistrationImages, getRegistrationPolicies } from "@/lib/actions";
 import Link from "next/link";
-import { getRegistrationPolicies, getRegistrationImages } from "@/lib/actions";
 
 export default async function RegistrationLayout() {
     const policies = await getRegistrationPolicies();
     const registrationImages = await getRegistrationImages();
 
-    // Filter to only images that have a slot and imageUrl
-    const visibleImages = registrationImages.filter(img => img.slot && img.imageUrl);
+    // Separate into session images and camp images.
+    // Supports legacy slot values ('current', 'next') alongside the new 'session' value.
+    const sessionImages = registrationImages
+        .filter(img => img.imageUrl && (img.slot === 'session' || img.slot === 'current' || img.slot === 'next'))
+        .sort((a, b) => a.id - b.id)
+        .map(img => ({ id: img.id, imageUrl: img.imageUrl!, title: img.title ?? null, slot: img.slot ?? null }));
 
-    // Sort in a consistent order: current, next, camp
-    const slotOrder = ['current', 'next', 'camp'];
-    visibleImages.sort((a, b) => {
-        const aIndex = slotOrder.indexOf(a.slot!);
-        const bIndex = slotOrder.indexOf(b.slot!);
-        return aIndex - bIndex;
-    });
+    const campImages = registrationImages
+        .filter(img => img.imageUrl && img.slot === 'camp')
+        .map(img => ({ id: img.id, imageUrl: img.imageUrl!, title: img.title ?? null, slot: img.slot ?? null }));
 
 
     return (
@@ -66,51 +66,15 @@ export default async function RegistrationLayout() {
               </div>
             </div>
 
-            {/* Schedule Images */}
-            {visibleImages.map((img) => {
-                const url = img.imageUrl!;
-                const isPdf = url.split('?')[0].toLowerCase().endsWith('.pdf');
-                return (
-                    <div key={img.id}>
-                        {/* Schedule Title */}
-                        <div className="mx-auto max-w-2xl lg:mx-0 mt-10">
-                          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900 sm:text-2xl">{img.title || 'Schedule'}</h2>
-                        </div>
+            {/* Recreational Sessions Carousel */}
+            {sessionImages.length > 0 && (
+                <SessionCarousel images={sessionImages} title="Recreational Sessions" />
+            )}
 
-                        {/* Schedule File */}
-                        <div className="mt-6 flex justify-center">
-                            {isPdf ? (
-                                <div className="w-full max-w-4xl">
-                                    <iframe
-                                        src={url}
-                                        title={img.title || 'Schedule'}
-                                        className="w-full h-[80vh] rounded-lg border border-[var(--border)]"
-                                        loading="lazy"
-                                    />
-                                    <a
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="mt-3 inline-block text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]"
-                                    >
-                                        Open PDF in new tab
-                                    </a>
-                                </div>
-                            ) : (
-                                <Image
-                                    src={url}
-                                    alt={img.title || 'Schedule'}
-                                    width={1200}
-                                    height={800}
-                                    className="w-full h-auto max-w-4xl rounded-lg border border-[var(--border)]"
-                                    loading="lazy"
-                                    quality={85}
-                                />
-                            )}
-                        </div>
-                    </div>
-                );
-            })}
+            {/* Camps Carousel – only shown when camp images exist */}
+            {campImages.length > 0 && (
+                <SessionCarousel images={campImages} title="Camps" />
+            )}
 
             {/* Policies Title */}
             <div className="mt-16 sm:flex sm:items-center">

@@ -18,7 +18,6 @@ const s3Config: { region: string; credentials?: { accessKeyId: string; secretAcc
     region: process.env.AWS_REGION,
 };
 
-// Only add explicit credentials if both are provided
 if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
     s3Config.credentials = {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -33,28 +32,23 @@ const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 function getS3KeyFromUrl(url: string): string | null {
     try {
         const urlObj = new URL(url);
-        // Key is the path without the leading slash
         return urlObj.pathname.slice(1);
     } catch {
         return null;
     }
 }
 
-// Upload to S3
-async function uploadToS3(file: File, keyPrefix: string, fileTitle: string) {
+// Upload a file to S3 using a fully specified key
+async function uploadToS3(file: File, key: string): Promise<string> {
     try {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Determine file extension
-        const ext = file.name.split('.').pop()?.toLowerCase() || (file.type === 'application/pdf' ? 'pdf' : 'jpg');
-        const key = `${keyPrefix}/${fileTitle}.${ext}`;
-
         await s3.send(new PutObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: key,
-        Body: buffer,
-        ContentType: file.type,
+            Bucket: BUCKET_NAME,
+            Key: key,
+            Body: buffer,
+            ContentType: file.type,
         }));
 
         return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
@@ -103,49 +97,23 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Check if a registration image already exists for this slot
-        const existingImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, slot));
+        // Build a unique S3 key per upload so multiple files can share the same slot
+        const ext = imageRaw.name.split('.').pop()?.toLowerCase() || (imageRaw.type === 'application/pdf' ? 'pdf' : 'jpg');
+        const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const key = `registration/${slot}-${uniqueSuffix}.${ext}`;
 
-        // Delete old S3 object if replacing (key may change due to different file extension)
-        if (existingImages.length > 0 && existingImages[0].imageUrl) {
-            const oldKey = getS3KeyFromUrl(existingImages[0].imageUrl);
-            if (oldKey) {
-                try {
-                    await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldKey }));
-                } catch (error) {
-                    console.error('S3 delete old file error (non-fatal):', error);
-                }
-            }
-        }
+        const imageUrl = await uploadToS3(imageRaw, key);
 
-        // Upload file to S3 using slot as the file key
-        const imageUrl = await uploadToS3(imageRaw, 'registration', slot);
-
-        let result;
-        if (existingImages.length > 0) {
-            // Update existing record
-            const existingImage = existingImages[0];
-            [result] = await db.update(registrationImage)
-                .set({
-                    imageUrl,
-                    title,
-                    updatedAt: new Date(),
-                })
-                .where(eq(registrationImage.id, existingImage.id))
-                .returning();
-        } else {
-            // Insert new record
-            [result] = await db.insert(registrationImage).values({
-                imageUrl,
-                title,
-                slot,
-            }).returning();
-        }
+        // Always insert a new record — multiple images per slot are supported
+        const [result] = await db.insert(registrationImage).values({
+            imageUrl,
+            title,
+            slot,
+        }).returning();
 
         return NextResponse.json({
             success: true,
             body: result,
-            imageUrl: imageUrl,
         }, { status: 200 });
     } catch (error) {
         console.error("Error in POST /api/register/session-image:", error);
@@ -156,90 +124,29 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export async function PATCH(req: NextRequest) {
-    try {
-        const { action } = await req.json();
-
-        if (action !== 'promote-next') {
-            return NextResponse.json(
-                { success: false, error: 'Invalid action' },
-                { status: 400 }
-            );
-        }
-
-        // Find the next session image
-        const nextImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, 'next'));
-
-        if (nextImages.length === 0) {
-            return NextResponse.json(
-                { success: false, error: 'No next session image to promote' },
-                { status: 404 }
-            );
-        }
-
-        // Delete the current session image if it exists
-        const currentImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, 'current'));
-
-        if (currentImages.length > 0) {
-            if (currentImages[0].imageUrl) {
-                const oldKey = getS3KeyFromUrl(currentImages[0].imageUrl);
-                if (oldKey) {
-                    try {
-                        await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldKey }));
-                    } catch (error) {
-                        console.error('S3 delete error (non-fatal):', error);
-                    }
-                }
-            }
-            await db.delete(registrationImage).where(eq(registrationImage.id, currentImages[0].id));
-        }
-
-        // Update the next session record to become current
-        const [result] = await db.update(registrationImage)
-            .set({
-                slot: 'current',
-                updatedAt: new Date(),
-            })
-            .where(eq(registrationImage.id, nextImages[0].id))
-            .returning();
-
-        return NextResponse.json({
-            success: true,
-            body: result,
-        }, { status: 200 });
-    } catch (error) {
-        console.error("Error in PATCH /api/register/session-image:", error);
-        return NextResponse.json(
-            { success: false, error: error instanceof Error ? error.message : String(error) },
-            { status: 500 }
-        );
-    }
-}
-
 export async function DELETE(req: NextRequest) {
     try {
-        const { slot } = await req.json();
+        const { id } = await req.json();
 
-        if (!slot) {
+        if (!id) {
             return NextResponse.json(
-                { success: false, error: 'Slot is required' },
+                { success: false, error: 'ID is required' },
                 { status: 400 }
             );
         }
 
-        // Find the existing record for this slot
-        const existingImages = await db.select().from(registrationImage).where(eq(registrationImage.slot, slot));
+        const existing = await db.select().from(registrationImage).where(eq(registrationImage.id, id));
 
-        if (existingImages.length === 0) {
+        if (existing.length === 0) {
             return NextResponse.json(
-                { success: false, error: 'No image found for this slot' },
+                { success: false, error: 'No image found with this ID' },
                 { status: 404 }
             );
         }
 
         // Delete from S3
-        if (existingImages[0].imageUrl) {
-            const s3Key = getS3KeyFromUrl(existingImages[0].imageUrl);
+        if (existing[0].imageUrl) {
+            const s3Key = getS3KeyFromUrl(existing[0].imageUrl);
             if (s3Key) {
                 try {
                     await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: s3Key }));
@@ -250,11 +157,9 @@ export async function DELETE(req: NextRequest) {
         }
 
         // Delete from DB
-        await db.delete(registrationImage).where(eq(registrationImage.id, existingImages[0].id));
+        await db.delete(registrationImage).where(eq(registrationImage.id, id));
 
-        return NextResponse.json({
-            success: true,
-        }, { status: 200 });
+        return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
         console.error("Error in DELETE /api/register/session-image:", error);
         return NextResponse.json(
