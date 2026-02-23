@@ -31,9 +31,16 @@ import {
 } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { IoAmericanFootballOutline, IoMedalOutline, IoShirtOutline } from 'react-icons/io5'
 import { LuGraduationCap, LuUserRoundSearch } from "react-icons/lu"
+
+type AnnouncementData = {
+  id: number;
+  message: string;
+  linkUrl: string | null;
+  isActive: boolean | null;
+}
 
 // Define a type for the call-to-action items
 interface CallToAction {
@@ -109,11 +116,45 @@ const social = [
   },
 ]
 
-export default function Navbar({ topOffset = 0 }: { topOffset?: number }) {
+export default function Navbar({ topOffset = 0, announcement }: { topOffset?: number; announcement?: AnnouncementData | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [announcementScrolled, setAnnouncementScrolled] = useState(false)
+
+  useEffect(() => {
+    if (!announcement) return
+    const threshold = window.innerHeight / 2
+    const handleScroll = () => {
+      setAnnouncementScrolled(window.scrollY > threshold)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [announcement])
+
+  const bannerVisible = !!announcement && !mobileMenuOpen && !announcementScrolled
+  const navTop = bannerVisible ? topOffset : 0
 
   return (
-    <header className="bg-white fixed w-full z-50 shadow-md" style={{ top: topOffset + 'px' }}>
+    <>
+    {announcement && !mobileMenuOpen && (
+      <div
+        className="fixed top-0 w-full z-[60] bg-[var(--primary)] py-2.5 transition-transform duration-300 ease-in-out"
+        style={{ transform: announcementScrolled ? 'translateY(-100%)' : 'translateY(0)' }}
+      >
+        {announcement.linkUrl ? (
+          <Link href={announcement.linkUrl} className="block hover:opacity-90 transition-opacity">
+            <div className="flex items-center justify-center gap-2 px-4">
+              <p className="text-sm font-medium text-white truncate">{announcement.message}</p>
+              <span className="text-sm font-medium text-white/80 whitespace-nowrap">Learn more &rarr;</span>
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center justify-center gap-2 px-4">
+            <p className="text-sm font-medium text-white truncate">{announcement.message}</p>
+          </div>
+        )}
+      </div>
+    )}
+    <header className="bg-white fixed w-full z-50 shadow-md transition-[top] duration-300 ease-in-out" style={{ top: navTop + 'px' }}>
 
     {/* Tablet/Desktop Nav */}
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8 h-[75px]">
@@ -556,5 +597,6 @@ export default function Navbar({ topOffset = 0 }: { topOffset?: number }) {
         </DialogPanel>
       </Dialog>
     </header>
+    </>
   )
 }

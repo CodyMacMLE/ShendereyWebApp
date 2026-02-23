@@ -1,5 +1,4 @@
 import "@/app/globals.css";
-import AnnouncementBanner from "@/components/Layout/Public/AnnouncementBanner/page";
 import Footer from "@/components/Layout/Public/Footer/page";
 import Navbar from '@/components/Layout/Public/Navbar/page';
 import AdminButton from "@/components/UI/AdminButton/page";
@@ -19,8 +18,7 @@ export default async function PublicLayout({
 
   return (
     <section>
-      {hasBanner && <AnnouncementBanner announcement={activeAnnouncement} />}
-      <Navbar topOffset={hasBanner ? 40 : 0} />
+      <Navbar topOffset={hasBanner ? 40 : 0} announcement={activeAnnouncement} />
       <main className={`${hasBanner ? 'mt-[110px]' : 'mt-[70px]'} bg-white`}>
         {children}
       </main>
