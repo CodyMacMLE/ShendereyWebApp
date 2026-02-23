@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 type S3BucketData = {
@@ -29,41 +30,62 @@ type ProgramWithClassCount = {
     classCount: number
 }
 
-// Calculate estimated monthly storage costs
-const estimateMonthlyCosts = (s3Data: S3BucketData): number => {
-    // AWS S3 Standard Storage pricing: $0.023 per GB per month (as of 2024)
-    // Using a slightly higher rate to account for potential variations
-    const storageCostPerGB = 0.025 // $0.025 per GB per month
-    const lightsailCost = 3.50 // $3.50 per month
-    const s3RequestCost = 1.00 // $1.00 per month
-    const s3DataTransferCost = 8.00 // $8.00 per month
+type Coach = {
+    id: number
+    name: string
+    isSeniorStaff: boolean | null
+}
 
-    const USDtoCAD = 1.37;
+type User = {
+    id: number
+    isActive: boolean | null
+    isAthlete: boolean | null
+}
 
-    const totalCost = ((s3Data.bytes / (1024 ** 3)) * storageCostPerGB + lightsailCost + s3RequestCost + s3DataTransferCost) * USDtoCAD
-    
-    // Round up to the nearest 2 decimal places
-    return Math.ceil(totalCost * 100) / 100
+type RegistrationImage = {
+    id: number
+    imageUrl: string | null
+    title: string | null
+    slot: string | null
 }
 
 export default function AdminDashboard() {
+
+    // ── S3 ──
     const [s3Data, setS3Data] = useState<S3BucketData | null>(null)
     const [s3Loading, setS3Loading] = useState(true)
     const [s3Error, setS3Error] = useState<string | null>(null)
-    const [unreadTryouts, setUnreadTryouts] = useState<number>(0)
+
+    // ── Tryouts ──
+    const [unreadTryouts, setUnreadTryouts] = useState(0)
     const [tryoutsLoading, setTryoutsLoading] = useState(true)
-    const [estimatedCosts, setEstimatedCosts] = useState<number>(0)
-    const [costsLoading, setCostsLoading] = useState(true)
+
+    // ── Gallery ──
+    const [galleryTotal, setGalleryTotal] = useState(0)
+    const [galleryLoading, setGalleryLoading] = useState(true)
+
+    // ── Team ──
+    const [coachCount, setCoachCount] = useState(0)
+    const [seniorStaffCount, setSeniorStaffCount] = useState(0)
+    const [athleteCount, setAthleteCount] = useState(0)
+    const [teamLoading, setTeamLoading] = useState(true)
+
+    // ── Programs ──
     const [recreationalPrograms, setRecreationalPrograms] = useState<ProgramWithClassCount[]>([])
     const [programsLoading, setProgramsLoading] = useState(true)
-    const [scheduleTitle, setScheduleTitle] = useState<string | null>(null)
-    const [scheduleLoading, setScheduleLoading] = useState(true)
+
+    // ── Registration ──
+    const [sessionImages, setSessionImages] = useState<RegistrationImage[]>([])
+    const [campImages, setCampImages] = useState<RegistrationImage[]>([])
+    const [registrationLoading, setRegistrationLoading] = useState(true)
 
     useEffect(() => {
         fetchS3Data()
         fetchUnreadTryouts()
+        fetchGalleryStats()
+        fetchTeamStats()
         fetchRecreationalPrograms()
-        fetchScheduleTitle()
+        fetchRegistrationImages()
     }, [])
 
     const fetchS3Data = async () => {
@@ -72,39 +94,16 @@ export default function AdminDashboard() {
             setS3Error(null)
             const res = await fetch('/api/analytics/s3-bucket')
             if (!res.ok) {
-                let errorMessage = 'Failed to fetch S3 data'
-                try {
-                    const errorData = await res.json()
-                    errorMessage = errorData.error || errorData.message || errorMessage
-                    // Log the full error for debugging
-                    console.error('S3 API error response:', errorData)
-                } catch {
-                    errorMessage = res.statusText || errorMessage
-                }
-                setS3Error(errorMessage)
-                console.error('S3 data fetch failed:', errorMessage, 'Status:', res.status)
+                let msg = 'Failed to fetch S3 data'
+                try { msg = (await res.json()).error || msg } catch { msg = res.statusText || msg }
+                setS3Error(msg)
                 return
             }
             const data = await res.json()
-            console.log('S3 data received:', data) // Debug log
-            if (data.error) {
-                setS3Error(data.error)
-                // Still set costs to 0 if there's an error
-                setEstimatedCosts(0)
-                setCostsLoading(false)
-            } else {
-                setS3Data(data)
-                const costs = estimateMonthlyCosts(data)
-                setEstimatedCosts(costs)
-                setCostsLoading(false)
-            }
+            if (data.error) setS3Error(data.error)
+            else setS3Data(data)
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to load S3 data'
-            setS3Error(errorMessage)
-            console.error('Error fetching S3 data:', error)
-            // Set costs to 0 on error and stop loading
-            setEstimatedCosts(0)
-            setCostsLoading(false)
+            setS3Error(error instanceof Error ? error.message : 'Failed to load S3 data')
         } finally {
             setS3Loading(false)
         }
@@ -112,14 +111,10 @@ export default function AdminDashboard() {
 
     const fetchUnreadTryouts = async () => {
         try {
-            setTryoutsLoading(true)
             const res = await fetch('/api/tryouts')
-            if (!res.ok) {
-                throw new Error('Failed to fetch tryouts')
-            }
+            if (!res.ok) throw new Error('Failed to fetch tryouts')
             const data = await res.json()
-            const unreadCount = data.body.filter((tryout: Tryout) => !tryout.readStatus).length
-            setUnreadTryouts(unreadCount)
+            setUnreadTryouts(data.body.filter((t: Tryout) => !t.readStatus).length)
         } catch (error) {
             console.error(error)
         } finally {
@@ -127,44 +122,61 @@ export default function AdminDashboard() {
         }
     }
 
+    const fetchGalleryStats = async () => {
+        try {
+            const res = await fetch('/api/gallery?page=1&limit=1')
+            if (!res.ok) throw new Error('Failed to fetch gallery')
+            const data = await res.json()
+            setGalleryTotal(data.pagination?.totalCount || 0)
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setGalleryLoading(false)
+        }
+    }
+
+    const fetchTeamStats = async () => {
+        try {
+            const [coachRes, usersRes] = await Promise.all([
+                fetch('/api/coach'),
+                fetch('/api/users'),
+            ])
+            if (coachRes.ok) {
+                const coachData = await coachRes.json()
+                const list: Coach[] = coachData.body || []
+                setCoachCount(list.length)
+                setSeniorStaffCount(list.filter(c => c.isSeniorStaff).length)
+            }
+            if (usersRes.ok) {
+                const usersData = await usersRes.json()
+                const list: User[] = usersData.data || []
+                setAthleteCount(list.filter(u => u.isAthlete && u.isActive).length)
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setTeamLoading(false)
+        }
+    }
+
     const fetchRecreationalPrograms = async () => {
         try {
-            setProgramsLoading(true)
             const res = await fetch('/api/programs')
-            if (!res.ok) {
-                throw new Error('Failed to fetch programs')
-            }
+            if (!res.ok) throw new Error('Failed to fetch programs')
             const data = await res.json()
-            const recreationalProgramsList = data.body.filter((program: Program) => program.category === 'recreational')
-            
-            // Fetch class counts for each program
-            const programsWithCounts = await Promise.all(
-                recreationalProgramsList.map(async (program: Program) => {
+            const recPrograms = data.body.filter((p: Program) => p.category === 'recreational')
+            const withCounts = await Promise.all(
+                recPrograms.map(async (program: Program) => {
                     try {
                         const groupsRes = await fetch(`/api/groups/${program.id}`)
-                        if (groupsRes.ok) {
-                            const groupsData = await groupsRes.json()
-                            return {
-                                id: program.id,
-                                name: program.name,
-                                classCount: groupsData.body?.length || 0
-                            }
-                        }
-                        return {
-                            id: program.id,
-                            name: program.name,
-                            classCount: 0
-                        }
+                        const groupsData = groupsRes.ok ? await groupsRes.json() : { body: [] }
+                        return { id: program.id, name: program.name, classCount: groupsData.body?.length || 0 }
                     } catch {
-                        return {
-                            id: program.id,
-                            name: program.name,
-                            classCount: 0
-                        }
+                        return { id: program.id, name: program.name, classCount: 0 }
                     }
                 })
             )
-            setRecreationalPrograms(programsWithCounts)
+            setRecreationalPrograms(withCounts)
         } catch (error) {
             console.error(error)
         } finally {
@@ -172,27 +184,29 @@ export default function AdminDashboard() {
         }
     }
 
-    const fetchScheduleTitle = async () => {
+    const fetchRegistrationImages = async () => {
         try {
-            setScheduleLoading(true)
             const res = await fetch('/api/register/session-image')
-            if (!res.ok) {
-                throw new Error('Failed to fetch schedule title')
-            }
+            if (!res.ok) throw new Error('Failed to fetch registration images')
             const data = await res.json()
             if (data.success && data.body) {
-                setScheduleTitle(data.body.title)
-            } else {
-                setScheduleTitle(null)
+                const sessions: RegistrationImage[] = []
+                const camps: RegistrationImage[] = []
+                for (const img of data.body as RegistrationImage[]) {
+                    if (!img.imageUrl) continue
+                    if (img.slot === 'session' || img.slot === 'current' || img.slot === 'next') sessions.push(img)
+                    else if (img.slot === 'camp') camps.push(img)
+                }
+                setSessionImages(sessions.sort((a, b) => a.id - b.id))
+                setCampImages(camps.sort((a, b) => a.id - b.id))
             }
         } catch (error) {
             console.error(error)
         } finally {
-            setScheduleLoading(false)
+            setRegistrationLoading(false)
         }
     }
 
-    // Calculate progress bar percentages
     const maxSizeGB = 400
     const recommendationGB = 250
     const currentSizeGB = s3Data?.gb || 0
@@ -201,64 +215,53 @@ export default function AdminDashboard() {
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
-            {/* Title */}
+
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
                     <h1 className="text-base font-semibold text-[var(--foreground)]">Dashboard</h1>
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="mt-8">
+            <div className="mt-8 space-y-6">
+
+                {/* ══════════ Row 1 ══════════ */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {/* S3 Bucket Size Card */}
-                    <div className="col-span-1 bg-[var(--card-bg)] rounded-lg p-6 shadow-md">
-                        <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Media Storage</h2>
+
+                    {/* Media Storage */}
+                    <div className="bg-[var(--card-bg)] rounded-lg p-6 shadow-md">
+                        <h2 className="text-sm font-semibold text-[var(--foreground)] mb-4">Media Storage</h2>
                         {s3Loading ? (
                             <p className="text-sm text-[var(--muted)]">Loading...</p>
                         ) : s3Error || !s3Data ? (
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <p className="text-sm text-red-600 dark:text-red-400">Error loading data</p>
-                                {s3Error && (
-                                    <p className="text-xs text-[var(--muted)]">{s3Error}</p>
-                                )}
+                                {s3Error && <p className="text-xs text-[var(--muted)]">{s3Error}</p>}
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <div>
-                                    <div className="flex items-baseline justify-between mb-2">
-                                        <span className="text-3xl font-semibold tracking-tight text-[var(--foreground)]">
-                                            {s3Data.gb >= 1 
-                                                ? `${s3Data.gb.toFixed(2)} GB`
-                                                : s3Data.mb !== undefined
-                                                ? `${s3Data.mb.toFixed(2)} MB`
-                                                : `${(s3Data.bytes / 1024 ** 2).toFixed(2)} MB`
-                                            }
-                                        </span>
-                                        <span className="text-sm text-[var(--muted)]">/ {maxSizeGB} GB</span>
-                                    </div>
+                                <div className="flex items-baseline justify-between">
+                                    <span className="text-3xl font-semibold tracking-tight text-[var(--foreground)]">
+                                        {s3Data.gb >= 1
+                                            ? `${s3Data.gb.toFixed(2)} GB`
+                                            : s3Data.mb !== undefined
+                                            ? `${s3Data.mb.toFixed(2)} MB`
+                                            : `${(s3Data.bytes / 1024 ** 2).toFixed(2)} MB`}
+                                    </span>
+                                    <span className="text-sm text-[var(--muted)]">/ {maxSizeGB} GB</span>
                                 </div>
-                                
-                                {/* Progress Bar Container */}
-                                <div className="relative">
-                                    <div className="mb-1 flex items-center justify-between">
-                                        <span className="text-xs text-[var(--muted)]">Recommended max: {recommendationGB} GB</span>
-                                    </div>
-                                    <div className="relative w-full h-6 bg-[var(--progress-bg)] rounded-full overflow-hidden">
-                                        {/* Current usage bar */}
+                                <div>
+                                    <p className="mb-1 text-xs text-[var(--muted)]">Recommended max: {recommendationGB} GB</p>
+                                    <div className="relative w-full h-5 bg-[var(--progress-bg)] rounded-full overflow-hidden">
                                         <div
                                             className="h-full transition-all duration-300 bg-[var(--primary)]"
                                             style={{ width: `${Math.min(currentPercent, 100)}%` }}
                                         />
-                                        
-                                        {/* Recommendation line */}
                                         <div
                                             className="absolute top-0 bottom-0 w-0.5 bg-[var(--progress-line)] z-10"
                                             style={{ left: `${recommendationPercent}%` }}
                                         />
                                     </div>
                                 </div>
-                                
                                 <p className="text-xs text-[var(--muted)]">
                                     Last updated: {new Date(s3Data.timestamp).toLocaleDateString()}
                                 </p>
@@ -266,89 +269,180 @@ export default function AdminDashboard() {
                         )}
                     </div>
 
-                    {/* Estimated Costs Card */}
-                    <div className="col-span-1 bg-[var(--card-bg)] rounded-lg p-6 shadow-md">
-                        <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Estimated Monthly Costs</h2>
-                        {costsLoading ? (
-                            <p className="text-sm text-[var(--muted)]">Loading...</p>
-                        ) : (
-                            <div className="flex items-baseline gap-x-2">
-                                <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]">
-                                    {estimatedCosts.toLocaleString('en-US', { 
-                                        style: 'currency', 
-                                        currency: 'CAD',
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2
-                                    })}
-                                </span>
-                            </div>
-                        )}
+                    {/* Unread Tryouts */}
+                    <div className="bg-[var(--card-bg)] rounded-lg p-6 shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-sm font-semibold text-[var(--foreground)] mb-4">Unread Tryouts</h2>
+                            {tryoutsLoading ? (
+                                <p className="text-sm text-[var(--muted)]">Loading...</p>
+                            ) : (
+                                <>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className={`text-4xl font-semibold tracking-tight ${unreadTryouts > 0 ? 'text-amber-500' : 'text-[var(--foreground)]'}`}>
+                                            {unreadTryouts}
+                                        </span>
+                                        {unreadTryouts > 0 && (
+                                            <span className="text-xs font-medium text-amber-500">pending</span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-[var(--muted)] mt-2">
+                                        {unreadTryouts === 0
+                                            ? 'All submissions reviewed'
+                                            : `${unreadTryouts} submission${unreadTryouts !== 1 ? 's' : ''} awaiting review`}
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                        <Link href="/admin/tryouts" className="mt-4 text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]">
+                            View tryouts →
+                        </Link>
                     </div>
 
-                    {/* Unread Tryouts Card */}
-                    <div className="col-span-1 bg-[var(--card-bg)] rounded-lg p-6 shadow-md">
-                        <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Unread Tryouts</h2>
-                        {tryoutsLoading ? (
-                            <p className="text-sm text-[var(--muted)]">Loading...</p>
-                        ) : (
-                            <div className="flex items-baseline gap-x-2">
-                                <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]">
-                                    {unreadTryouts}
-                                </span>
-                            </div>
-                        )}
+                    {/* Gallery */}
+                    <div className="bg-[var(--card-bg)] rounded-lg p-6 shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-sm font-semibold text-[var(--foreground)] mb-4">Gallery</h2>
+                            {galleryLoading ? (
+                                <p className="text-sm text-[var(--muted)]">Loading...</p>
+                            ) : (
+                                <>
+                                    <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]">
+                                        {galleryTotal.toLocaleString()}
+                                    </span>
+                                    <p className="text-xs text-[var(--muted)] mt-2">
+                                        {galleryTotal === 1 ? '1 media item' : `${galleryTotal.toLocaleString()} media items`} in the gallery
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                        <Link href="/admin/gallery" className="mt-4 text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]">
+                            Manage gallery →
+                        </Link>
                     </div>
                 </div>
 
-                {/* Second Row - Recreational Programs Card (full width or larger) */}
-                <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    {/* Recreational Programs Card */}
-                    <div className="col-span-1 bg-[var(--card-bg)] rounded-lg p-6 shadow-md">
-                        <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Recreational Programs & Classes</h2>
-                        {programsLoading ? (
-                            <p className="text-sm text-[var(--muted)]">Loading...</p>
-                        ) : recreationalPrograms.length === 0 ? (
-                            <p className="text-sm text-[var(--muted)]">No recreational programs found</p>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="mb-4">
-                                    <p className="text-sm text-[var(--muted)]">Total Programs: <span className="font-semibold text-[var(--foreground)]">{recreationalPrograms.length}</span></p>
-                                    <p className="text-sm text-[var(--muted)]">Total Classes: <span className="font-semibold text-[var(--foreground)]">{recreationalPrograms.reduce((sum, prog) => sum + prog.classCount, 0)}</span></p>
+                {/* ══════════ Row 2 ══════════ */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+                    {/* Team Overview */}
+                    <div className="bg-[var(--card-bg)] rounded-lg p-6 shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-sm font-semibold text-[var(--foreground)] mb-4">Team</h2>
+                            {teamLoading ? (
+                                <p className="text-sm text-[var(--muted)]">Loading...</p>
+                            ) : (
+                                <div className="space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-[var(--muted)]">Total Staff</span>
+                                        <span className="text-sm font-semibold text-[var(--foreground)]">{coachCount}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-[var(--muted)]">Senior Staff</span>
+                                        <span className="text-sm font-semibold text-[var(--foreground)]">{seniorStaffCount}</span>
+                                    </div>
+                                    <div className="h-px bg-[var(--border)]" />
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-[var(--muted)]">Active Athletes</span>
+                                        <span className="text-sm font-semibold text-[var(--foreground)]">{athleteCount}</span>
+                                    </div>
                                 </div>
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-[var(--border)]">
-                                        <thead>
-                                            <tr>
-                                                <th className="py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Program</th>
-                                                <th className="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Classes</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-[var(--border)]">
-                                            {recreationalPrograms.map((program) => (
-                                                <tr key={program.id}>
-                                                    <td className="py-3 text-sm text-[var(--foreground)]">{program.name}</td>
-                                                    <td className="py-3 text-sm text-[var(--foreground)] text-right">{program.classCount}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        <Link href="/admin/users" className="mt-4 text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]">
+                            Manage team →
+                        </Link>
                     </div>
 
-                    {/* Current Schedule Title Card */}
-                    <div className="col-span-1 bg-[var(--card-bg)] rounded-lg p-6 shadow-md">
-                        <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Current Recreational Schedule</h2>
-                        {scheduleLoading ? (
-                            <p className="text-sm text-[var(--muted)]">Loading...</p>
-                        ) : scheduleTitle ? (
-                            <div className="space-y-2">
-                                <p className="text-xl font-semibold text-[var(--foreground)]">{scheduleTitle}</p>
-                            </div>
-                        ) : (
-                            <p className="text-sm text-[var(--muted)]">No schedule title set</p>
-                        )}
+                    {/* Recreational Programs */}
+                    <div className="bg-[var(--card-bg)] rounded-lg p-6 shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-sm font-semibold text-[var(--foreground)] mb-4">Recreational Programs</h2>
+                            {programsLoading ? (
+                                <p className="text-sm text-[var(--muted)]">Loading...</p>
+                            ) : recreationalPrograms.length === 0 ? (
+                                <p className="text-sm text-[var(--muted)]">No programs found</p>
+                            ) : (
+                                <div className="space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-[var(--muted)]">Programs</span>
+                                        <span className="text-sm font-semibold text-[var(--foreground)]">{recreationalPrograms.length}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-[var(--muted)]">Total Classes</span>
+                                        <span className="text-sm font-semibold text-[var(--foreground)]">
+                                            {recreationalPrograms.reduce((sum, p) => sum + p.classCount, 0)}
+                                        </span>
+                                    </div>
+                                    <div className="h-px bg-[var(--border)]" />
+                                    <div className="space-y-1">
+                                        {recreationalPrograms.map(program => (
+                                            <div key={program.id} className="flex items-center justify-between">
+                                                <span className="text-xs text-[var(--foreground)] truncate max-w-[65%]">{program.name}</span>
+                                                <span className="text-xs text-[var(--muted)]">
+                                                    {program.classCount} class{program.classCount !== 1 ? 'es' : ''}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <Link href="/admin/programs" className="mt-4 text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]">
+                            Manage programs →
+                        </Link>
+                    </div>
+
+                    {/* Registration Schedules */}
+                    <div className="bg-[var(--card-bg)] rounded-lg p-6 shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-sm font-semibold text-[var(--foreground)] mb-4">Registration Schedules</h2>
+                            {registrationLoading ? (
+                                <p className="text-sm text-[var(--muted)]">Loading...</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {/* Sessions */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">Rec Sessions</span>
+                                            <span className="text-xs font-semibold text-[var(--foreground)]">{sessionImages.length}</span>
+                                        </div>
+                                        {sessionImages.length > 0 ? (
+                                            <ul className="space-y-1">
+                                                {sessionImages.map(img => (
+                                                    <li key={img.id} className="text-xs text-[var(--foreground)] truncate pl-2 border-l-2 border-[var(--primary)]">
+                                                        {img.title || 'Untitled'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-xs text-[var(--muted)] pl-2">No sessions uploaded</p>
+                                        )}
+                                    </div>
+                                    <div className="h-px bg-[var(--border)]" />
+                                    {/* Camps */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide">Camps</span>
+                                            <span className="text-xs font-semibold text-[var(--foreground)]">{campImages.length}</span>
+                                        </div>
+                                        {campImages.length > 0 ? (
+                                            <ul className="space-y-1">
+                                                {campImages.map(img => (
+                                                    <li key={img.id} className="text-xs text-[var(--foreground)] truncate pl-2 border-l-2 border-[var(--primary)]">
+                                                        {img.title || 'Untitled'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-xs text-[var(--muted)] pl-2">No camps uploaded</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <Link href="/admin/registration" className="mt-4 text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]">
+                            Manage registration →
+                        </Link>
                     </div>
                 </div>
             </div>
