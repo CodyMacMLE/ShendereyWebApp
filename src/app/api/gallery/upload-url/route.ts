@@ -1,5 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { checkStorageLimit } from '@/lib/storage-limit';
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -39,6 +40,14 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: 'fileName and fileType are required' },
         { status: 400 }
+      );
+    }
+
+    const storageCheck = await checkStorageLimit();
+    if (!storageCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: storageCheck.message },
+        { status: 507 }
       );
     }
 

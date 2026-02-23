@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { sponsors } from '@/lib/schema';
+import { checkStorageLimit } from '@/lib/storage-limit';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
@@ -64,6 +65,14 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     try {
+        const storageCheck = await checkStorageLimit();
+        if (!storageCheck.allowed) {
+            return NextResponse.json(
+                { success: false, error: storageCheck.message },
+                { status: 507 }
+            );
+        }
+
         const formData = await req.formData();
 
         // Grab Form Data

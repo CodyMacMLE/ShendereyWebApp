@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { registrationImage } from '@/lib/schema';
+import { checkStorageLimit } from '@/lib/storage-limit';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -94,6 +95,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(
                 { success: false, error: 'Slot is required' },
                 { status: 400 }
+            );
+        }
+
+        const storageCheck = await checkStorageLimit();
+        if (!storageCheck.allowed) {
+            return NextResponse.json(
+                { success: false, error: storageCheck.message },
+                { status: 507 }
             );
         }
 

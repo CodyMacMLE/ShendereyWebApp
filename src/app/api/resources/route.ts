@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { resources } from "@/lib/schema";
+import { checkStorageLimit } from "@/lib/storage-limit";
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
@@ -76,6 +77,14 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     try {
+        const storageCheck = await checkStorageLimit();
+        if (!storageCheck.allowed) {
+            return NextResponse.json(
+                { success: false, error: storageCheck.message },
+                { status: 507 }
+            );
+        }
+
         const formData = await req.formData();
         const name = formData.get('name') as string;
         const size = formData.get('size') as unknown as number;
@@ -120,6 +129,14 @@ export async function DELETE(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
+        const storageCheck = await checkStorageLimit();
+        if (!storageCheck.allowed) {
+            return NextResponse.json(
+                { success: false, error: storageCheck.message },
+                { status: 507 }
+            );
+        }
+
         const formData = await req.formData();
         const id = formData.get('id') as unknown as number;
         const name = formData.get('name') as string;

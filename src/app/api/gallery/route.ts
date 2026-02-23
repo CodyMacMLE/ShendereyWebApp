@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { gallery } from '@/lib/schema';
+import { checkStorageLimit } from '@/lib/storage-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { desc, count } from 'drizzle-orm';
 
@@ -68,10 +69,10 @@ export async function POST(
   const contentType = req.headers.get('content-type');
   
   if (contentType?.includes('application/json')) {
-    // Handle JSON request (direct S3 upload)
+    // Handle JSON request (direct S3 upload — file already in S3 via presigned URL)
     const body = await req.json();
     const { name, description, date, mediaType, mediaUrl, videoThumbnail } = body;
-    
+
     try {
       // Use the thumbnail URL provided by the client, or default to empty string
       const thumbnailUrl = videoThumbnail || '';
@@ -96,6 +97,14 @@ export async function POST(
     // Handle FormData request (legacy upload)
     const formData = await req.formData();
     try {
+      const storageCheck = await checkStorageLimit();
+      if (!storageCheck.allowed) {
+        return NextResponse.json(
+          { success: false, error: storageCheck.message },
+          { status: 507 }
+        );
+      }
+
       const mediaType = formData.get('mediaType');
       const mediaRaw = formData.get('media');
       const mediaUrl = mediaRaw instanceof File ? await uploadToS3(mediaRaw, 'gallery') : '';
