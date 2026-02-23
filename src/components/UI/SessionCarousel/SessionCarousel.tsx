@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
 
 interface CarouselImage {
     id: number;
@@ -15,7 +15,7 @@ interface SessionCarouselProps {
     title: string;
 }
 
-const INTERVAL_MS = 5000;
+const INTERVAL_MS = 10000;
 const TICK_MS = 50;
 
 export default function SessionCarousel({ images, title }: SessionCarouselProps) {

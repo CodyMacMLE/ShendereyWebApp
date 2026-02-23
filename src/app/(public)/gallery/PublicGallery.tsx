@@ -12,6 +12,8 @@ interface GalleryMedia {
     mediaUrl: string | null;
     mediaType: string | null;
     videoThumbnail?: string | null;
+    source?: 'instagram';
+    permalink?: string | null;
 }
 
 interface PaginationInfo {
@@ -122,6 +124,24 @@ export default function PublicGallery({
                                             width={1000}
                                             height={1000}
                                         />
+                                    )}
+                                    {item.source === 'instagram' && (
+                                        <div className="absolute bottom-2 right-2 bg-white/80 rounded-full p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="url(#ig-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <defs>
+                                                    <linearGradient id="ig-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                                                        <stop offset="0%" stopColor="#f09433" />
+                                                        <stop offset="25%" stopColor="#e6683c" />
+                                                        <stop offset="50%" stopColor="#dc2743" />
+                                                        <stop offset="75%" stopColor="#cc2366" />
+                                                        <stop offset="100%" stopColor="#bc1888" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                                            </svg>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -245,6 +265,16 @@ export default function PublicGallery({
                                                                 width={1000}
                                                                 height={1000}
                                                             />
+                                                        )}
+                                                        {selectedMedia.source === 'instagram' && selectedMedia.permalink && (
+                                                            <a
+                                                                href={selectedMedia.permalink}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="mt-3 inline-flex items-center gap-1 text-sm text-pink-600 hover:text-pink-800"
+                                                            >
+                                                                View on Instagram ↗
+                                                            </a>
                                                         )}
                                                     </div>
                                                 </>

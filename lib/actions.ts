@@ -284,6 +284,11 @@ export const getGalleryMedia = async (page: number = 1, limit: number = 20) => {
     };
 }
 
+export const getAllGalleryMedia = async () => {
+    const items = await db.select().from(gallery).orderBy(desc(gallery.date)).limit(500);
+    return items.map(item => ({ ...item, id: item.id.toString() }));
+}
+
 export const getResources = async () => {
     const resourcesData = await db.select().from(resources).orderBy(desc(resources.createdAt));
     return resourcesData.map(item => ({

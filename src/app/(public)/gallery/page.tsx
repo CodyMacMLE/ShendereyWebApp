@@ -1,4 +1,5 @@
-import { getGalleryMedia } from "@/lib/actions";
+import { getAllGalleryMedia } from "@/lib/actions";
+import { getInstagramMedia } from "@/lib/instagram";
 import { Metadata } from "next";
 import PublicGallery from "./PublicGallery";
 
@@ -14,8 +15,43 @@ interface GalleryPageProps {
 export default async function Gallery({ searchParams }: GalleryPageProps) {
     const params = await searchParams;
     const page = parseInt(params.page || '1', 10);
-    const limit = 20; // Items per page
-    const result = await getGalleryMedia(page, limit);
+    const limit = 20;
+
+    const [dbItems, igItems] = await Promise.all([
+        getAllGalleryMedia(),
+        getInstagramMedia(),
+    ]);
+
+    const normalizedIg = igItems.map(item => ({
+        id: `ig_${item.id}`,
+        name: item.caption ? item.caption.slice(0, 150) : null,
+        mediaUrl: item.media_url,
+        mediaType: item.media_type === 'VIDEO' ? 'video/mp4' : 'image/jpeg',
+        videoThumbnail: item.thumbnail_url ?? null,
+        date: new Date(item.timestamp),
+        source: 'instagram' as const,
+        permalink: item.permalink,
+    }));
+
+    const merged = [...dbItems, ...normalizedIg].sort((a, b) => {
+        const aDate = a.date ? new Date(a.date).getTime() : 0;
+        const bDate = b.date ? new Date(b.date).getTime() : 0;
+        return bDate - aDate;
+    });
+
+    const totalCount = merged.length;
+    const totalPages = Math.ceil(totalCount / limit);
+    const offset = (page - 1) * limit;
+    const pageItems = merged.slice(offset, offset + limit);
+
+    const pagination = {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+    };
 
     return (
         <div className="bg-white">
@@ -27,9 +63,9 @@ export default async function Gallery({ searchParams }: GalleryPageProps) {
             </div>
 
             {/* Gallery Images */}
-            <PublicGallery 
-                galleryMedia={result.data} 
-                pagination={result.pagination}
+            <PublicGallery
+                galleryMedia={pageItems}
+                pagination={pagination}
             />
         </div>
     )
