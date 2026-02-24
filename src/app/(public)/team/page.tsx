@@ -25,7 +25,13 @@ function formatName(fullName: string) {
 }
 
 export const metadata: Metadata = {
-    title: 'Team',
+    title: 'Competitive Team',
+    description: 'Meet the current Shenderey Gymnastics competitive team. Our athletes compete at regional, provincial, and national levels across the Xcel, Compulsory, and Provincial programs.',
+    openGraph: {
+        title: 'Competitive Team | Shenderey Gymnastics',
+        description: 'Meet the current Shenderey Gymnastics competitive team competing at regional, provincial, and national levels.',
+        type: 'website',
+    },
 };
 
 export default async function Team() {

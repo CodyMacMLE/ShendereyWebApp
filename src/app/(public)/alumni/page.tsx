@@ -1,5 +1,16 @@
 import { getAlumni } from '@/lib/actions';
 import AlumniCards from './AlumniCards';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'NCAA Alumni',
+  description: 'Shenderey Gymnastics alumni who went on to compete at the NCAA level. Our programme has produced scholarship gymnasts at top universities across North America.',
+  openGraph: {
+    title: 'NCAA Alumni | Shenderey Gymnastics',
+    description: 'Shenderey Gymnastics alumni who earned NCAA scholarships and competed at top universities across North America.',
+    type: 'website',
+  },
+};
 
 export type Athlete = {
     id: number;

@@ -5,7 +5,13 @@ import { SponsorsQuote } from "@/public/files/quotes";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: 'Sponsors',
+    title: 'Sponsors & Affiliates',
+    description: 'Meet the sponsors and affiliates who support Shenderey Gymnastics Centre. Their generosity helps our athletes train, compete, and succeed at the highest levels.',
+    openGraph: {
+        title: 'Sponsors & Affiliates | Shenderey Gymnastics',
+        description: 'The sponsors and affiliates whose support helps Shenderey Gymnastics athletes train and compete at the highest levels.',
+        type: 'website',
+    },
 };
 
 export default async function Sponsors() {

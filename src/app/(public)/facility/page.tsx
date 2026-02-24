@@ -14,7 +14,13 @@ const photos = [
 ]
 
 export const metadata: Metadata = {
-  title: 'Facility',
+  title: 'Our Facility',
+  description: 'Tour the Shenderey Gymnastics Centre facility in Newmarket, Ontario — a state-of-the-art training environment with Olympic-standard equipment for vault, bars, beam, floor, and trampoline.',
+  openGraph: {
+    title: 'Our Facility | Shenderey Gymnastics',
+    description: 'State-of-the-art training facility in Newmarket, Ontario with Olympic-standard equipment for vault, bars, beam, floor, and trampoline.',
+    type: 'website',
+  },
 };
 
 export default function Facility() {

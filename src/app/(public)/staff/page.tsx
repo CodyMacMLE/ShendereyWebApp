@@ -39,7 +39,13 @@ function formatName(fullName: string) {
 }
   
 export const metadata: Metadata = {
-    title: 'Staff',
+    title: 'Coaching Staff',
+    description: 'Meet the nationally certified coaching staff at Shenderey Gymnastics Centre. Our dedicated coaches bring decades of experience developing gymnasts from beginner to national level.',
+    openGraph: {
+        title: 'Coaching Staff | Shenderey Gymnastics',
+        description: 'Nationally certified coaches at Shenderey Gymnastics Centre with decades of experience developing gymnasts from beginner to national level.',
+        type: 'website',
+    },
 };
 
 export default async function Staff() {

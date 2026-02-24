@@ -14,6 +14,12 @@ function formatName(fullName: string) {
 
 export const metadata: Metadata = {
   title: 'Achievements',
+  description: 'Explore the competitive achievements of Shenderey Gymnastics athletes — provincial titles, national placements, and awards earned across all program levels.',
+  openGraph: {
+    title: 'Achievements | Shenderey Gymnastics',
+    description: 'Provincial titles, national placements, and awards earned by Shenderey Gymnastics athletes across all competitive program levels.',
+    type: 'website',
+  },
 };
 
 export default async function Achievements() {

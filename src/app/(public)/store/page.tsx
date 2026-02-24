@@ -3,7 +3,13 @@ import { Metadata } from "next";
 import StoreGrid from "./StoreGrid";
 
 export const metadata: Metadata = {
-    title: 'Store',
+    title: 'Spirit Wear Store',
+    description: 'Shop Shenderey Gymnastics spirit wear. Show your club pride with official apparel and gear for athletes, families, and supporters.',
+    openGraph: {
+        title: 'Spirit Wear Store | Shenderey Gymnastics',
+        description: 'Official Shenderey Gymnastics apparel and spirit wear for athletes, families, and supporters.',
+        type: 'website',
+    },
 };
 
 export default async function Store() {

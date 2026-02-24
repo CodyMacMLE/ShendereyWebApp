@@ -1,5 +1,16 @@
 import { getProspects } from '@/lib/actions';
 import ProspectCards from './ProspectCards';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Prospects',
+  description: 'Shenderey Gymnastics scouted prospects — up-and-coming competitive athletes being developed for provincial, national, and potential NCAA pathways.',
+  openGraph: {
+    title: 'Prospects | Shenderey Gymnastics',
+    description: 'Scouted prospects at Shenderey Gymnastics being developed for provincial, national, and NCAA pathways.',
+    type: 'website',
+  },
+};
 
 export type Athlete = {
     id: number;

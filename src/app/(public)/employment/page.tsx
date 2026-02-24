@@ -5,7 +5,13 @@ import { getCoaches } from "@/lib/actions";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: 'Employment',
+    title: 'Employment Opportunities',
+    description: 'Join the Shenderey Gymnastics coaching team in Newmarket, Ontario. We are always looking for passionate, certified gymnastics coaches to help athletes reach their full potential.',
+    openGraph: {
+        title: 'Employment Opportunities | Shenderey Gymnastics',
+        description: 'Join the Shenderey Gymnastics coaching team in Newmarket, Ontario. Coaching positions for certified gymnastics instructors.',
+        type: 'website',
+    },
 };
 
 

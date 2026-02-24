@@ -1,6 +1,7 @@
 import { AcademicCapIcon, EnvelopeOpenIcon, GlobeAltIcon, GlobeAmericasIcon, SparklesIcon, StarIcon } from '@heroicons/react/20/solid'
 import { BuildingOffice2Icon, ClockIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import type { Metadata } from 'next'
 
 import { getJuniorStaff, getSeniorStaff, getSponsors } from '@/lib/actions'
 import { contactDetails } from '@/public/files/contactDetails'
@@ -10,6 +11,52 @@ import { featuredTestimonial, testimonials } from '@/public/files/testemonials'
 
 import RollingGallery from '@/components/UI/RollingGallery/page'
 import { formatName } from '@/lib/utils'
+
+export const metadata: Metadata = {
+  title: 'Shenderey Gymnastics | Premier Gymnastics Club in Newmarket, Ontario',
+  description: 'Shenderey Gymnastics Centre offers recreational and competitive gymnastics programs in Newmarket, Ontario. Nationally certified coaches. Est. 1984. Register today.',
+  openGraph: {
+    title: 'Shenderey Gymnastics | Premier Gymnastics Club in Newmarket, Ontario',
+    description: 'Recreational and competitive gymnastics programs in Newmarket, Ontario for all ages. Nationally certified coaches. Established 1984.',
+    type: 'website',
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SportsClub',
+  name: 'Shenderey Gymnastics Centre',
+  description: 'Premier gymnastics club in Newmarket, Ontario offering recreational and competitive programs since 1984.',
+  telephone: '+19058954194',
+  email: 'sgcrecreational@gmail.com',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '17075 Leslie St., Units 3-5',
+    addressLocality: 'Newmarket',
+    addressRegion: 'ON',
+    postalCode: 'L3Y 8E1',
+    addressCountry: 'CA',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 44.0558312,
+    longitude: -79.4301737,
+  },
+  sameAs: [
+    'https://www.facebook.com/shendereygymnastics',
+    'https://www.instagram.com/shendereygymnastics/',
+  ],
+  openingHoursSpecification: [
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Monday',    opens: '13:00', closes: '20:45' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Tuesday',   opens: '13:00', closes: '20:30' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Wednesday', opens: '13:00', closes: '20:30' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Thursday',  opens: '12:00', closes: '20:30' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Friday',    opens: '13:00', closes: '20:30' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday',  opens: '09:00', closes: '17:00' },
+  ],
+  foundingDate: '1984',
+  sport: 'Gymnastics',
+};
 
 /* For changing programs */
 const programs = [
@@ -93,6 +140,10 @@ export default async function Home() {
 
   return (
     <div className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Hero section */}
       <div className="relative bg-gray-900 shadow-hero mt-[50px]">
@@ -348,7 +399,7 @@ export default async function Home() {
             </div>
             <div className="flex items-start justify-end lg:order-first">
               <Image
-                alt="Product screenshot"
+                alt="Shenderey Gymnastics Centre training facility"
                 src="/facility/sgi_136.jpg"
                 width={2432}
                 height={1442}

@@ -9,7 +9,13 @@ import Link from "next/link";
 
 
 export const metadata: Metadata = {
-    title: 'Competitive',
+    title: 'Competitive Programs',
+    description: 'Explore Shenderey Gymnastics competitive programs — Pre-Competitive, Xcel, Compulsory, Provincial, and National. Train with nationally certified coaches and pursue your gymnastics potential.',
+    openGraph: {
+        title: 'Competitive Programs | Shenderey Gymnastics',
+        description: 'Explore Shenderey Gymnastics competitive programs — Pre-Competitive, Xcel, Compulsory, Provincial, and National. Train with nationally certified coaches.',
+        type: 'website',
+    },
 };
 
 export default async function Competitive() {
@@ -47,7 +53,7 @@ export default async function Competitive() {
                         </div>
                         <div className="flex items-start justify-end lg:order-first">
                             <Image
-                                alt=""
+                                alt="Shenderey Gymnastics competitive athlete training"
                                 src="/images/sgi_006.webp"
                                 width={2000}
                                 height={900}

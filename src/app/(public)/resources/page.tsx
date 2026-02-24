@@ -5,6 +5,12 @@ import StackedList from "./StackedList";
 
 export const metadata: Metadata = {
     title: 'Resources',
+    description: 'Access resources and downloads for Shenderey Gymnastics athletes and families — schedules, forms, handbooks, and important club documents.',
+    openGraph: {
+        title: 'Resources | Shenderey Gymnastics',
+        description: 'Resources and downloads for Shenderey Gymnastics athletes and families — schedules, forms, handbooks, and club documents.',
+        type: 'website',
+    },
 };
 
 export default async function Resources() {

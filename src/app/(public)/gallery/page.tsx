@@ -6,6 +6,12 @@ import PublicGallery from "./PublicGallery";
 
 export const metadata: Metadata = {
     title: 'Gallery',
+    description: 'Browse the Shenderey Gymnastics photo gallery — competition highlights, training sessions, athlete achievements, and life at our Newmarket gymnastics centre.',
+    openGraph: {
+        title: 'Gallery | Shenderey Gymnastics',
+        description: 'Competition highlights, training sessions, and athlete moments from Shenderey Gymnastics Centre in Newmarket, Ontario.',
+        type: 'website',
+    },
 };
 
 interface GalleryPageProps {

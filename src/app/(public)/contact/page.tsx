@@ -4,6 +4,12 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: 'Contact Us',
+    description: 'Get in touch with Shenderey Gymnastics Centre in Newmarket, Ontario. Contact our recreational or competitive programs by phone or email. Office hours Monday–Saturday.',
+    openGraph: {
+        title: 'Contact Us | Shenderey Gymnastics',
+        description: 'Contact Shenderey Gymnastics Centre in Newmarket, Ontario. Reach our recreational or competitive teams by phone or email.',
+        type: 'website',
+    },
 };
 
 export default function Contact() {

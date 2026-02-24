@@ -8,7 +8,13 @@ import { Program } from "@/lib/types";
 
 
 export const metadata: Metadata = {
-    title: 'Recreational',
+    title: 'Recreational Programs',
+    description: 'Shenderey Gymnastics recreational classes for all ages in Newmarket, Ontario. Fun, fitness, and fundamentals in a supportive environment with nationally certified coaches.',
+    openGraph: {
+        title: 'Recreational Programs | Shenderey Gymnastics',
+        description: 'Gymnastics recreational classes for all ages in Newmarket, Ontario. Fun, fitness, and fundamentals with nationally certified coaches.',
+        type: 'website',
+    },
 };
 
 export default async function Recreational() {
