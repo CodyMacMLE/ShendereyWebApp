@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import { registrationImage } from '@/lib/schema';
 import { checkStorageLimit } from '@/lib/storage-limit';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Validate required environment variables
@@ -61,7 +61,10 @@ async function uploadToS3(file: File, key: string): Promise<string> {
 
 export async function GET() {
     try {
-        const registrationImages = await db.select().from(registrationImage);
+        const registrationImages = await db
+            .select()
+            .from(registrationImage)
+            .orderBy(asc(registrationImage.order), asc(registrationImage.id));
 
         return NextResponse.json({
             success: true,
@@ -126,6 +129,101 @@ export async function POST(req: NextRequest) {
         }, { status: 200 });
     } catch (error) {
         console.error("Error in POST /api/register/session-image:", error);
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
+    }
+}
+
+// PATCH — update title and/or replace image file
+export async function PATCH(req: NextRequest) {
+    try {
+        const formData = await req.formData();
+        const idRaw = formData.get('id');
+        const id = idRaw ? Number(idRaw) : NaN;
+
+        if (!id || isNaN(id)) {
+            return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
+        }
+
+        const existing = await db.select().from(registrationImage).where(eq(registrationImage.id, id));
+        if (existing.length === 0) {
+            return NextResponse.json({ success: false, error: 'No image found with this ID' }, { status: 404 });
+        }
+
+        const updates: { title?: string; imageUrl?: string; updatedAt: Date } = {
+            updatedAt: new Date(),
+        };
+
+        const titleRaw = formData.get('title');
+        if (typeof titleRaw === 'string') {
+            updates.title = titleRaw;
+        }
+
+        const newFile = formData.get('image');
+        if (newFile instanceof File) {
+            const storageCheck = await checkStorageLimit();
+            if (!storageCheck.allowed) {
+                return NextResponse.json({ success: false, error: storageCheck.message }, { status: 507 });
+            }
+
+            const slot = existing[0].slot || 'registration';
+            const ext = newFile.name.split('.').pop()?.toLowerCase() || (newFile.type === 'application/pdf' ? 'pdf' : 'jpg');
+            const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+            const key = `registration/${slot}-${uniqueSuffix}.${ext}`;
+
+            updates.imageUrl = await uploadToS3(newFile, key);
+
+            // Delete old S3 object (non-fatal)
+            if (existing[0].imageUrl) {
+                const oldKey = getS3KeyFromUrl(existing[0].imageUrl);
+                if (oldKey) {
+                    try {
+                        await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldKey }));
+                    } catch (err) {
+                        console.error('S3 delete old image error (non-fatal):', err);
+                    }
+                }
+            }
+        }
+
+        const [updated] = await db
+            .update(registrationImage)
+            .set(updates)
+            .where(eq(registrationImage.id, id))
+            .returning();
+
+        return NextResponse.json({ success: true, body: updated }, { status: 200 });
+    } catch (error) {
+        console.error("Error in PATCH /api/register/session-image:", error);
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
+    }
+}
+
+// PUT — batch reorder images
+export async function PUT(req: NextRequest) {
+    try {
+        const { images } = await req.json() as { images: { id: number; order: number }[] };
+
+        if (!Array.isArray(images) || images.length === 0) {
+            return NextResponse.json({ success: false, error: 'images array is required' }, { status: 400 });
+        }
+
+        await Promise.all(
+            images.map(({ id, order }) =>
+                db.update(registrationImage)
+                    .set({ order, updatedAt: new Date() })
+                    .where(eq(registrationImage.id, id))
+            )
+        );
+
+        return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error) {
+        console.error("Error in PUT /api/register/session-image:", error);
         return NextResponse.json(
             { success: false, error: error instanceof Error ? error.message : String(error) },
             { status: 500 }

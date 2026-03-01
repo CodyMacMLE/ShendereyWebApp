@@ -2,7 +2,7 @@
 
 import ErrorModal from "@/components/UI/ErrorModal/page";
 import Modal from "@/components/UI/Modal/page";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import imageCompression from 'browser-image-compression';
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -18,6 +18,7 @@ interface RegistrationImage {
     imageUrl: string | null;
     title: string | null;
     slot: string | null;
+    order: number | null;
 }
 
 interface PendingUpload {
@@ -26,39 +27,85 @@ interface PendingUpload {
     title: string;
 }
 
+// ─── PDF icon helper ──────────────────────────────────────────────────────────
+
+function PdfIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" className={className ?? "h-6 w-6 text-red-500"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+        </svg>
+    );
+}
+
 // ─── Image Card ──────────────────────────────────────────────────────────────
 
 function ImageCard({
     img,
+    index,
+    isDragOver,
     onDelete,
     isDeleting,
+    onEdit,
+    onDragStart,
+    onDragOver,
+    onDrop,
+    onDragEnd,
 }: {
     img: RegistrationImage;
+    index: number;
+    isDragOver: boolean;
     onDelete: (id: number) => void;
     isDeleting: boolean;
+    onEdit: (img: RegistrationImage) => void;
+    onDragStart: (index: number) => void;
+    onDragOver: (e: React.DragEvent, index: number) => void;
+    onDrop: (index: number) => void;
+    onDragEnd: () => void;
 }) {
     const isPdf = img.imageUrl?.split('?')[0].toLowerCase().endsWith('.pdf');
 
     return (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--card-bg)] overflow-hidden">
-            {isPdf ? (
-                <div className="flex items-center justify-center h-40 bg-red-50">
-                    <div className="text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                        <p className="mt-1 text-xs font-medium text-red-600">PDF</p>
+        <div
+            draggable
+            onDragStart={() => onDragStart(index)}
+            onDragOver={(e) => onDragOver(e, index)}
+            onDrop={() => onDrop(index)}
+            onDragEnd={onDragEnd}
+            className={`rounded-lg border bg-[var(--card-bg)] overflow-hidden cursor-grab active:cursor-grabbing transition-all ${
+                isDragOver
+                    ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] opacity-75'
+                    : 'border-[var(--border)]'
+            }`}
+        >
+            {/* Thumbnail with edit overlay */}
+            <div className="relative group">
+                {isPdf ? (
+                    <div className="flex items-center justify-center h-40 bg-red-50">
+                        <div className="text-center">
+                            <PdfIcon className="h-10 w-10 mx-auto text-red-500" />
+                            <p className="mt-1 text-xs font-medium text-red-600">PDF</p>
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <Image
-                    src={img.imageUrl!}
-                    alt={img.title || 'Schedule'}
-                    width={400}
-                    height={280}
-                    className="w-full h-40 object-cover"
-                />
-            )}
+                ) : (
+                    <Image
+                        src={img.imageUrl!}
+                        alt={img.title || 'Schedule'}
+                        width={400}
+                        height={280}
+                        className="w-full h-40 object-cover"
+                    />
+                )}
+                {/* Edit overlay */}
+                <button
+                    onClick={() => onEdit(img)}
+                    className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors"
+                    title="Edit"
+                >
+                    <PencilSquareIcon className="w-7 h-7 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" />
+                </button>
+            </div>
+
+            {/* Footer */}
             <div className="p-3 flex items-center justify-between gap-2">
                 <p className="text-xs font-medium text-[var(--foreground)] truncate flex-1">
                     {img.title || 'Untitled'}
@@ -79,13 +126,68 @@ function ImageCard({
     );
 }
 
-// ─── PDF icon helper ──────────────────────────────────────────────────────────
+// ─── Sortable Image Grid ──────────────────────────────────────────────────────
 
-function PdfIcon() {
+function SortableImageGrid({
+    images,
+    deletingImageId,
+    onDelete,
+    onEdit,
+    onReorder,
+}: {
+    images: RegistrationImage[];
+    deletingImageId: number | null;
+    onDelete: (id: number) => void;
+    onEdit: (img: RegistrationImage) => void;
+    onReorder: (newOrder: RegistrationImage[]) => void;
+}) {
+    const [dragIndex, setDragIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+    const handleDragStart = (index: number) => setDragIndex(index);
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (index !== dragIndex) setDragOverIndex(index);
+    };
+
+    const handleDrop = (dropIndex: number) => {
+        if (dragIndex === null || dragIndex === dropIndex) {
+            setDragIndex(null);
+            setDragOverIndex(null);
+            return;
+        }
+        const reordered = [...images];
+        const [moved] = reordered.splice(dragIndex, 1);
+        reordered.splice(dropIndex, 0, moved);
+        onReorder(reordered);
+        setDragIndex(null);
+        setDragOverIndex(null);
+    };
+
+    const handleDragEnd = () => {
+        setDragIndex(null);
+        setDragOverIndex(null);
+    };
+
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-        </svg>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {images.map((img, index) => (
+                <ImageCard
+                    key={img.id}
+                    img={img}
+                    index={index}
+                    isDragOver={dragOverIndex === index}
+                    onDelete={onDelete}
+                    isDeleting={deletingImageId === img.id}
+                    onEdit={onEdit}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onDragEnd={handleDragEnd}
+                />
+            ))}
+        </div>
     );
 }
 
@@ -106,6 +208,11 @@ export default function Registration() {
     const [campImages, setCampImages] = useState<RegistrationImage[]>([]);
     const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
 
+    // ── Order dirty flags ──
+    const [sessionOrderChanged, setSessionOrderChanged] = useState(false);
+    const [campOrderChanged, setCampOrderChanged] = useState(false);
+    const [isSavingOrder, setIsSavingOrder] = useState<'session' | 'camp' | null>(null);
+
     // ── Upload modal ──
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [uploadCategory, setUploadCategory] = useState<'session' | 'camp' | null>(null);
@@ -114,7 +221,17 @@ export default function Registration() {
     const [isUploading, setIsUploading] = useState(false);
     const [formErrors, setFormErrors] = useState<{ msg: string }[]>([]);
 
+    // ── Edit modal ──
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editingImage, setEditingImage] = useState<RegistrationImage | null>(null);
+    const [editTitle, setEditTitle] = useState('');
+    const [editFile, setEditFile] = useState<File | null>(null);
+    const [editPreview, setEditPreview] = useState<string | null>(null);
+    const [editErrors, setEditErrors] = useState<{ msg: string }[]>([]);
+    const [isSavingEdit, setIsSavingEdit] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const editFileInputRef = useRef<HTMLInputElement>(null);
     const placeholderSession = `Fall ${new Date().getFullYear()}`;
 
     // ── Click-outside handler for policy delete confirmations ──
@@ -291,6 +408,94 @@ export default function Registration() {
         setFormErrors([]);
     };
 
+    // ── Edit image ──
+    const openEditModal = (img: RegistrationImage) => {
+        setEditingImage(img);
+        setEditTitle(img.title || '');
+        setEditFile(null);
+        setEditPreview(null);
+        setEditErrors([]);
+        setEditModalOpen(true);
+    };
+
+    const closeEditModal = () => {
+        if (editPreview) URL.revokeObjectURL(editPreview);
+        setEditModalOpen(false);
+        setEditingImage(null);
+        setEditFile(null);
+        setEditPreview(null);
+        setEditErrors([]);
+    };
+
+    const handleEditFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 100 * 1024 * 1024) {
+            setEditErrors([{ msg: 'File exceeds 100 MB limit' }]);
+            return;
+        }
+
+        let processedFile = file;
+        if (file.type.startsWith('image/')) {
+            try {
+                processedFile = await imageCompression(file, {
+                    maxSizeMB: 0.8,
+                    maxWidthOrHeight: 1024,
+                    useWebWorker: true,
+                });
+            } catch (err) {
+                console.error("Compression error:", err);
+            }
+        }
+
+        if (editPreview) URL.revokeObjectURL(editPreview);
+        const preview = file.type.startsWith('image/') ? URL.createObjectURL(processedFile) : null;
+        setEditFile(processedFile);
+        setEditPreview(preview);
+        setEditErrors([]);
+        if (editFileInputRef.current) editFileInputRef.current.value = '';
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingImage) return;
+        if (!editTitle.trim()) {
+            setEditErrors([{ msg: 'Title is required' }]);
+            return;
+        }
+
+        try {
+            setIsSavingEdit(true);
+            setEditErrors([]);
+
+            const formData = new FormData();
+            formData.append('id', String(editingImage.id));
+            formData.append('title', editTitle.trim());
+            if (editFile) formData.append('image', editFile);
+
+            const res = await fetch('/api/register/session-image', { method: 'PATCH', body: formData });
+            const data = await res.json();
+
+            if (!data.success) {
+                setEditErrors([{ msg: data.error || 'Failed to save changes' }]);
+                return;
+            }
+
+            const updated: RegistrationImage = data.body;
+            setSessionImages(prev => prev.map(img => img.id === updated.id ? updated : img));
+            setCampImages(prev => prev.map(img => img.id === updated.id ? updated : img));
+
+            closeEditModal();
+            setMessage({ type: 'success', text: 'Image updated successfully!' });
+            setTimeout(() => setMessage(null), 3000);
+        } catch (error) {
+            console.error("Edit error:", error);
+            setEditErrors([{ msg: 'Error saving changes. Please try again.' }]);
+        } finally {
+            setIsSavingEdit(false);
+        }
+    };
+
     // ── Delete image by ID ──
     const handleDeleteImage = async (id: number) => {
         try {
@@ -317,6 +522,48 @@ export default function Registration() {
             setTimeout(() => setMessage(null), 5000);
         } finally {
             setDeletingImageId(null);
+        }
+    };
+
+    // ── Reorder handlers ──
+    const handleSessionReorder = (reordered: RegistrationImage[]) => {
+        setSessionImages(reordered);
+        setSessionOrderChanged(true);
+    };
+
+    const handleCampReorder = (reordered: RegistrationImage[]) => {
+        setCampImages(reordered);
+        setCampOrderChanged(true);
+    };
+
+    const handleSaveOrder = async (category: 'session' | 'camp') => {
+        const images = category === 'session' ? sessionImages : campImages;
+        try {
+            setIsSavingOrder(category);
+            const res = await fetch('/api/register/session-image', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    images: images.map((img, index) => ({ id: img.id, order: index })),
+                }),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                if (category === 'session') setSessionOrderChanged(false);
+                else setCampOrderChanged(false);
+                setMessage({ type: 'success', text: 'Order saved!' });
+                setTimeout(() => setMessage(null), 3000);
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Failed to save order' });
+                setTimeout(() => setMessage(null), 5000);
+            }
+        } catch (error) {
+            console.error("Save order error:", error);
+            setMessage({ type: 'error', text: 'Error saving order. Please try again.' });
+            setTimeout(() => setMessage(null), 5000);
+        } finally {
+            setIsSavingOrder(null);
         }
     };
 
@@ -415,25 +662,33 @@ export default function Registration() {
                                     {sessionImages.length} image{sessionImages.length !== 1 ? 's' : ''} — shown as a carousel on the register page
                                 </p>
                             </div>
-                            <button
-                                onClick={() => { setUploadCategory('session'); setUploadModalOpen(true); }}
-                                className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)]"
-                            >
-                                + Add Session Images
-                            </button>
+                            <div className="flex items-center gap-2">
+                                {sessionOrderChanged && (
+                                    <button
+                                        onClick={() => handleSaveOrder('session')}
+                                        disabled={isSavingOrder === 'session'}
+                                        className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 disabled:opacity-50"
+                                    >
+                                        {isSavingOrder === 'session' ? 'Saving…' : 'Save Order'}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => { setUploadCategory('session'); setUploadModalOpen(true); }}
+                                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)]"
+                                >
+                                    + Add Session Images
+                                </button>
+                            </div>
                         </div>
 
                         {sessionImages.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                                {sessionImages.map(img => (
-                                    <ImageCard
-                                        key={img.id}
-                                        img={img}
-                                        onDelete={handleDeleteImage}
-                                        isDeleting={deletingImageId === img.id}
-                                    />
-                                ))}
-                            </div>
+                            <SortableImageGrid
+                                images={sessionImages}
+                                deletingImageId={deletingImageId}
+                                onDelete={handleDeleteImage}
+                                onEdit={openEditModal}
+                                onReorder={handleSessionReorder}
+                            />
                         ) : (
                             <div className="rounded-lg border-2 border-dashed border-[var(--border)] p-10 text-center">
                                 <p className="text-sm text-[var(--muted)]">No session images uploaded yet</p>
@@ -456,25 +711,33 @@ export default function Registration() {
                                     {campImages.length} image{campImages.length !== 1 ? 's' : ''} — only shown on register page when at least one image is uploaded
                                 </p>
                             </div>
-                            <button
-                                onClick={() => { setUploadCategory('camp'); setUploadModalOpen(true); }}
-                                className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)]"
-                            >
-                                + Add Camp Images
-                            </button>
+                            <div className="flex items-center gap-2">
+                                {campOrderChanged && (
+                                    <button
+                                        onClick={() => handleSaveOrder('camp')}
+                                        disabled={isSavingOrder === 'camp'}
+                                        className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 disabled:opacity-50"
+                                    >
+                                        {isSavingOrder === 'camp' ? 'Saving…' : 'Save Order'}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => { setUploadCategory('camp'); setUploadModalOpen(true); }}
+                                    className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)]"
+                                >
+                                    + Add Camp Images
+                                </button>
+                            </div>
                         </div>
 
                         {campImages.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                                {campImages.map(img => (
-                                    <ImageCard
-                                        key={img.id}
-                                        img={img}
-                                        onDelete={handleDeleteImage}
-                                        isDeleting={deletingImageId === img.id}
-                                    />
-                                ))}
-                            </div>
+                            <SortableImageGrid
+                                images={campImages}
+                                deletingImageId={deletingImageId}
+                                onDelete={handleDeleteImage}
+                                onEdit={openEditModal}
+                                onReorder={handleCampReorder}
+                            />
                         ) : (
                             <div className="rounded-lg border-2 border-dashed border-[var(--border)] p-10 text-center">
                                 <p className="text-sm text-[var(--muted)]">No camp images uploaded yet</p>
@@ -603,6 +866,107 @@ export default function Registration() {
                                         ? `Upload ${pendingUploads.length} File${pendingUploads.length !== 1 ? 's' : ''}`
                                         : 'Upload'
                                 }
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* ══════════ Edit Image Modal ══════════ */}
+            {editModalOpen && editingImage && (
+                <Modal
+                    title="Edit Image"
+                    setModalEnable={closeEditModal}
+                >
+                    <div>
+                        {editErrors.length > 0 && (
+                            <div className="mb-4"><ErrorModal errors={editErrors} /></div>
+                        )}
+
+                        {/* Current / new image preview */}
+                        <div className="mb-5">
+                            <p className="text-xs font-medium text-[var(--muted)] mb-2">Image</p>
+                            <div className="relative rounded-lg overflow-hidden border border-[var(--border)] bg-[var(--card-bg)]">
+                                {editPreview ? (
+                                    <Image
+                                        src={editPreview}
+                                        alt="New image preview"
+                                        width={600}
+                                        height={300}
+                                        className="w-full h-40 object-cover"
+                                    />
+                                ) : editingImage.imageUrl?.split('?')[0].toLowerCase().endsWith('.pdf') ? (
+                                    <div className="flex items-center justify-center h-40 bg-red-50">
+                                        <div className="text-center">
+                                            <PdfIcon className="h-10 w-10 mx-auto text-red-500" />
+                                            <p className="mt-1 text-xs font-medium text-red-600">PDF</p>
+                                        </div>
+                                    </div>
+                                ) : editingImage.imageUrl ? (
+                                    <Image
+                                        src={editingImage.imageUrl}
+                                        alt={editingImage.title || 'Current image'}
+                                        width={600}
+                                        height={300}
+                                        className="w-full h-40 object-cover"
+                                    />
+                                ) : null}
+
+                                {/* Replace button overlay */}
+                                <label
+                                    htmlFor="edit-file-input"
+                                    className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/40 transition-colors cursor-pointer group"
+                                >
+                                    <span className="flex items-center gap-1.5 bg-white/90 text-xs font-semibold text-gray-800 px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow">
+                                        <PencilSquareIcon className="w-3.5 h-3.5" />
+                                        Replace file
+                                    </span>
+                                </label>
+                                <input
+                                    ref={editFileInputRef}
+                                    id="edit-file-input"
+                                    type="file"
+                                    accept="image/*,.pdf"
+                                    className="hidden"
+                                    onChange={handleEditFileSelected}
+                                />
+                            </div>
+                            {editFile && (
+                                <p className="mt-1.5 text-xs text-[var(--muted)]">New file selected: {editFile.name}</p>
+                            )}
+                        </div>
+
+                        {/* Title input */}
+                        <div className="mb-5">
+                            <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
+                                Title
+                            </label>
+                            <input
+                                type="text"
+                                value={editTitle}
+                                onChange={e => setEditTitle(e.target.value)}
+                                placeholder={placeholderSession}
+                                className="w-full text-sm rounded-md border-0 py-1.5 px-3 text-[var(--foreground)] shadow-sm ring-1 ring-inset ring-[var(--border)] focus:ring-2 focus:ring-inset focus:ring-[var(--primary)] bg-[var(--card-bg)]"
+                            />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center justify-end gap-x-4 pt-1">
+                            <button
+                                type="button"
+                                onClick={closeEditModal}
+                                disabled={isSavingEdit}
+                                className="rounded-md py-2 text-sm font-semibold text-red-600 hover:text-red-500 disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSaveEdit}
+                                disabled={isSavingEdit}
+                                className="rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--button-text)] shadow-sm hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSavingEdit ? 'Saving…' : 'Save Changes'}
                             </button>
                         </div>
                     </div>

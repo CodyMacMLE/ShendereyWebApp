@@ -227,6 +227,7 @@ export const registrationImage = pgTable('registration_images', {
     imageUrl: text('imageUrl'),
     title: text('title'),
     slot: text('slot'),
+    order: integer('order').default(0),
     createdAt: timestamp('createdAt').defaultNow(),
     updatedAt: timestamp('updatedAt').defaultNow(),
 })
