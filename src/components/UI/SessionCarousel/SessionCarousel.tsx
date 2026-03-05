@@ -108,7 +108,7 @@ export default function SessionCarousel({ images, title }: SessionCarouselProps)
                 )}
 
                 {/* Slide content */}
-                <div className="relative overflow-hidden rounded-lg border border-[var(--border)] h-[1000px]">
+                <div className="relative overflow-hidden rounded-lg h-[1000px]">
                     {isPdf ? (
                         <iframe
                             src={current.imageUrl}
@@ -133,16 +133,16 @@ export default function SessionCarousel({ images, title }: SessionCarouselProps)
                             <button
                                 onClick={goPrev}
                                 aria-label="Previous slide"
-                                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white text-2xl leading-none transition-colors select-none"
+                                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors select-none"
                             >
-                                ‹
+                                <span className="text-2xl leading-none pb-0.5">‹</span>
                             </button>
                             <button
                                 onClick={goNext}
                                 aria-label="Next slide"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white text-2xl leading-none transition-colors select-none"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors select-none"
                             >
-                                ›
+                                <span className="text-2xl leading-none pb-0.5">›</span>
                             </button>
                         </>
                     )}
