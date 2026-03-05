@@ -31,9 +31,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Spam detected' }, { status: 400 });
         }
 
-        // Check if email already exists
+        // Check if email has reached the submission limit (5 per email)
         const existingEmail = await db.select().from(tryouts).where(eq(tryouts.contactEmail, contactEmail.trim()));
-        if (existingEmail.length > 0) {
+        if (existingEmail.length >= 5) {
             return NextResponse.json({ message: 'Email already exists' }, { status: 200 });
         }
 
