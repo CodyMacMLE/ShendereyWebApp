@@ -13,10 +13,6 @@ export default async function RegistrationLayout() {
         .sort((a, b) => a.id - b.id)
         .map(img => ({ id: img.id, imageUrl: img.imageUrl!, title: img.title ?? null, slot: img.slot ?? null }));
 
-    const campImages = registrationImages
-        .filter(img => img.imageUrl && img.slot === 'camp')
-        .map(img => ({ id: img.id, imageUrl: img.imageUrl!, title: img.title ?? null, slot: img.slot ?? null }));
-
 
     return (
         <div className="px-4 pb-5 sm:px-6 lg:px-8 pt-20 bg-white">
@@ -69,11 +65,6 @@ export default async function RegistrationLayout() {
             {/* Recreational Sessions Carousel */}
             {sessionImages.length > 0 && (
                 <SessionCarousel images={sessionImages} title="Recreational Sessions" />
-            )}
-
-            {/* Camps Carousel – only shown when camp images exist */}
-            {campImages.length > 0 && (
-                <SessionCarousel images={campImages} title="Camps" />
             )}
 
             {/* Policies Title */}

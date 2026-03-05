@@ -251,3 +251,115 @@ Contact Information:
     }
 }
 
+interface EventEmailData {
+    eventType: 'camp' | 'birthday';
+    childName: string;
+    childAge: number;
+    contactName: string;
+    contactEmail: string;
+    contactPhone: string;
+    notes: string;
+    preferredDate: string | null;
+    numGuests: number | null;
+}
+
+export async function sendEventEmail(data: EventEmailData): Promise<void> {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        throw new Error('SMTP credentials are not configured. Please set SMTP_USER and SMTP_PASS environment variables.');
+    }
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+    });
+
+    const eventLabel = data.eventType === 'birthday' ? 'Birthday Party' : 'Camp';
+
+    const birthdaySection = data.eventType === 'birthday' ? `
+            <div class="section">
+                <div class="section-title">Party Details</div>
+                <div class="field">
+                    <span class="field-label">Preferred Date:</span>
+                    <span class="field-value">${escapeHtml(data.preferredDate || 'N/A')}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Approximate Guests:</span>
+                    <span class="field-value">${data.numGuests ?? 'N/A'}</span>
+                </div>
+            </div>` : '';
+
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+                h1 { color: #ec4899; border-bottom: 3px solid #ec4899; padding-bottom: 10px; }
+                .section { margin: 20px 0; padding: 15px; background-color: #f9fafb; border-left: 4px solid #ec4899; }
+                .section-title { font-weight: bold; font-size: 18px; color: #db2777; margin-bottom: 10px; }
+                .field { margin: 10px 0; }
+                .field-label { font-weight: bold; color: #4b5563; }
+                .field-value { color: #111827; margin-left: 10px; }
+            </style>
+        </head>
+        <body>
+            <h1>New ${escapeHtml(eventLabel)} Registration</h1>
+            <div class="section">
+                <div class="section-title">Child's Information</div>
+                <div class="field"><span class="field-label">Name:</span><span class="field-value">${escapeHtml(data.childName)}</span></div>
+                <div class="field"><span class="field-label">Age:</span><span class="field-value">${data.childAge}</span></div>
+            </div>
+            ${birthdaySection}
+            <div class="section">
+                <div class="section-title">Contact Information</div>
+                <div class="field"><span class="field-label">Name:</span><span class="field-value">${escapeHtml(data.contactName)}</span></div>
+                <div class="field"><span class="field-label">Email:</span><span class="field-value">${escapeHtml(data.contactEmail)}</span></div>
+                <div class="field"><span class="field-label">Phone:</span><span class="field-value">${escapeHtml(data.contactPhone)}</span></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Additional Notes</div>
+                <div class="field"><span class="field-value">${escapeHtml(data.notes) || 'None'}</span></div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    const textContent = `
+New ${eventLabel} Registration
+
+Child's Information:
+- Name: ${data.childName || 'N/A'}
+- Age: ${data.childAge || 'N/A'}
+${data.eventType === 'birthday' ? `Party Details:
+- Preferred Date: ${data.preferredDate || 'N/A'}
+- Approximate Guests: ${data.numGuests ?? 'N/A'}
+` : ''}
+Contact Information:
+- Name: ${data.contactName || 'N/A'}
+- Email: ${data.contactEmail || 'N/A'}
+- Phone: ${data.contactPhone || 'N/A'}
+
+Additional Notes:
+${data.notes || 'None'}
+    `;
+
+    try {
+        await transporter.sendMail({
+            from: process.env.SMTP_USER,
+            to: 'sgcrecreational@gmail.com',
+            subject: `New ${eventLabel} Registration - ${data.childName || 'Unknown'}`,
+            text: textContent,
+            html: htmlContent,
+        });
+        console.log('Event registration email sent successfully');
+    } catch (error) {
+        console.error('Failed to send event registration email:', error);
+        throw error;
+    }
+}
+

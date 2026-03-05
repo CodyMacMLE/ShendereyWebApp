@@ -17,6 +17,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import {
   Bars3Icon,
   BuildingOffice2Icon,
+  CalendarDaysIcon,
   ChatBubbleBottomCenterTextIcon,
   ClipboardDocumentCheckIcon,
   ClipboardDocumentIcon,
@@ -61,6 +62,7 @@ const programs = [
     { name: 'Recreational', description: 'Information on all the recretional programs', href: '/recreational', icon: IoAmericanFootballOutline },
     { name: 'Competitive', description: 'Check out our prestigious competitive programs', href: '/competitive', icon: IoMedalOutline },
     { name: 'Registration', description: 'Registration platform for our recreational program', href: '/register', icon: CursorArrowRaysIcon },
+    { name: 'Camps & Events', description: 'Gymnastics camps and birthday party bookings', href: '/camps-and-events', icon: CalendarDaysIcon },
     { name: 'Tryouts', description: 'Tryouts for athletes who are looking for more', href: '/tryouts', icon: ClipboardDocumentCheckIcon },
 ]
 
