@@ -108,31 +108,20 @@ export default function SessionCarousel({ images, title }: SessionCarouselProps)
                 )}
 
                 {/* Slide content */}
-                <div className="relative overflow-hidden rounded-lg border border-[var(--border)]">
+                <div className="relative overflow-hidden rounded-lg border border-[var(--border)] h-[500px]">
                     {isPdf ? (
-                        <div className="w-full">
-                            <iframe
-                                src={current.imageUrl}
-                                title={current.title || 'Schedule'}
-                                className="w-full h-[80vh]"
-                                loading="lazy"
-                            />
-                            <a
-                                href={current.imageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-3 inline-block text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]"
-                            >
-                                Open PDF in new tab
-                            </a>
-                        </div>
+                        <iframe
+                            src={current.imageUrl}
+                            title={current.title || 'Schedule'}
+                            className="w-full h-full"
+                            loading="lazy"
+                        />
                     ) : (
                         <Image
                             src={current.imageUrl}
                             alt={current.title || 'Schedule'}
-                            width={1200}
-                            height={800}
-                            className="w-full h-auto"
+                            fill
+                            className="object-contain"
                             loading="lazy"
                             quality={85}
                         />
