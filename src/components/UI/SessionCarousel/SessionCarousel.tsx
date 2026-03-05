@@ -108,7 +108,7 @@ export default function SessionCarousel({ images, title }: SessionCarouselProps)
                 )}
 
                 {/* Slide content */}
-                <div className="relative overflow-hidden rounded-lg border border-[var(--border)] h-[500px]">
+                <div className="relative overflow-hidden rounded-lg border border-[var(--border)] h-[800px]">
                     {isPdf ? (
                         <iframe
                             src={current.imageUrl}
