@@ -261,6 +261,7 @@ interface EventEmailData {
     notes: string;
     preferredDate: string | null;
     numGuests: number | null;
+    selectedPackage?: string | null;
 }
 
 export async function sendEventEmail(data: EventEmailData): Promise<void> {
@@ -283,6 +284,10 @@ export async function sendEventEmail(data: EventEmailData): Promise<void> {
     const birthdaySection = data.eventType === 'birthday' ? `
             <div class="section">
                 <div class="section-title">Party Details</div>
+                <div class="field">
+                    <span class="field-label">Package:</span>
+                    <span class="field-value">${escapeHtml(data.selectedPackage || 'Not specified')}</span>
+                </div>
                 <div class="field">
                     <span class="field-label">Preferred Date:</span>
                     <span class="field-value">${escapeHtml(data.preferredDate || 'N/A')}</span>

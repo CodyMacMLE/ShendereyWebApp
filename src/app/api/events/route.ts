@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const { eventType, childName, childAge, contactName, contactEmail, contactPhone, notes, preferredDate, numGuests, honeypot } = formData;
+        const { eventType, childName, childAge, contactName, contactEmail, contactPhone, notes, preferredDate, numGuests, selectedPackage, honeypot } = formData;
 
         if (honeypot) {
             return NextResponse.json({ error: 'Spam detected' }, { status: 400 });
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
             notes: notes?.trim(),
             preferredDate: preferredDate || null,
             numGuests: numGuests ? parseInt(numGuests) : null,
+            selectedPackage: selectedPackage?.trim() || null,
         });
 
         return NextResponse.json({ success: 'Event registration submitted successfully' }, { status: 200 });

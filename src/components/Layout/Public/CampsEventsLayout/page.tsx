@@ -1,9 +1,14 @@
 import EventForm from "@/components/Form/EventForm/page";
+import BirthdayPackages from "@/components/UI/BirthdayPackages/page";
 import SessionCarousel from "@/components/UI/SessionCarousel/SessionCarousel";
-import { getRegistrationImages } from "@/lib/actions";
+import { getBirthdayPackages, getRegistrationImages } from "@/lib/actions";
+import { Suspense } from "react";
 
 export default async function CampsEventsLayout() {
-    const registrationImages = await getRegistrationImages();
+    const [registrationImages, birthdayPkgs] = await Promise.all([
+        getRegistrationImages(),
+        getBirthdayPackages(),
+    ]);
 
     const campImages = registrationImages
         .filter(img => img.imageUrl && img.slot === 'camp')
@@ -75,13 +80,27 @@ export default async function CampsEventsLayout() {
                 </div>
             </div>
 
+            {/* Birthday Party Packages */}
+            {birthdayPkgs.length > 0 && (
+                <>
+                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                        <div className="border-t border-gray-200" />
+                    </div>
+                    <BirthdayPackages packages={birthdayPkgs} />
+                </>
+            )}
+
             {/* Divider */}
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="border-t border-gray-200" />
             </div>
 
             {/* Event Registration Form */}
-            <EventForm />
+            <div id="event-form">
+                <Suspense>
+                    <EventForm />
+                </Suspense>
+            </div>
 
         </div>
     );

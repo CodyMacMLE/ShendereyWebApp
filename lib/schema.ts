@@ -260,3 +260,16 @@ export const announcement = pgTable('announcement', {
     createdAt: timestamp('createdAt').defaultNow(),
     updatedAt: timestamp('updatedAt').defaultNow(),
 })
+
+// BIRTHDAY PACKAGES
+export const birthdayPackages = pgTable('birthday_packages', {
+    id: serial('id').primaryKey(),
+    name: text('name').notNull(),
+    price: doublePrecision('price').notNull(),
+    description: text('description'),
+    features: text('features'), // JSON: [{text: string, included: boolean}]
+    isPopular: boolean('isPopular').default(false),
+    order: integer('order').default(0),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow(),
+})

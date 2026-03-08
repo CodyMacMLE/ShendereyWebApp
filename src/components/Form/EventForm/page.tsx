@@ -2,10 +2,16 @@
 
 import ErrorModal from "@/components/UI/ErrorModal/page";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 type EventType = 'camp' | 'birthday';
+
+type BirthdayPackage = {
+    id: number;
+    name: string | null;
+    price: number | null;
+};
 
 const inputClass = "block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6";
 const wrapperClass = "flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)]";
@@ -13,10 +19,13 @@ const btnClass = "inline-block bg-[var(--primary)] text-white px-4 py-2 rounded-
 
 export default function EventForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+
     const [eventType, setEventType] = useState<EventType>('camp');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [packages, setPackages] = useState<BirthdayPackage[]>([]);
 
     const [formData, setFormData] = useState({
         childName: "",
@@ -27,10 +36,37 @@ export default function EventForm() {
         notes: "",
         preferredDate: "",
         numGuests: "",
+        selectedPackage: "",
         honeypot: "",
     });
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // Read URL params on mount to pre-select birthday tab and/or package
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        const pkg = searchParams.get('package');
+        if (tab === 'birthday' || pkg) {
+            setEventType('birthday');
+        }
+        if (pkg) {
+            setFormData(prev => ({ ...prev, selectedPackage: decodeURIComponent(pkg) }));
+        }
+    }, [searchParams]);
+
+    // Fetch available packages for dropdown
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await fetch('/api/birthday-packages');
+                if (res.ok) {
+                    const data = await res.json();
+                    setPackages(data.body ?? []);
+                }
+            } catch { /* silent */ }
+        };
+        load();
+    }, []);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
@@ -177,6 +213,31 @@ export default function EventForm() {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Package selection */}
+                                        {packages.length > 0 && (
+                                            <div className="sm:col-span-2">
+                                                <label htmlFor="selectedPackage" className="block text-sm/6 font-medium text-gray-900">Party Package</label>
+                                                <div className="mt-2">
+                                                    <div className={wrapperClass}>
+                                                        <select
+                                                            id="selectedPackage"
+                                                            name="selectedPackage"
+                                                            value={formData.selectedPackage}
+                                                            onChange={handleInputChange}
+                                                            className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 focus:outline-none bg-transparent sm:text-sm/6"
+                                                        >
+                                                            <option value="">Select a package</option>
+                                                            {packages.map(pkg => (
+                                                                <option key={pkg.id} value={pkg.name ?? ''}>
+                                                                    {pkg.name}{pkg.price != null ? ` — $${pkg.price.toLocaleString('en-CA', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : ''}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         <div className="col-span-full sm:col-span-4">
                                             <label htmlFor="notes" className="block text-sm/6 font-medium text-gray-900">Additional Notes</label>

@@ -15,6 +15,7 @@ import {
   CurrencyDollarIcon,
   CursorArrowRaysIcon,
   DocumentDuplicateIcon,
+  GiftIcon,
   HomeIcon,
   MegaphoneIcon,
   PlayCircleIcon,
@@ -43,6 +44,7 @@ const navigation = [
   { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
   { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
   { name: 'Announcement', href: '/admin/announcement', icon: MegaphoneIcon },
+  { name: 'Birthday Packages', href: '/admin/birthday-packages', icon: GiftIcon },
 ]
 
 function classNames(...classes: string[]) {
@@ -101,7 +103,8 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                     <li>
                       <ul role="list" className="-mx-2 space-y-1">
                         {navigation.map((item) => {
-                          const isActive = pathname.includes(item.name.toLowerCase()) || (item.name === 'Dashboard' && pathname === '');
+                          const hrefKey = item.href.replace('/admin/', '').replace('/admin', '');
+                        const isActive = hrefKey ? pathname.startsWith(hrefKey) : pathname === '';
                           return (
                             <li key={item.name}>
                               <a
@@ -153,7 +156,8 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                 <li>
                   <ul role="list" className="mx-2 space-y-1">
                     {navigation.map((item) => {
-                        const isActive = pathname.includes(item.name.toLowerCase()) || (item.name === 'Dashboard' && pathname === '');
+                        const hrefKey = item.href.replace('/admin/', '').replace('/admin', '');
+                        const isActive = hrefKey ? pathname.startsWith(hrefKey) : pathname === '';
                         return (
                           <li key={item.name} className='group'>
                             <a
