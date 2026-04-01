@@ -22,7 +22,6 @@ export default async function Resources() {
         size: data.size || 0,
         views: data.views || 0,
         createdAt: data.createdAt || new Date(),
-        resourceUrl: data.resourceUrl || '',
     }));
     
 

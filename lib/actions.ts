@@ -363,7 +363,13 @@ export const getAllGalleryMedia = unstable_cache(
 
 export const getResources = unstable_cache(
     async () => {
-        const resourcesData = await db.select().from(resources).orderBy(desc(resources.createdAt));
+        const resourcesData = await db.select({
+            id: resources.id,
+            name: resources.name,
+            size: resources.size,
+            views: resources.views,
+            createdAt: resources.createdAt,
+        }).from(resources).orderBy(desc(resources.createdAt));
         return resourcesData.map(item => ({
             ...item,
             id: item.id.toString()

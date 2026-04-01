@@ -36,6 +36,33 @@ async function deleteFromS3(url: string) {
     }
 }
 
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ resourceId: string }> }) {
+    try {
+        const { resourceId } = await params;
+        const id = parseInt(resourceId);
+
+        if (!id || isNaN(id)) {
+            return NextResponse.json({ success: false, error: "Invalid resource ID" }, { status: 400 });
+        }
+
+        const resource = await db.select({ resourceUrl: resources.resourceUrl })
+            .from(resources)
+            .where(eq(resources.id, id));
+
+        if (!resource.length || !resource[0].resourceUrl) {
+            return NextResponse.json({ success: false, error: "Resource not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, resourceUrl: resource[0].resourceUrl }, { status: 200 });
+    } catch (error) {
+        console.error("Error in GET /api/resources/[resourceId]:", error);
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
+    }
+}
+
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ resourceId: string }> }) {
     try {
         const { resourceId } = await params;
