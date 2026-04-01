@@ -77,6 +77,27 @@ export default async function Recreational() {
                 <ProgramLayout programs={programs as unknown as Program[]} category="recreational" />
             </div>
 
+            {/* Register CTA */}
+            <div className="py-24 sm:py-32">
+                <div className="mx-auto max-w-2xl text-center px-6">
+                    <h2 className="text-base/7 font-semibold text-[var(--primary)]">Ready to Join?</h2>
+                    <p className="mt-2 text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                        Register Today
+                    </p>
+                    <p className="mt-6 text-lg/8 text-gray-600">
+                        View recreational class schedules and secure your spot. Registration is open now for all age groups and skill levels.
+                    </p>
+                    <div className="mt-10">
+                        <a
+                            href="/register"
+                            className="rounded-md bg-[var(--primary)] px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                        >
+                            See recreational schedules here
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     )
 }
