@@ -3,12 +3,13 @@
 import { Resource } from '@/lib/types';
 import { formatFullDate } from '@/lib/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export default function StackedList({ resources }: { resources: Resource[] }) {
 
     const [search, setSearch] = useState('')
     const [localResources, setLocalResources] = useState<Resource[]>(resources)
+    const urlCache = useRef<Map<number, string>>(new Map())
 
     // Helper function to convert bytes to human-readable format
     const formatFileSize = (bytes: number): string => {
@@ -23,10 +24,20 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
 
     const handleOpenResource = async (resource: Resource) => {
         try {
+            // Resolve URL from client-side cache or fetch on demand
+            let resourceUrl = urlCache.current.get(resource.id)
+            if (!resourceUrl) {
+                const urlResponse = await fetch(`/api/resources/${resource.id}`)
+                if (!urlResponse.ok) throw new Error('Failed to fetch resource URL')
+                const { resourceUrl: fetchedUrl } = await urlResponse.json()
+                urlCache.current.set(resource.id, fetchedUrl)
+                resourceUrl = fetchedUrl
+            }
+
             // Optimistically update the local state first
-            setLocalResources(prev => 
-                prev.map(r => 
-                    r.id === resource.id 
+            setLocalResources(prev =>
+                prev.map(r =>
+                    r.id === resource.id
                         ? { ...r, views: r.views + 1 }
                         : r
                 )
@@ -42,9 +53,9 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
 
             if (!response.ok) {
                 // If the API call fails, revert the optimistic update
-                setLocalResources(prev => 
-                    prev.map(r => 
-                        r.id === resource.id 
+                setLocalResources(prev =>
+                    prev.map(r =>
+                        r.id === resource.id
                             ? { ...r, views: r.views - 1 }
                             : r
                     )
@@ -52,14 +63,13 @@ export default function StackedList({ resources }: { resources: Resource[] }) {
                 console.error('Failed to increment view count')
             }
 
-            // Open PDF directly in Google Docs Viewer
-            window.open(`https://docs.google.com/viewer?url=${resource.resourceUrl}`, '_blank');
+            window.open(`https://docs.google.com/viewer?url=${resourceUrl}`, '_blank');
         } catch (error) {
             console.error('Error opening resource:', error)
             // Revert the optimistic update on error
-            setLocalResources(prev => 
-                prev.map(r => 
-                    r.id === resource.id 
+            setLocalResources(prev =>
+                prev.map(r =>
+                    r.id === resource.id
                         ? { ...r, views: r.views - 1 }
                         : r
                 )

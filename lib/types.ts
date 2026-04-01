@@ -175,7 +175,7 @@ export type Resource = {
     size: number,
     views: number,
     createdAt: Date,
-    resourceUrl: string,
+    resourceUrl?: string,
 };
 
 // TRYOUTS
