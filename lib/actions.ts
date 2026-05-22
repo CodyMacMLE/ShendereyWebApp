@@ -232,11 +232,12 @@ export const getGroups = unstable_cache(
 export const getSponsors = unstable_cache(
     async () => {
         const diamondSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Diamond"));
+        const platinumSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Platinum"));
         const goldSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Gold"));
         const silverSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Silver"));
         const affiliates = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Affiliate"));
 
-        const allSponsors = {diamondSponsors, goldSponsors, silverSponsors, affiliates};
+        const allSponsors = {diamondSponsors, platinumSponsors, goldSponsors, silverSponsors, affiliates};
         return allSponsors;
     },
     ['sponsors'],
