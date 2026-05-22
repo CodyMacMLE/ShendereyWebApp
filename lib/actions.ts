@@ -229,17 +229,17 @@ export const getGroups = unstable_cache(
     { revalidate: 86400, tags: ['groups'] }
 )
 
-export const getSponsors = unstable_cache(
-    async () => {
-        const diamondSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Diamond"));
-        const platinumSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Platinum"));
-        const goldSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Gold"));
-        const silverSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Silver"));
-        const affiliates = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Affiliate"));
+export async function fetchSponsors() {
+    const diamondSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Diamond"));
+    const platinumSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Platinum"));
+    const goldSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Gold"));
+    const silverSponsors = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Silver"));
+    const affiliates = await db.select().from(sponsors).where(eq(sponsors.sponsorLevel, "Affiliate"));
+    return { diamondSponsors, platinumSponsors, goldSponsors, silverSponsors, affiliates };
+}
 
-        const allSponsors = {diamondSponsors, platinumSponsors, goldSponsors, silverSponsors, affiliates};
-        return allSponsors;
-    },
+export const getSponsors = unstable_cache(
+    fetchSponsors,
     ['sponsors'],
     { revalidate: 86400, tags: ['sponsors'] }
 )

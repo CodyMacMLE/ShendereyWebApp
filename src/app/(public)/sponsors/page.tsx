@@ -1,6 +1,7 @@
 import Image from "next/image";
 
-import { getSponsors } from "@/lib/actions";
+import { fetchSponsors, getSponsors } from "@/lib/actions";
+import { isAdmin } from "@/lib/auth";
 import { SponsorsQuote } from "@/public/files/quotes";
 import { Metadata } from "next";
 
@@ -16,7 +17,8 @@ export const metadata: Metadata = {
 
 export default async function Sponsors() {
 
-    const {diamondSponsors, platinumSponsors, goldSponsors, silverSponsors, affiliates} = await getSponsors();
+    const admin = await isAdmin();
+    const {diamondSponsors, platinumSponsors, goldSponsors, silverSponsors, affiliates} = await (admin ? fetchSponsors() : getSponsors());
 
     // Helper function to ensure URLs have proper protocol
     const ensureHttps = (url: string) => {
