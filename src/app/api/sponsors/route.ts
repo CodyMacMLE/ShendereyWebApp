@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
             website: website?.toString() || ''
         }).returning();
 
-        revalidateTag('sponsors');
+        revalidateTag('sponsors', {});
         return NextResponse.json({ success: true, body: insertedSponsor[0] }, { status: 200 });
 
     } catch (error) {
