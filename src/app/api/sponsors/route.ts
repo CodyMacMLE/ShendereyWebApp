@@ -3,6 +3,7 @@ import { sponsors } from '@/lib/schema';
 import { checkStorageLimit } from '@/lib/storage-limit';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
+import { revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Validate required environment variables
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
             website: website?.toString() || ''
         }).returning();
 
-        // Return Program to Front-end
+        revalidateTag('sponsors');
         return NextResponse.json({ success: true, body: insertedSponsor[0] }, { status: 200 });
 
     } catch (error) {

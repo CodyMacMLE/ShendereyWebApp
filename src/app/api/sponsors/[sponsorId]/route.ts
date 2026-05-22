@@ -3,6 +3,7 @@ import { sponsors } from "@/lib/schema";
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 // Validate required environment variables
@@ -82,6 +83,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ s
             }
         }
         await db.delete(sponsors).where(eq(sponsors.id, id));
+        revalidateTag('sponsors');
         return NextResponse.json({ success: true, body: id }, { status: 200 });
 
     } catch (error) {
@@ -129,6 +131,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ spon
             ...(newSponsorImgUrl !== undefined ? { sponsorImgUrl: newSponsorImgUrl } : {}),
         }).where(eq(sponsors.id, id)).returning();
 
+        revalidateTag('sponsors');
         return NextResponse.json({ success: true, body: sponsor[0] }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 });
