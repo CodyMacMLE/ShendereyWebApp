@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function Sponsors() {
 
-    const {diamondSponsors, goldSponsors, silverSponsors, affiliates} = await getSponsors();
+    const {diamondSponsors, platinumSponsors, goldSponsors, silverSponsors, affiliates} = await getSponsors();
 
     // Helper function to ensure URLs have proper protocol
     const ensureHttps = (url: string) => {
@@ -27,7 +27,7 @@ export default async function Sponsors() {
         return `https://${url}`;
     };
 
-    const numSponsors = diamondSponsors.length + goldSponsors.length + silverSponsors.length;
+    const numSponsors = diamondSponsors.length + platinumSponsors.length + goldSponsors.length + silverSponsors.length;
 
     return (
         
@@ -143,6 +143,31 @@ export default async function Sponsors() {
                       className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6 m-t-10"
                       >
                         {diamondSponsors.map((sponsor) => (
+                          <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
+                            <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                                <div className="relative mx-auto h-24 w-24 flex shrink-0 items-center justify-center">
+                                    <Image alt={sponsor.organization!} src={sponsor.sponsorImgUrl!} fill className="object-contain" sizes="96px" />
+                                </div>
+                                <h3 className="mt-6 text-base/7 font-semibold tracking-tight text-gray-900">{sponsor.organization}</h3>
+                            </a>
+                          </li>
+                      ))}
+                      </ul>
+                    </div>
+                )}
+                { platinumSponsors.length > 0 && (
+                    <div>
+                      <div className="mx-auto max-w-2xl sm:text-center">
+                        <h2 className="text-3xl text-balance font-semibold tracking-tight sm:text-4xl pt-20 text-gray-900">
+                            Platinum Sponsors
+                        </h2>
+                      </div>
+
+                      <ul
+                      role="list"
+                      className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6 m-t-10"
+                      >
+                        {platinumSponsors.map((sponsor) => (
                           <li key={`${sponsor.organization}-${sponsor.sponsorLevel}`}>
                             <a href={ensureHttps(sponsor.website!)} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
                                 <div className="relative mx-auto h-24 w-24 flex shrink-0 items-center justify-center">

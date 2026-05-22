@@ -98,7 +98,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ spon
     const organization = formData.get('organization');
     const sponsorLevel = formData.get('sponsorLevel');
     const sponsorImgRaw = formData.get('media');
-    let newSponsorImgUrl = null;
+    let newSponsorImgUrl: string | undefined = undefined;
 
     if (!id) {
         return NextResponse.json({ success: false, error: "Missing sponsor ID" }, { status: 400 });
@@ -126,7 +126,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ spon
             description: getString(description),
             organization: getString(organization),
             sponsorLevel: getString(sponsorLevel),
-            sponsorImgUrl: newSponsorImgUrl,
+            ...(newSponsorImgUrl !== undefined ? { sponsorImgUrl: newSponsorImgUrl } : {}),
         }).where(eq(sponsors.id, id)).returning();
 
         return NextResponse.json({ success: true, body: sponsor[0] }, { status: 200 });
