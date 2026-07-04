@@ -10,7 +10,38 @@ import { HomeStats } from '@/public/files/stats'
 import { featuredTestimonial, testimonials } from '@/public/files/testemonials'
 
 import RollingGallery from '@/components/UI/RollingGallery/page'
+import RevealGroup from '@/components/UI/RevealGroup/page'
+import CountUp from '@/components/UI/CountUp/page'
 import { formatName } from '@/lib/utils'
+import { Archivo } from 'next/font/google'
+
+// Display face for hero headlines — scoped here, not global.
+const archivo = Archivo({ subsets: ['latin'], weight: ['700', '900'] })
+
+// Consistent section heading: pink uppercase eyebrow + Archivo display title.
+function SectionHeading({
+  eyebrow,
+  title,
+  subtitle,
+  center = false,
+}: {
+  eyebrow?: string
+  title: string
+  subtitle?: string
+  center?: boolean
+}) {
+  return (
+    <div className={center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}>
+      {eyebrow && (
+        <p className="text-sm font-bold uppercase tracking-[0.14em] text-[var(--primary)]">{eyebrow}</p>
+      )}
+      <h2 className={`${archivo.className} mt-3 text-balance text-4xl font-black tracking-tight text-gray-900 sm:text-5xl`}>
+        {title}
+      </h2>
+      {subtitle && <p className="mt-4 text-lg/8 text-gray-600">{subtitle}</p>}
+    </div>
+  )
+}
 
 export const metadata: Metadata = {
   title: 'Shenderey Gymnastics | Premier Gymnastics Club in Newmarket, Ontario',
@@ -139,15 +170,15 @@ export default async function Home() {
   const sponsors = [...fetchedSponsors.diamondSponsors, ...fetchedSponsors.goldSponsors, ...fetchedSponsors.silverSponsors, ...fetchedSponsors.affiliates]
 
   return (
-    <div className="bg-white">
+    <RevealGroup className="bg-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hero section */}
-      <div className="relative bg-gray-900 shadow-hero mt-[50px]">
-        {/* Decorative image and overlay */}
+      {/* Hero section — full-bleed cinematic */}
+      <div data-reveal="off" className="relative isolate mt-[50px] flex min-h-[88vh] items-end overflow-hidden bg-gray-900 shadow-hero">
+        {/* Photo */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
           <Image
             alt=""
@@ -159,28 +190,44 @@ export default async function Home() {
             quality={85}
           />
         </div>
-        <div aria-hidden="true" className="absolute inset-0 bg-gray-900 opacity-70" />
-        {/* Content of Hero Section */}
-        <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-52 text-center sm:py-56 lg:px-0">
-          <p className="mt-4 text-xl text-[var(--primary)]">Join the Legacy</p>
-          <h1 className="text-4xl font-bold tracking-tight text-white lg:text-6xl">Become a Part of The Shenderey Family!</h1>
-          <p className="mt-4 text-xl text-white">
-            Spots fill fast! Register today to secure your place in a club where dreams take flight.
-            Be part of the tradition. Join us and make your mark!
+        {/* Gradient scrim — lets the photo breathe up top, anchors text at the base */}
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/90" />
+
+        {/* Content */}
+        <div className="relative mx-auto w-full max-w-7xl px-6 pb-14 sm:pb-20 lg:px-8">
+          <p className="text-sm font-bold uppercase tracking-[0.14em] text-pink-300">
+            Newmarket, Ontario · Est. 1984
           </p>
-          <div className="flex gap-5 mb-4">
+          <h1 className={`${archivo.className} mt-4 max-w-[16ch] text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-7xl`}>
+            Where champions take flight.
+          </h1>
+          <p className="mt-5 max-w-2xl text-lg text-gray-200 sm:text-xl">
+            Forty years of coaching recreational and competitive gymnasts — taught right,
+            from the very first cartwheel. Spots fill fast each season.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
             <a
               href="/register"
-              className="mt-8 inline-block rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-gray-900 hover:bg-gray-100"
+              className="inline-block rounded-md bg-white px-8 py-3 text-base font-medium text-gray-900 hover:bg-gray-100"
             >
-              Recreational
+              Recreational Programs
             </a>
             <a
               href="/competitive"
-              className="mt-8 inline-block rounded-md border border-transparent bg-[var(--primary)] px-8 py-3 text-base font-medium text-white hover:bg-[var(--primary-hover)]"
+              className="inline-block rounded-md bg-[var(--primary)] px-8 py-3 text-base font-medium text-white hover:bg-[var(--primary-hover)]"
             >
-              Competitive
+              Competitive Stream
             </a>
+          </div>
+
+          {/* Credibility strip */}
+          <div className="mt-10 flex flex-wrap gap-x-10 gap-y-5 border-t border-white/20 pt-6">
+            {HomeStats.map((stat) => (
+              <div key={stat.id}>
+                <div className={`${archivo.className} text-3xl font-black leading-none text-white`}>{stat.value}</div>
+                <div className="mt-1.5 text-xs uppercase tracking-wide text-gray-300">{stat.name}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -188,12 +235,14 @@ export default async function Home() {
       {/* Programs */}
       <div className="relative isolate overflow-hidden bg-white py-24 sm:py-30">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="mt-2 text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Programs</h2>
-          </div>
+          <SectionHeading
+            eyebrow="What we offer"
+            title="Programs"
+            subtitle="From first cartwheel to competitive podium — a path for every age and level."
+          />
           <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-8">
             {programs.map((card) => (
-              <div key={card.name} className="flex flex-col gap-y-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-black/10 shadow-lg h-full">
+              <div key={card.name} className="flex h-full flex-col gap-y-4 rounded-xl bg-white p-6 shadow-lg ring-1 ring-inset ring-black/10 transition duration-200 hover:-translate-y-1 hover:shadow-xl">
                 <card.icon aria-hidden="true" className="h-7 w-5 flex-none text-[var(--primary)]" />
                 <div className="flex-grow">
                   <h3 className="font-semibold text-[var(--primary)]">{card.name}</h3>
@@ -213,37 +262,8 @@ export default async function Home() {
 
       {/* Testimonial */}
       <div className="relative isolate bg-white pb-32 pt-24 sm:pt-20">
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2 transform-gpu overflow-hidden opacity-30 blur-3xl"
-        >
-          <div
-            style={{
-              clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-            }}
-            className="ml-[max(50%,38rem)] aspect-[1313/771] w-[82.0625rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc]"
-          />
-        </div>
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 -z-10 flex transform-gpu overflow-hidden pt-32 opacity-25 blur-3xl sm:pt-40 xl:justify-end"
-        >
-          <div
-            style={{
-              clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-            }}
-            className="ml-[-22rem] aspect-[1313/771] w-[82.0625rem] flex-none origin-top-right rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] xl:ml-0 xl:mr-[calc(50%-12rem)]"
-          />
-        </div>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-base/7 font-semibold text-magenta-600">Testimonials</h2>
-            <p className="mt-2 text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              What our customers are saying
-            </p>
-          </div>
+          <SectionHeading center eyebrow="Testimonials" title="What families are saying" />
           <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm/6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
             <figure className="rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 sm:col-span-2 xl:col-start-2 xl:row-end-1">
               <blockquote className="p-6 text-lg font-semibold tracking-tight text-gray-900 sm:p-12 sm:text-xl/8">
@@ -303,17 +323,17 @@ export default async function Home() {
       <div className="bg-white py-20 sm:py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="text-center">
-              <h2 className="text-balance text-4xl font-semibold tracking-tight text-black sm:text-5xl">
-                Our Achievements
-              </h2>
-              <p className="mt-4 text-lg/8 text-black">Looking back on what our athletes hard work has accomplished</p>
-            </div>
+            <SectionHeading
+              center
+              eyebrow="Track record"
+              title="Our achievements"
+              subtitle="Four decades of dedication — measured on the podium and beyond."
+            />
             <dl className="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
               {HomeStats.map((stat) => (
                 <div key={stat.id} className="flex flex-col bg-gray-600/5 p-8">
                   <dt className="text-sm/6 font-semibold text-gray-600">{stat.name}</dt>
-                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900">{stat.value}</dd>
+                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900"><CountUp value={stat.value} /></dd>
                 </div>
               ))}
             </dl>
@@ -324,15 +344,12 @@ export default async function Home() {
       {/* Staff Members */}
       <div className="bg-white py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl lg:mx-auto text-center">
-            <h2 className="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              Our Team
-            </h2>
-            <p className="mt-6 text-lg/8 text-gray-600 text-left">
-              All Shenderey Gymnastics coaches are nationally certified. They are here to assist each gymnast to reach her maximum potential, and they recognize that each child is ultimately responsible for her own success,
-              involvement, and progress. Our coaches are dedicated and passionate about providing top quality training in a technically sound and safe manner for all of our athletes.
-            </p>
-          </div>
+          <SectionHeading
+            center
+            eyebrow="Our coaches"
+            title="Meet the team"
+            subtitle="Every Shenderey coach is nationally certified and dedicated to helping each gymnast reach her full potential — with top-quality training delivered in a technically sound, safe environment."
+          />
           <ul
             role="list"
             className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6"
@@ -377,10 +394,10 @@ export default async function Home() {
           <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
             <div className="lg:ml-auto lg:pl-4 lg:pt-4">
               <div className="lg:max-w-lg">
-                <h2 className="text-base/7 font-semibold text-[var(--primary)]">Train Safer</h2>
-                <p className="mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                  A State of the Art Facility
-                </p>
+                <p className="text-sm font-bold uppercase tracking-[0.14em] text-[var(--primary)]">Train safer</p>
+                <h2 className={`${archivo.className} mt-3 text-pretty text-4xl font-black tracking-tight text-gray-900 sm:text-5xl`}>
+                  A state-of-the-art facility
+                </h2>
                 <p className="mt-6 text-lg/8 text-gray-600">
                   Our facility is a cutting-edge training center designed to inspire athletes of all levels, from beginners to elite competitors. The gym is well-lit, air-conditioned and equipped with the latest in gymnastics apparatus, including Olympic-standard equipment for vault, bars, beam, floor and trampoline.
                 </p>
@@ -415,10 +432,13 @@ export default async function Home() {
       {/* Affiliations */}
       <div className="bg-white py-10 sm:py-32">
         <div className="mx-auto px-6 lg:px-8">
-          <h2 className="text-center text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            Our Affiliates and Sponsors
-          </h2>
-          <div className="mt-32 w-full h-[150px]">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-[var(--primary)]">Proudly partnered</p>
+            <h2 className={`${archivo.className} mt-3 text-pretty text-4xl font-black tracking-tight text-gray-900 sm:text-5xl`}>
+              Our affiliates &amp; sponsors
+            </h2>
+          </div>
+          <div className="mt-16 w-full h-[150px]">
             <RollingGallery images={sponsors.map(sponsor => ({
               url: sponsor.sponsorImgUrl || '',
               alt: sponsor.organization || '',
@@ -436,10 +456,12 @@ export default async function Home() {
             {/* Text Section */}
             <div className="lg:mr-auto lg:pr-4 lg:pt-4">
               <div className="lg:max-w-lg">
-                <p className="mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                <p className="text-sm font-bold uppercase tracking-[0.14em] text-[var(--primary)]">Visit us</p>
+                <h2 className={`${archivo.className} mt-3 text-pretty text-4xl font-black tracking-tight text-gray-900 sm:text-5xl`}>
                   Get in touch
-                </p>
+                </h2>
                 <p className="mt-6 text-lg/8 text-gray-600">
+                  Questions about programs, schedules, or registration? Come see the gym or reach out — we&apos;re happy to help.
                 </p>
                 <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
                   <div className="flex gap-x-4">
@@ -512,11 +534,11 @@ export default async function Home() {
       {/* Call to Action */}
       <div className="relative">
         <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-25 text-center sm:py-10 lg:px-0">
-          <p className="mt-4 text-xl text-magenta-500">Join the Legacy</p>
-          <h1 className="text-4xl font-bold tracking-tight text-black lg:text-6xl">Become a Part of The Shenderey Family!</h1>
+          <p className="text-sm font-bold uppercase tracking-[0.14em] text-[var(--primary)]">Ready when you are</p>
+          <h2 className={`${archivo.className} mt-2 text-4xl font-black tracking-tight text-black lg:text-6xl`}>Your gymnast&apos;s next chapter starts here.</h2>
           <p className="mt-4 text-xl text-black">
-            Spots fill fast! Register today to secure your place in a club where dreams take flight.
-            Be part of the tradition. Join us and make your mark!
+            Classes fill quickly each season. Book a trial or register today — our coaches
+            will help you find the right program for your athlete&apos;s age and level.
           </p>
           <div className="flex gap-5 mb-4">
             <a
@@ -535,6 +557,6 @@ export default async function Home() {
         </div>
       </div>
 
-    </div>
+    </RevealGroup>
   )
 }
