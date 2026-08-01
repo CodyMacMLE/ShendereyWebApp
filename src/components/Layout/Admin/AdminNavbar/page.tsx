@@ -34,17 +34,42 @@ import { useTheme } from '@/components/Theme/page'
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components"
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-  { name: 'Users', href: '/admin/users', icon: UsersIcon},
-  { name: 'Programs', href: '/admin/programs', icon: CursorArrowRaysIcon },
-  { name: 'Registration', href: '/admin/registration', icon: BookOpenIcon },
-  { name: 'Gallery', href: '/admin/gallery', icon: PlayCircleIcon },
-  { name: 'Tryouts', href: '/admin/tryouts', icon: ClipboardDocumentIcon },
-  { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
-  { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
-  { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
-  { name: 'Announcement', href: '/admin/announcement', icon: MegaphoneIcon },
-  { name: 'Birthday Packages', href: '/admin/birthday-packages', icon: GiftIcon },
+  {
+    category: 'Overview',
+    items: [
+      { name: 'Dashboard', href: '/admin', icon: HomeIcon },
+    ],
+  },
+  {
+    category: 'People',
+    items: [
+      { name: 'Users', href: '/admin/users', icon: UsersIcon },
+      { name: 'Tryouts', href: '/admin/tryouts', icon: ClipboardDocumentIcon },
+    ],
+  },
+  {
+    category: 'Programs',
+    items: [
+      { name: 'Programs', href: '/admin/programs', icon: CursorArrowRaysIcon },
+      { name: 'Registration', href: '/admin/registration', icon: BookOpenIcon },
+      { name: 'Birthday Packages', href: '/admin/birthday-packages', icon: GiftIcon },
+    ],
+  },
+  {
+    category: 'Content',
+    items: [
+      { name: 'Gallery', href: '/admin/gallery', icon: PlayCircleIcon },
+      { name: 'Announcement', href: '/admin/announcement', icon: MegaphoneIcon },
+      { name: 'Resources', href: '/admin/resources', icon: DocumentDuplicateIcon },
+    ],
+  },
+  {
+    category: 'Business',
+    items: [
+      { name: 'Sponsors', href: '/admin/sponsors', icon: CurrencyDollarIcon },
+      { name: 'Store', href: '/admin/store', icon: IoShirtOutline },
+    ],
+  },
 ]
 
 function classNames(...classes: string[]) {
@@ -99,34 +124,39 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                   />
                 </div>
                 <nav className="flex flex-1 flex-col">
-                  <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                    <li>
-                      <ul role="list" className="-mx-2 space-y-1">
-                        {navigation.map((item) => {
-                          const hrefKey = item.href.replace('/admin/', '').replace('/admin', '');
-                        const isActive = hrefKey ? pathname.startsWith(hrefKey) : pathname === '';
-                          return (
-                            <li key={item.name}>
-                              <a
-                                href={item.href}
-                                className={classNames(
-                                  isActive ? 'bg-gray-50 text-magenta-600' : 'text-gray-700 hover:bg-gray-50 hover:text-magenta-600',
-                                  'group flex gap-x-3 rounded-md p-2 text-sm font-semibold',
-                                )}
-                              >
-                                <item.icon
+                  <ul role="list" className="flex flex-1 flex-col gap-y-4">
+                    {navigation.map((section) => (
+                      <li key={section.category}>
+                        <div className="px-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                          {section.category}
+                        </div>
+                        <ul role="list" className="-mx-2 mt-1.5 space-y-0.5">
+                          {section.items.map((item) => {
+                            const hrefKey = item.href.replace('/admin/', '').replace('/admin', '');
+                            const isActive = hrefKey ? pathname.startsWith(hrefKey) : pathname === '';
+                            return (
+                              <li key={item.name}>
+                                <a
+                                  href={item.href}
                                   className={classNames(
-                                    isActive ? 'text-magenta-600' : 'text-gray-400 group-hover:text-magenta-600',
-                                    'size-6 shrink-0',
+                                    isActive ? 'bg-gray-50 text-magenta-600' : 'text-gray-700 hover:bg-gray-50 hover:text-magenta-600',
+                                    'group flex gap-x-3 rounded-md px-2 py-1.5 text-sm font-semibold items-center',
                                   )}
-                                />
-                                {item.name}
-                              </a>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    </li>
+                                >
+                                  <item.icon
+                                    className={classNames(
+                                      isActive ? 'text-magenta-600' : 'text-gray-400 group-hover:text-magenta-600',
+                                      'size-6 shrink-0',
+                                    )}
+                                  />
+                                  {item.name}
+                                </a>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </li>
+                    ))}
                   </ul>
                 </nav>
               </div>
@@ -151,11 +181,15 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
             </div>
               
             {/* Nav Buttons */}
-            <nav className="flex flex-1 flex-col mt-6">
-              <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                <li>
-                  <ul role="list" className="mx-2 space-y-1">
-                    {navigation.map((item) => {
+            <nav className="flex flex-1 flex-col mt-4">
+              <ul role="list" className="flex flex-1 flex-col gap-y-4">
+                {navigation.map((section) => (
+                  <li key={section.category}>
+                    <div className="px-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+                      {section.category}
+                    </div>
+                    <ul role="list" className="mx-2 mt-1.5 space-y-0.5">
+                      {section.items.map((item) => {
                         const hrefKey = item.href.replace('/admin/', '').replace('/admin', '');
                         const isActive = hrefKey ? pathname.startsWith(hrefKey) : pathname === '';
                         return (
@@ -164,7 +198,7 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                               href={item.href}
                               className={classNames(
                                 isActive ? ' text-[var(--primary)]' : 'text-[var(--foreground)] group-hover:text-[var(--primary)]',
-                                'flex gap-x-3 rounded-md p-2 text-sm font-semibold items-center',
+                                'flex gap-x-3 rounded-md px-2 py-1.5 text-sm font-semibold items-center',
                               )}
                             >
                               <item.icon
@@ -178,8 +212,9 @@ export default function AdminNavbar({ content }: DashboardNavProps) {
                           </li>
                         )
                       })}
-                  </ul>
-                </li>
+                    </ul>
+                  </li>
+                ))}
               </ul>
             </nav>
           

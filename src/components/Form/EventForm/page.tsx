@@ -1,6 +1,7 @@
 "use client";
 
 import ErrorModal from "@/components/UI/ErrorModal/page";
+import { recreationalContact, registrationPortalUrl } from "@/public/files/contactDetails";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -15,7 +16,7 @@ type BirthdayPackage = {
 
 const inputClass = "block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6";
 const wrapperClass = "flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--primary)]";
-const btnClass = "inline-block bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-hover)] cursor-pointer text-sm font-medium self-start";
+const btnClass = "inline-block bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-hover)] cursor-pointer text-sm font-medium";
 
 export default function EventForm() {
     const router = useRouter();
@@ -136,25 +137,18 @@ export default function EventForm() {
                 {/* Camp — registration cards */}
                 {eventType === 'camp' && (
                     <div className="mt-8 flex justify-center">
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-4xl w-full">
-                            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col h-full">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">New Member</h3>
-                                <p className="text-sm text-gray-600 mb-4 flex-grow">
-                                    New to the gym? Click the button below to sign up and register for a camp.
-                                </p>
-                                <Link href="https://shenderey-gymnastics-centre-newmarket.gymdesk.com/signup" target="_blank" className={btnClass}>
-                                    New Member Sign Up
-                                </Link>
-                            </div>
-                            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col h-full">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Returning Member</h3>
-                                <p className="text-sm text-gray-600 mb-4 flex-grow">
-                                    Email us at <a href="mailto:sgcrecreational@gmail.com" className="text-[var(--primary)] hover:text-[var(--primary-hover)] underline">sgcrecreational@gmail.com</a> to register for a camp.
-                                </p>
-                                <Link href="mailto:sgcrecreational@gmail.com" className={btnClass}>
-                                    Email Us
-                                </Link>
-                            </div>
+                        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 max-w-xl w-full text-center">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Register Online</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                New and returning families register for camps through our online portal.
+                            </p>
+                            <Link href={registrationPortalUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>
+                                Register Now
+                            </Link>
+                            <p className="mt-4 text-xs text-gray-500">
+                                Questions about registering? Email us at{' '}
+                                <a href={`mailto:${recreationalContact.email}`} className="text-[var(--primary)] hover:text-[var(--primary-hover)] underline">{recreationalContact.email}</a>.
+                            </p>
                         </div>
                     </div>
                 )}
