@@ -432,15 +432,8 @@ export const getProducts = unstable_cache(
 
 export const getActiveAnnouncement = unstable_cache(
     async () => {
-        // The banner renders in the public layout, so every page depends on this
-        // query — including at build time when pages are prerendered. Degrade to
-        // no banner rather than failing the render if the database is unreachable.
-        try {
-            const result = await db.select().from(announcement).where(eq(announcement.isActive, true)).limit(1);
-            return result[0] || null;
-        } catch {
-            return null;
-        }
+        const result = await db.select().from(announcement).where(eq(announcement.isActive, true)).limit(1);
+        return result[0] || null;
     },
     ['active-announcement'],
     { revalidate: 300, tags: ['announcement'] }
