@@ -57,6 +57,8 @@ export const recreationalContact = {
     postal: 'L3Y 8E1',
 }
 
+export const registrationPortalUrl = 'https://portal.iclasspro.com/shendereygymnastics/dashboard'
+
 export const socialLinks = {
   facebook: 'https://www.facebook.com/shendereygymnastics',
   instagram: 'https://www.instagram.com/shendereygymnastics/'

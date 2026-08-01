@@ -1,5 +1,6 @@
 import SessionCarousel from "@/components/UI/SessionCarousel/SessionCarousel";
 import { getRegistrationImages, getRegistrationPolicies } from "@/lib/actions";
+import { recreationalContact, registrationPortalUrl } from "@/public/files/contactDetails";
 import Link from "next/link";
 
 export default async function RegistrationLayout() {
@@ -27,38 +28,25 @@ export default async function RegistrationLayout() {
               <h2 className="mt-2 text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl">Sign up with us today</h2>
             </div>
 
-            {/* Registration Cards */}
+            {/* Registration CTA */}
             <div className="mt-8 flex justify-center">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-4xl w-full">
-                {/* New Member Card */}
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 transition-shadow flex flex-col h-full">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">New Member</h3>
-                  <p className="text-sm text-gray-600 mb-4 flex-grow">
-                    New to the gym? Click the button below to sign up with us today.
-                  </p>
-                  <Link
-                    href="https://shenderey-gymnastics-centre-newmarket.gymdesk.com/signup"
-                    target="_blank"
-                    className="inline-block bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-hover)] cursor-pointer text-sm font-medium self-start"
-                  >
-                    New Member Sign Up
-                  </Link>
-                </div>
-
-                {/* Returning Member Card */}
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 transition-shadow flex flex-col h-full">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Returning Member</h3>
-                  <p className="text-sm text-gray-600 mb-4 flex-grow">
-                    Email us at <a href="mailto:sgcrecreational@gmail.com" className="text-[var(--primary)] hover:text-[var(--primary-hover)] underline">sgcrecreational@gmail.com</a> to register.
-                  </p>
-                  <Link
-                    href="mailto:sgcrecreational@gmail.com"
-                    target="_blank"
-                    className="inline-block bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-hover)] cursor-pointer text-sm font-medium self-start"
-                  >
-                    Email Us
-                  </Link>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 max-w-xl w-full text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Register Online</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  New and returning families register through our online portal.
+                </p>
+                <Link
+                  href={registrationPortalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-hover)] cursor-pointer text-sm font-medium"
+                >
+                  Go to Registration Portal
+                </Link>
+                <p className="mt-4 text-xs text-gray-500">
+                  Questions about registering? Email us at{' '}
+                  <a href={`mailto:${recreationalContact.email}`} className="text-[var(--primary)] hover:text-[var(--primary-hover)] underline">{recreationalContact.email}</a>.
+                </p>
               </div>
             </div>
 
